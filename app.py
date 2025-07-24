@@ -614,41 +614,34 @@ elif st.session_state.step == 5:
         st.radio(
             label="턱 소리 종류",
             options=joint_sound_options,
-            index=3,  # "선택 안 함" 기본 선택
+            index=3,
             key="tmj_sound",
             label_visibility="collapsed"
         )
 
         if st.session_state.tmj_sound == "딸깍소리":
-    st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
+            st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
+            all_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
+            selected = st.session_state.get("tmj_click_context", [])
+            updated_selected = []
 
-    all_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
-    selected = st.session_state.get("tmj_click_context", [])
+            for option in all_options:
+                checked = option in selected
+                new_checked = st.checkbox(option, value=checked, key=f"click_{option}")
+                if new_checked:
+                    updated_selected.append(option)
 
-    updated_selected = []
+            if "모두" in updated_selected:
+                updated_selected = ["모두"]
+                for option in all_options:
+                    if option != "모두":
+                        st.session_state[f"click_{option}"] = False
+            else:
+                st.session_state["click_모두"] = False
 
-    for option in all_options:
-        # 각 항목을 체크박스로 표시
-        checked = option in selected
-        new_checked = st.checkbox(option, value=checked, key=f"click_{option}")
-
-        if new_checked:
-            updated_selected.append(option)
-
-    # '모두'가 선택되면 나머지 자동 해제
-    if "모두" in updated_selected:
-        updated_selected = ["모두"]
-        # 다른 checkbox들의 상태도 비활성화 필요
-        for option in all_options:
-            if option != "모두":
-                st.session_state[f"click_{option}"] = False
-    else:
-        # '모두' 체크 해제
-        st.session_state["click_모두"] = False
-
-    st.session_state.tmj_click_context = updated_selected
-else:
-    st.session_state.tmj_click_context = []
+            st.session_state.tmj_click_context = updated_selected
+        else:
+            st.session_state.tmj_click_context = []
 
         st.markdown("---")
         st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
@@ -670,6 +663,7 @@ else:
                 key="jaw_unlock_possible",
                 label_visibility="collapsed"
             )
+
         elif st.session_state.get("jaw_locked_now") == "아니오":
             st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
             st.radio(
@@ -695,7 +689,6 @@ else:
     with col1:
         if st.button("이전 단계"):
             go_back()
-
     with col2:
         if st.button("다음 단계로 이동 👉"):
             errors = []
@@ -704,22 +697,18 @@ else:
                 errors.append("턱관절 소리 여부를 선택해주세요.")
             if st.session_state.get("jaw_locked_now") == "선택 안 함":
                 errors.append("현재 턱 잠김 여부를 선택해주세요.")
-
-            if st.session_state.get("jaw_locked_now") == "예":
-                if st.session_state.get("jaw_unlock_possible") == "선택 안 함":
-                    errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
-            elif st.session_state.get("jaw_locked_now") == "아니오":
+            if st.session_state.get("jaw_locked_now") == "예" and st.session_state.get("jaw_unlock_possible") == "선택 안 함":
+                errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
+            if st.session_state.get("jaw_locked_now") == "아니오":
                 if st.session_state.get("jaw_locked_past") == "선택 안 함":
                     errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
-                elif st.session_state.get("jaw_locked_past") == "예" and \
-                     st.session_state.get("mao_fits_3fingers") == "선택 안 함":
+                elif st.session_state.get("jaw_locked_past") == "예" and st.session_state.get("mao_fits_3fingers") == "선택 안 함":
                     errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
 
             if errors:
                 for err in errors:
                     st.warning(err)
             else:
-                # STEP6으로 바로 이동하도록 보장
                 st.session_state.step = 6
 
 
