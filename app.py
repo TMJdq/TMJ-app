@@ -461,12 +461,13 @@ elif st.session_state.step == 5:
         # 턱 소리 종류
         st.markdown("**턱에서 나는 소리가 있나요?**")
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
+
         st.radio(
-            label="턱 소리 종류",
+            "턱에서 나는 소리가 있나요?",
             options=joint_sound_options,
-            key="tmj_sound",
-            label_visibility="collapsed"
+            key="tmj_sound"
         )
+
 
         # 딸깍소리 관련
         if st.session_state.tmj_sound == "딸깍소리":
