@@ -702,13 +702,13 @@ elif st.session_state.step == 5:
     if st.session_state.tmj_sound_value != "딸깍소리":
         st.session_state.tmj_click_context = []
 
-   
+    
 
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            st.session_state.step = 2
+            go_back()
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
