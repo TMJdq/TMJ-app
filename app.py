@@ -1393,4 +1393,4 @@ elif st.session_state.step == 19:
         st.session_state.step = 0
         for key in list(st.session_state.keys()):
             del st.session_state[key]
-        st.experimental_rerun()
+        st.rerun()
