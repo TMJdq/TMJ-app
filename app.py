@@ -1426,21 +1426,20 @@ elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
 
-    results = compute_probability_scores(st.session_state)
+    results = compute_diagnoses(st.session_state)
 
     if not results:
         st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
-        diagnoses = [d[0] for d in results]
-        if len(diagnoses) == 1:
-            st.error(f"**{diagnoses[0]}**이(가) 의심됩니다.")
+        if len(results) == 1:
+            st.error(f"**{results[0]}**이(가) 의심됩니다.")
         else:
-            st.error(f"**{', '.join(diagnoses)}**이(가) 의심됩니다.")
+            st.error(f"**{', '.join(results)}**이(가) 의심됩니다.")
 
         st.markdown("---")
-        for diagnosis, _ in results:
+        for diagnosis in results:
             st.markdown(f"### 🔹 {diagnosis}")
-            desc_key = diagnosis.split(' (')[0]  # 영어 이름 추출
+            desc_key = diagnosis.split(' (')[0]  # 진단명 키
             desc = dc_tmd_explanations.get(desc_key, "설명 없음")
             st.info(f"📝 {desc}")
             st.markdown("---")
@@ -1463,4 +1462,5 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.experimental_rerun()
+
 
