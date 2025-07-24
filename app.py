@@ -84,7 +84,7 @@ def compute_diagnoses(state):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
     # 6. 퇴행성 관절 질환
-    if is_yes(state.get("crepitus_confirmed")):
+    if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
     # 7~8. 디스크 변위 (감소 없음)
