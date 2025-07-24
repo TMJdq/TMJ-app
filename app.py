@@ -443,6 +443,7 @@ elif st.session_state.step == 4:
 
 
 # STEP 5: 턱관절 소리 및 잠김
+# STEP 5: 턱관절 소리 및 잠김
 elif st.session_state.step == 5:
     st.title("현재 증상 (턱관절 소리 및 잠김 증상)")
     st.markdown("---")
@@ -450,7 +451,7 @@ elif st.session_state.step == 5:
     with st.container(border=True):
         st.markdown("**턱에서 나는 소리가 있나요?**")
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
-        st.radio(
+        tmj_sound_selection = st.radio(
             label="턱 소리 종류",
             options=joint_sound_options,
             index=joint_sound_options.index(st.session_state.get("tmj_sound", "선택 안 함")),
@@ -459,8 +460,8 @@ elif st.session_state.step == 5:
         )
 
         # 딸깍소리 조건
-        if st.session_state.tmj_sound == "딸깍소리":
-            st.markdown("#### 📌 딸깍 소리가 나는 상황을 모두 선택하세요")
+        if tmj_sound_selection == "딸깍소리":
+            st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
             st.session_state.setdefault("tmj_click_context", [])
 
@@ -473,11 +474,8 @@ elif st.session_state.step == 5:
 
             st.session_state["tmj_click_context"] = updated_context
 
-        else:
-            st.session_state["tmj_click_context"] = []
-
         # 사각사각소리 조건
-        if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
+        if tmj_sound_selection == "사각사각소리(크레피투스)":
             st.markdown("**사각사각소리가 확실히 느껴지나요?**")
             st.radio(
                 label="사각사각소리 확실 여부",
@@ -486,8 +484,6 @@ elif st.session_state.step == 5:
                 key="crepitus_confirmed",
                 label_visibility="collapsed"
             )
-        else:
-            st.session_state["crepitus_confirmed"] = "선택 안 함"
 
         # 턱 잠김 관련 조건
         show_lock_questions = (
@@ -498,11 +494,10 @@ elif st.session_state.step == 5:
         if show_lock_questions:
             st.markdown("---")
             st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
-            lock_options = ["예", "아니오", "선택 안 함"]
             st.radio(
                 label="턱이 현재 걸려있나요?",
-                options=lock_options,
-                index=lock_options.index(st.session_state.get("jaw_locked_now", "선택 안 함")),
+                options=["예", "아니오", "선택 안 함"],
+                index=["예", "아니오", "선택 안 함"].index(st.session_state.get("jaw_locked_now", "선택 안 함")),
                 key="jaw_locked_now",
                 label_visibility="collapsed"
             )
@@ -536,11 +531,6 @@ elif st.session_state.step == 5:
                         key="mao_fits_3fingers",
                         label_visibility="collapsed"
                     )
-        else:
-            st.session_state["jaw_locked_now"] = "선택 안 함"
-            st.session_state["jaw_unlock_possible"] = "선택 안 함"
-            st.session_state["jaw_locked_past"] = "선택 안 함"
-            st.session_state["mao_fits_3fingers"] = "선택 안 함"
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -579,6 +569,7 @@ elif st.session_state.step == 5:
             else:
                 st.session_state.step = 6
 
+                
 # STEP 6: 빈도 및 시기, 강도
 elif st.session_state.step == 6:
     st.title("현재 증상 (빈도 및 시기)")
