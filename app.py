@@ -311,7 +311,7 @@ elif st.session_state.step == 3:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 2
     with col2:
         if st.button("다음 단계로 이동 👉"):
             if st.session_state.get("jaw_aggravation") == "선택 안 함":
@@ -319,7 +319,7 @@ elif st.session_state.step == 3:
             elif st.session_state.get("pain_quality") == "선택 안 함":
                 st.warning("통증 양상 항목을 선택해주세요.")
             else:
-                go_next()
+                st.session_state.step = 4
 
 
 
@@ -530,7 +530,7 @@ elif st.session_state.step == 4:
 
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 3
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
@@ -709,7 +709,7 @@ elif st.session_state.step == 5:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 2
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
@@ -794,7 +794,7 @@ elif st.session_state.step == 6:
             )
 
             if freq_valid and time_valid:
-                go_next()
+                st.session_state.step = 7
             else:
                 if not freq_valid and not time_valid:
                     st.warning("빈도와 시간대 항목을 모두 입력하거나 선택해주세요.")
@@ -874,7 +874,7 @@ elif st.session_state.step == 7:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 6
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
@@ -885,7 +885,7 @@ elif st.session_state.step == 7:
                 st.session_state.get("habit_none", False)
             ])
             if has_first:
-                go_next()
+                st.session_state.step = 8
             else:
                 st.warning("‘이갈이/이 악물기/없음’ 중에서 최소 한 가지를 선택해주세요.")
 
@@ -919,10 +919,10 @@ elif st.session_state.step == 8:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 7
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            go_next()
+            st.session_state.step = 9
 
 
 # STEP 9: 턱 운동 범위 및 관찰2 (Range of Motion & Observations)
@@ -970,10 +970,10 @@ elif st.session_state.step == 9:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 8
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            go_next()
+            st.session_state.step = 10
 
   
 # STEP 10: 턱 운동 범위 및 관찰3 (Range of Motion & Observations)
@@ -1028,10 +1028,10 @@ elif st.session_state.step == 10:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 9
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            go_next()
+            st.session_state.step = 11
 
 
 # STEP 11: 근육 촉진 평가
@@ -1083,10 +1083,10 @@ elif st.session_state.step == 11:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 10
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            go_next()
+            st.session_state.step = 12
 
 
 # STEP 12: 귀 관련 증상
@@ -1131,7 +1131,7 @@ elif st.session_state.step == 12:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 11
     with col2:
         if st.button("다음 단계로 이동 👉"):
             # 최소 하나라도 선택되었는지 확인
@@ -1140,7 +1140,7 @@ elif st.session_state.step == 12:
             elif "없음" in st.session_state.selected_ear_symptoms and len(st.session_state.selected_ear_symptoms) > 1:
                 st.warning("'없음'과 다른 증상을 동시에 선택할 수 없습니다. 다시 확인해주세요.")
             else:
-                go_next()
+                st.session_state.step = 13
                 
 
 # STEP 13: 경추/목/어깨 관련 증상
@@ -1198,7 +1198,7 @@ elif st.session_state.step == 13:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 12
     with col2:
         if st.button("다음 단계로 이동 👉"):
             trauma_selected = st.session_state.get('neck_trauma_radio') in ["예", "아니오"]
@@ -1214,7 +1214,7 @@ elif st.session_state.step == 13:
             elif not trauma_selected:
                 st.warning("목 외상 여부를 선택해주세요.")
             else:
-                go_next()
+                st.session_state.step = 14
 
 
 # STEP 14: 정서적 스트레스 이력
@@ -1255,13 +1255,13 @@ elif st.session_state.step == 14:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 13
     with col2:
         if st.button("다음 단계로 이동 👉"):
             if st.session_state.stress_radio == '선택 안 함':
                 st.warning("스트레스 여부를 선택해주세요.")
             else:
-                go_next()
+                st.session_state.step = 15
 
 
 # STEP 15: 과거 치과적 이력 (Past Dental History)
@@ -1354,13 +1354,13 @@ elif st.session_state.step == 15:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 14
     with col2:
         if st.button("다음 단계로 이동 👉"):
             if st.session_state.ortho_exp == '선택 안 함' or st.session_state.prosth_exp == '선택 안 함':
                 st.warning("교정치료 및 보철치료 항목을 모두 선택해주세요.")
             else:
-                go_next()
+                st.session_state.step = 16
 
 
 
@@ -1379,10 +1379,10 @@ elif st.session_state.step == 16:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 15
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            go_next()
+            st.session_state.step = 17
 
 
   
@@ -1414,10 +1414,10 @@ elif st.session_state.step == 17:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 16
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            go_next()
+            st.session_state.step = 18
 
 
 # STEP 18: 기능 평가
@@ -1512,7 +1512,7 @@ elif st.session_state.step == 18:
 
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 17
 
     with col2:
         if st.button("제출 👉"):
@@ -1533,7 +1533,7 @@ elif st.session_state.step == 18:
                 for err in errors:
                     st.warning(err)
             else:
-                go_next()
+                st.session_state.step = 19
 
 
 
