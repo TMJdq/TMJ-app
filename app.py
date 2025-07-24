@@ -1269,21 +1269,21 @@ elif st.session_state.step == 14:
                 "어떤 치료를 받으셨나요?",
                 value=st.session_state.get('tmd_treatment_detail', ''),
                 key="tmd_treatment_detail",
-                placeholder="예: 물리치료, 약물치료, 장치치료 등"
+                placeholder=" "
             )
 
             st.text_input(
                 "해당 치료에 대한 반응(효과나 문제점 등):",
                 value=st.session_state.get('tmd_treatment_response', ''),
                 key="tmd_treatment_response",
-                placeholder="선택 사항입니다. 예: 효과가 없었음, 일시적으로 완화됨 등"
+                placeholder=" "
             )
 
             st.text_input(
                 "현재 복용 중인 턱관절 관련 약물이 있다면 입력해주세요:",
                 value=st.session_state.get('tmd_current_medications', ''),
                 key="tmd_current_medications",
-                placeholder="선택 사항입니다. 예: 근이완제, 진통제 등"
+                placeholder=" "
             )
         else:
             st.session_state.tmd_treatment_detail = ""
