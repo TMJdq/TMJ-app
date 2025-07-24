@@ -815,25 +815,27 @@ elif st.session_state.step == 7:
             "이 악물기 - 밤(수면 중)": "habit_clenching_night",
         }
 
-        # '없음' 항목 체크박스
-        habit_none = st.checkbox("없음", key="habit_none")
+        # '없음' 체크박스
+        habit_none_checked = st.checkbox(
+            "없음",
+            value=st.session_state.get("habit_none", False),
+            key="habit_none"
+        )
 
-        # 다른 항목 선택
+        # 나머지 보기 항목 체크박스
         for label, key in first_habits.items():
-            val = st.checkbox(
+            st.checkbox(
                 label,
+                value=st.session_state.get(key, False),
                 key=key,
-                disabled=habit_none
+                disabled=habit_none_checked
             )
 
-        # '없음'이 체크되지 않은 상태에서 다른 항목 중 하나라도 체크되면 없음 해제
-        if not habit_none and any(st.session_state.get(k, False) for k in first_habits.values()):
-            st.session_state.habit_none = False
-
-        # '없음'이 체크되었을 경우 다른 항목 모두 False로 초기화
-        if habit_none:
-            for k in first_habits.values():
-                st.session_state[k] = False
+        # 선택 동기화 (없음 해제되면 나머지 선택 가능)
+        if not habit_none_checked:
+            for key in first_habits.values():
+                if key not in st.session_state:
+                    st.session_state[key] = False
 
         st.markdown("---")
         st.markdown("**다음 중 해당되는 습관이 있다면 모두 선택해주세요.**")
@@ -850,18 +852,18 @@ elif st.session_state.step == 7:
             st.session_state.selected_habits = []
 
         for habit in additional_habits:
-            key = f"habit_{habit.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_').replace('-', '_').replace('.', '').replace(':', '')}"
-            checked = st.checkbox(habit, key=key, value=(habit in st.session_state.selected_habits))
+            checkbox_key = f"habit_{habit.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_').replace('-', '_').replace('.', '_').replace(':', '')}"
+            checked = st.checkbox(habit, value=(habit in st.session_state.selected_habits), key=checkbox_key)
             if checked and habit not in st.session_state.selected_habits:
                 st.session_state.selected_habits.append(habit)
             elif not checked and habit in st.session_state.selected_habits:
                 st.session_state.selected_habits.remove(habit)
 
-        # 기타 선택 시 입력란 표시
         if "기타" in st.session_state.selected_habits:
-            st.text_input("기타 습관을 입력해주세요:", key="habit_other_detail")
+            st.text_input("기타 습관을 입력해주세요:", value=st.session_state.get('habit_other_detail', ''), key="habit_other_detail")
         else:
-            st.session_state.habit_other_detail = ""
+            if 'habit_other_detail' in st.session_state:
+                st.session_state.habit_other_detail = ""
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -871,7 +873,6 @@ elif st.session_state.step == 7:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            # 첫 질문 중 최소 하나 또는 기타 습관 중 최소 하나 선택 시 통과
             has_first_habit = any([
                 st.session_state.get("habit_bruxism_night", False),
                 st.session_state.get("habit_clenching_day", False),
