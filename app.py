@@ -376,14 +376,15 @@ elif st.session_state.step == 4:
             )
 
             st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
-            st.radio(
+            muscle_2s_choice = st.radio(
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("muscle_pressure_2s"),
                 key="muscle_pressure_2s"
             )
 
-            if st.session_state.get("muscle_pressure_2s") == "예":
+            # "예"를 선택한 경우에만 5초 질문 보여주기
+            if muscle_2s_choice == "예":
                 st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
                 st.radio(
                     label="",
@@ -391,6 +392,9 @@ elif st.session_state.step == 4:
                     index=get_radio_index("muscle_referred_pain"),
                     key="muscle_referred_pain"
                 )
+            else:
+                # 5초 질문 답변 초기화 (선택 안 함)
+                st.session_state["muscle_referred_pain"] = "선택 안 함"
 
         elif pain_type == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
@@ -502,7 +506,6 @@ elif st.session_state.step == 4:
                     st.warning(err)
             else:
                 st.session_state.step = 6 if pain_type in ["넓은 부위의 통증", "근육 통증", "두통"] else 5
-
 
 # STEP 5: 턱관절 소리 및 잠김
 elif st.session_state.step == 5:
