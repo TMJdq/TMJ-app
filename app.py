@@ -635,6 +635,7 @@ elif st.session_state.step == 5:
                 st.session_state.step = 6
 
 
+
                 
 # STEP 6: 빈도 및 시기, 강도
 elif st.session_state.step == 6:
