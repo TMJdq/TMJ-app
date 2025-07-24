@@ -86,6 +86,7 @@ def compute_diagnoses(state):
 
 
 
+
 # 총 단계 수 (0부터 시작)
 total_steps = 20 
 
