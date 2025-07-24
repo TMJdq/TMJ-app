@@ -806,7 +806,7 @@ elif st.session_state.step == 6:
                 st.session_state.step = 5
             elif complaint == "기타 불편한 증상":
                 st.session_state.step = 2
-            st.experimental_rerun()
+            return
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
