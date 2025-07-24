@@ -339,18 +339,29 @@ elif st.session_state.step == 1:
 elif st.session_state.step == 2:
     st.title("주 호소 (Chief Complaint)")
     st.markdown("---")
+
     with st.container(border=True):
         st.markdown("**이번에 병원을 방문한 주된 이유는 무엇인가요?**")
         st.radio(
             label="",
-            options=["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱관절 소리/잠김", "턱 움직임 관련 두통", "기타 불편한 증상", "선택 안 함"],
+            options=[
+                "턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)",
+                "턱관절 소리/잠김",
+                "턱 움직임 관련 두통",
+                "기타 불편한 증상",
+                "선택 안 함"
+            ],
             key="chief_complaint",
-            index=4,  # "선택 안 함"이 기본 선택
+            index=4,
             label_visibility="collapsed"
         )
 
-        if st.session_state.get("chief_complaint") == "기타":
-            st.text_input("기타 사유를 적어주세요:", value=st.session_state.get('chief_complaint_other', ''), key="chief_complaint_other")
+        if st.session_state.get("chief_complaint") == "기타 불편한 증상":
+            st.text_input(
+                "기타 사유를 적어주세요:",
+                value=st.session_state.get('chief_complaint_other', ''),
+                key="chief_complaint_other"
+            )
         else:
             st.session_state.chief_complaint_other = ""
 
@@ -365,15 +376,25 @@ elif st.session_state.step == 2:
 
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             go_back()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            if st.session_state.get("chief_complaint") == "선택 안 함":
+            complaint = st.session_state.get("chief_complaint")
+
+            if complaint == "선택 안 함":
                 st.warning("주 호소 항목을 선택해주세요.")
             else:
-                go_next()
+                # 주 호소에 따라 분기
+                if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
+                    st.session_state.step = 3  # 통증 양상
+                elif complaint == "턱관절 소리/잠김":
+                    st.session_state.step = 5  # 턱관절 관련
+                elif complaint == "기타 불편한 증상":
+                    st.session_state.step = 6  # 빈도 및 시기 등
 
 
 # STEP 3: 통증 양상
@@ -440,9 +461,9 @@ elif st.session_state.step == 4:
         if "넓은 부위의 통증" in st.session_state.pain_types or "근육 통증" in st.session_state.pain_types:
             st.markdown("#### 💬 근육/넓은 부위 관련")
 
-            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있습니까?**")
+            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
             st.radio(
-                label="입을 벌릴 때나 턱을 움직일 때 통증이 있습니까?",
+                label="입을 벌릴 때나 턱을 움직일 때 통증이 있나요?",
                 options=options,
                 index=default_index,
                 key="muscle_movement_pain",
@@ -473,16 +494,16 @@ elif st.session_state.step == 4:
         if "턱관절 통증" in st.session_state.pain_types:
             st.markdown("#### 💬 턱관절 관련")
 
-            st.markdown("**입을 벌릴 때나 움직일 때 턱관절에 통증이 있습니까?**")
+            st.markdown("**입을 벌릴 때나 움직일 때 턱관절에 통증이 있나요?**")
             st.radio(
-                label="입을 벌릴 때나 움직일 때 턱관절에 통증이 있습니까?",
+                label="입을 벌릴 때나 움직일 때 턱관절에 통증이 있나요?",
                 options=options,
                 index=default_index,
                 key="tmj_movement_pain",
                 label_visibility="collapsed"
             )
 
-            st.markdown("**턱관절 부위를 눌렀을 때 통증이 있습니까?**")
+            st.markdown("**턱관절 부위를 눌렀을 때 통증이 있나요?**")
             st.radio(
                 label="턱관절 부위를 눌렀을 때 통증이 있습니까?",
                 options=options,
@@ -496,9 +517,9 @@ elif st.session_state.step == 4:
         if "두통" in st.session_state.pain_types:
             st.markdown("#### 💬 두통 관련")
 
-            st.markdown("**두통이 관자놀이 부위에서 발생합니까?**")
+            st.markdown("**두통이 관자놀이 부위에서 발생하나요까?**")
             st.radio(
-                label="두통이 관자놀이 부위에서 발생합니까?",
+                label="두통이 관자놀이 부위에서 발생하나요?",
                 options=options,
                 index=default_index,
                 key="headache_temples",
