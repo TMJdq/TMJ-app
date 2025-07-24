@@ -44,52 +44,45 @@ def compute_diagnoses(state):
     def is_valid(value):
         return value in ["예", "아니오"]
 
-    def is_missing_or_unselected(value):
-        return value in [None, "", "선택 안 함"]
-
     # 1~3. 근육통 관련 진단 (배타적)
-    if is_valid(state.get("muscle_pressure_2s")):
-        if is_no(state.get("muscle_pressure_2s")):
+    if is_no(state.get("muscle_pressure_2s")):
+        diagnoses.append("근육통 (Myalgia)")
+    elif is_yes(state.get("muscle_pressure_2s")):
+        if is_yes(state.get("muscle_referred_pain")):
+            diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
+        elif is_no(state.get("muscle_referred_pain")):
             diagnoses.append("근육통 (Myalgia)")
-        elif is_yes(state.get("muscle_pressure_2s")):
-            if is_yes(state.get("muscle_referred_pain")):
-                diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
-            elif is_no(state.get("muscle_referred_pain")):
-                diagnoses.append("근육통 (Myalgia)")
-                diagnoses.append("국소 근육통 (Local Myalgia)")
+            diagnoses.append("국소 근육통 (Local Myalgia)")
 
     # 4. 관절통 (Arthralgia)
-    if is_valid(state.get("tmj_press_pain")) and is_yes(state.get("tmj_press_pain")):
+    if is_yes(state.get("tmj_press_pain")):
         diagnoses.append("관절통 (Arthralgia)")
 
     # 5. TMD에 기인한 두통
-    headache_keys = [
+    if all(state.get(k) == "예" for k in [
         "headache_temples",
         "headache_with_jaw",
         "headache_reproduce_by_pressure",
         "headache_not_elsewhere"
-    ]
-    if all(is_valid(state.get(k)) for k in headache_keys):
-        if all(is_yes(state.get(k)) for k in headache_keys):
-            diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
+    ]):
+        diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 6. 퇴행성 관절 질환
-    if is_valid(state.get("crepitus_confirmed")) and is_yes(state.get("crepitus_confirmed")):
+    # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
+    if is_yes(state.get("crepitus_confirmed")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7 & 8. 디스크 변위
-    if is_valid(state.get("mao_fits_3fingers")):
-        if is_yes(state.get("mao_fits_3fingers")):
-            diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-        elif is_no(state.get("mao_fits_3fingers")):
-            diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
+    # 7 & 8. 감소 없는 디스크 변위
+    if is_yes(state.get("mao_fits_3fingers")):
+        diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
+    elif is_no(state.get("mao_fits_3fingers")):
+        diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
     # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if is_valid(state.get("jaw_locked_now")) and is_yes(state.get("jaw_locked_now")):
+    if is_yes(state.get("jaw_locked_now")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 10. 감소 동반 디스크 변위
-    if not is_missing_or_unselected(state.get("tmj_sound")) and state.get("tmj_sound") == "딸깍소리":
+    if state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
