@@ -47,19 +47,25 @@ def compute_diagnoses(state):
     def is_missing_or_unselected(value):
         return value in [None, "", "선택 안 함"]
 
+    any_input_provided = False
+
     # 1~3. 근육통 관련 진단 (배타적)
-    if is_no(state.get("muscle_pressure_2s")):
-        diagnoses.append("근육통 (Myalgia)")
-    elif is_yes(state.get("muscle_pressure_2s")):
-        if is_yes(state.get("muscle_referred_pain")):
-            diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
-        elif is_no(state.get("muscle_referred_pain")):
+    if is_valid(state.get("muscle_pressure_2s")):
+        any_input_provided = True
+        if is_no(state.get("muscle_pressure_2s")):
             diagnoses.append("근육통 (Myalgia)")
-            diagnoses.append("국소 근육통 (Local Myalgia)")
+        elif is_yes(state.get("muscle_pressure_2s")):
+            if is_yes(state.get("muscle_referred_pain")):
+                diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
+            elif is_no(state.get("muscle_referred_pain")):
+                diagnoses.append("근육통 (Myalgia)")
+                diagnoses.append("국소 근육통 (Local Myalgia)")
 
     # 4. 관절통 (Arthralgia)
-    if is_yes(state.get("tmj_press_pain")):
-        diagnoses.append("관절통 (Arthralgia)")
+    if is_valid(state.get("tmj_press_pain")):
+        any_input_provided = True
+        if is_yes(state.get("tmj_press_pain")):
+            diagnoses.append("관절통 (Arthralgia)")
 
     # 5. TMD에 기인한 두통 (Headache attributed to TMD)
     headache_keys = [
@@ -68,28 +74,42 @@ def compute_diagnoses(state):
         "headache_reproduce_by_pressure",
         "headache_not_elsewhere"
     ]
-    if all(is_yes(state.get(k)) for k in headache_keys):
-        diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
+    if all(is_valid(state.get(k)) for k in headache_keys):
+        any_input_provided = True
+        if all(is_yes(state.get(k)) for k in headache_keys):
+            diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
     # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
-    if is_yes(state.get("crepitus_confirmed")):
-        diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
+    if is_valid(state.get("crepitus_confirmed")):
+        any_input_provided = True
+        if is_yes(state.get("crepitus_confirmed")):
+            diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
     # 7 & 8. 감소 없는 디스크 변위 (MAO 기반)
-    if is_yes(state.get("mao_fits_3fingers")):
-        diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-    elif is_no(state.get("mao_fits_3fingers")):
-        diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
+    if is_valid(state.get("mao_fits_3fingers")):
+        any_input_provided = True
+        if is_yes(state.get("mao_fits_3fingers")):
+            diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
+        elif is_no(state.get("mao_fits_3fingers")):
+            diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
     # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if is_yes(state.get("jaw_locked_now")):
-        diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
+    if is_valid(state.get("jaw_locked_now")):
+        any_input_provided = True
+        if is_yes(state.get("jaw_locked_now")):
+            diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 10. 감소 동반 디스크 변위
-    if state.get("tmj_sound") == "딸깍소리":
-        diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
+    if not is_missing_or_unselected(state.get("tmj_sound")):
+        any_input_provided = True
+        if state.get("tmj_sound") == "딸깍소리":
+            diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
+
+    if not any_input_provided:
+        return None  # 입력 부족
 
     return diagnoses
+
 
 
 
@@ -1376,7 +1396,11 @@ elif st.session_state.step == 19:
         "TMD에 기인한 두통 (Headache attributed to TMD)": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다."
     }
 
-    if results:
+    if results is None:
+        st.warning("⚠️ 진단을 위한 입력 정보가 부족하여 결과를 도출할 수 없습니다.")
+    elif not results:
+        st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
+    else:
         if len(results) == 1:
             st.error(f"**{results[0]}**이(가) 의심됩니다.")
         else:
@@ -1387,8 +1411,6 @@ elif st.session_state.step == 19:
             st.markdown(f"### 🔹 {diagnosis}")
             st.info(dc_tmd_explanations.get(diagnosis, "설명 없음"))
             st.markdown("---")
-    else:
-        st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
 
     st.info("※ 본 결과는 예비 진단이며, 전문의 상담을 반드시 권장합니다.")
 
@@ -1397,5 +1419,6 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+
 
 
