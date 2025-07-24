@@ -30,50 +30,31 @@ def go_back():
     st.session_state.step -= 1
     st.session_state.validation_errors = {} # 이전 단계로 돌아갈 때 에러 초기화
 
-# 설명
-dc_tmd_explanations = {
-    "Myalgia": "근육성 통증: 씹는 근육의 과사용 또는 긴장으로 인한 통증입니다.",
-    "Arthralgia": "관절 통증: 턱관절 자체의 염증이나 자극으로 발생하는 통증입니다.",
-    "Headache attributed to TMD": "턱관절과 관련된 두통: 측두부의 긴장이나 통증이 턱 기능장애와 관련되어 나타납니다.",
-    "Disc displacement with reduction": "턱관절 디스크가 위치 이탈 후 다시 돌아오는 상태로, 입을 벌릴 때 '딸깍' 소리가 날 수 있습니다.",
-    "Disc displacement without reduction": "디스크가 위치 이탈된 채 돌아오지 않는 상태로, 입이 잘 벌어지지 않거나 움직임 제한이 있습니다.",
-    "Degenerative joint disease": "퇴행성 관절 질환: 관절 연골의 마모나 퇴행으로 인해 통증, 마찰음, 기능 제한이 발생합니다."
-}
 
-# 진단 트리
+# 진단 함수
 def compute_diagnoses(state):
     diagnoses = []
 
-    # 주호소
-    complaint = state.get("chief_complaint")
-    is_pain_related = complaint in [
-        "턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)",
-        "턱 움직임 관련 두통"
-    ]
-    is_joint_related = complaint == "턱관절 소리/잠김"
-
     # 1. 근육통 (Myalgia)
-    if is_pain_related:
-        if "넓은 부위의 통증" in state.get("pain_types", []) or "근육 통증" in state.get("pain_types", []):
-            if state.get("muscle_pressure_2s") == "아니오" or (
-                state.get("muscle_pressure_2s") == "예" and state.get("muscle_referred_pain") == "아니오"):
-                diagnoses.append("근육통 (Myalgia)")
+    if state.get("muscle_pressure_2s") == "아니오" or (
+        state.get("muscle_pressure_2s") == "예" and state.get("muscle_referred_pain") == "아니오"
+    ):
+        diagnoses.append("근육통 (Myalgia)")
 
     # 2. 국소 근육통 (Local Myalgia)
-    if is_pain_related and state.get("muscle_referred_pain") == "아니오":
+    if state.get("muscle_referred_pain") == "아니오":
         diagnoses.append("국소 근육통 (Local Myalgia)")
 
     # 3. 방사성 근막통 (Myofascial Pain with Referral)
-    if is_pain_related and state.get("muscle_referred_pain") == "예":
+    if state.get("muscle_referred_pain") == "예":
         diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
 
     # 4. 관절통 (Arthralgia)
-    if is_pain_related:
-        if "턱관절 통증" in state.get("pain_types", []) and state.get("tmj_press_pain") == "예":
-            diagnoses.append("관절통 (Arthralgia)")
+    if state.get("tmj_press_pain") == "예":
+        diagnoses.append("관절통 (Arthralgia)")
 
-    # 5. TMD 관련 두통
-    if is_pain_related and "두통" in state.get("pain_types", []):
+    # 5. TMD에 기인한 두통
+    if "두통" in state.get("pain_types", []):
         if all(state.get(k) == "예" for k in [
             "headache_temples",
             "headache_with_jaw",
@@ -83,21 +64,22 @@ def compute_diagnoses(state):
             diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
     # 6. 감소 동반 간헐적 잠금 디스크 변위
-    if is_joint_related and state.get("jaw_locked_now") == "예":
-        diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with intermittent locking)")
+    if state.get("jaw_locked_now") == "예":
+        diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 7. 감소 없는 디스크 변위
-    if state.get("jaw_locked_past") == "예":
-        if state.get("mao_fits_3fingers") == "예":
-            diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-        elif state.get("mao_fits_3fingers") == "아니오":
-            diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction w/ Limitation)")
+    if state.get("jaw_locked_past") == "예" and state.get("mao_fits_3fingers") == "예":
+        diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
 
-    # 8. 퇴행성 관절 질환
+    # 8. 감소 없는 디스크 변위 (개구 제한 동반)
+    if state.get("jaw_locked_past") == "예" and state.get("mao_fits_3fingers") == "아니오":
+        diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction w/ Limitation)")
+
+    # 9. 퇴행성 관절 질환
     if state.get("tmj_sound") == "사각사각소리(크레피투스)":
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 9. 감소 동반 디스크 변위
+    # 10. 감소 동반 디스크 변위
     if state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
@@ -654,7 +636,7 @@ elif st.session_state.step == 6:
         st.markdown("---")
 
         # 통증 정도
-        st.markdown("**(통증이 있을 시)현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
+        st.markdown("**(통증이 있을 시) 현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
         st.slider("통증 정도 선택", 0, 10, value=st.session_state.get('pain_level', 0), key="pain_level")
 
     st.markdown("---")
@@ -667,7 +649,7 @@ elif st.session_state.step == 6:
     with col2:
         if st.button("다음 단계로 이동 👉"):
             freq_valid = (
-                selected_frequency in ["매일", "주 2~3회"]
+                selected_frequency not in ["선택 안 함", "기타"]
                 or (selected_frequency == "기타" and st.session_state.get('frequency_other_text', '').strip() != "")
             )
 
@@ -929,7 +911,7 @@ elif st.session_state.step == 11:
             unsafe_allow_html=True
         )
 
-        st.markdown("### 전문가 촉진 소견")
+        st.markdown("### 의료진 촉진 소견")
 
         st.markdown("**측두근 촉진 소견**")
         st.text_area(
@@ -1428,6 +1410,19 @@ elif st.session_state.step == 19:
 
     results = compute_diagnoses(st.session_state)
 
+    dc_tmd_explanations = {
+        "근육통": "→ 턱 주변 근육에서 발생하는 통증으로, 움직임이나 압박 시 통증이 심해지는 증상입니다.",
+        "국소 근육통": "→ 통증이 특정 근육 부위에만 국한되어 있고, 다른 부위로 퍼지지 않는 증상입니다.",
+        "방사성 근막통": "→ 특정 근육을 눌렀을 때 통증이 다른 부위로 방사되어 퍼지는 증상입니다.",
+        "관절통": "→ 턱관절 자체에 발생하는 통증으로, 움직이거나 누를 때 통증이 유발되는 상태입니다.",
+        "퇴행성 관절 질환": "→ 턱관절의 연골이나 뼈가 마모되거나 손상되어 통증과 기능 제한이 동반되는 상태입니다.",
+        "감소 없는 디스크 변위": "→ 턱관절 디스크가 비정상 위치에 있으며, 입을 벌려도 제자리로 돌아오지 않는 상태입니다.",
+        "감소 없는 디스크 변위 - 개구 제한 동반": "→ 디스크가 제자리로 돌아오지 않으며, 입 벌리기가 제한되는 상태입니다.",
+        "감소 동반 간헐적 잠금 디스크 변위": "→ 디스크가 움직일 때 딸깍소리가 나며, 일시적인 입 벌리기 장애가 간헐적으로 나타나는 상태입니다.",
+        "감소 동반 디스크 변위": "→ 입을 벌릴 때 디스크가 제자리로 돌아오며 딸깍소리가 나는 상태이며, 기능 제한은 없는 경우입니다.",
+        "TMD에 기인한 두통": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다.",
+    }
+
     if not results:
         st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
@@ -1439,22 +1434,11 @@ elif st.session_state.step == 19:
         st.markdown("---")
         for diagnosis in results:
             st.markdown(f"### 🔹 {diagnosis}")
-            desc_key = diagnosis.split(' (')[0]  # 진단명 키
+            desc_key = diagnosis.split(" (")[0]  # 한글 진단 키 추출
             desc = dc_tmd_explanations.get(desc_key, "설명 없음")
-            st.info(f"📝 {desc}")
+            st.info(desc)
             st.markdown("---")
 
-    st.subheader("📄 PDF 보고서 다운로드")
-    pdf_file_path = generate_pdf_report(st.session_state, results)
-    with open(pdf_file_path, "rb") as pdf_file:
-        st.download_button(
-            label="📄 PDF 보고서 다운로드",
-            data=pdf_file,
-            file_name=os.path.basename(pdf_file_path),
-            mime="application/pdf"
-        )
-
-    st.markdown("---")
     st.info("※ 본 결과는 예비 진단이며, 전문의 상담을 반드시 권장합니다.")
 
     if st.button("처음으로 돌아가기", use_container_width=True):
@@ -1462,5 +1446,6 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.experimental_rerun()
+
 
 
