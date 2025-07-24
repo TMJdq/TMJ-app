@@ -30,6 +30,8 @@ def go_back():
     st.session_state.step -= 1
     st.session_state.validation_errors = {} # 이전 단계로 돌아갈 때 에러 초기화
 
+st.write("세션 상태 전체 확인:", st.session_state)
+
 
 # 진단 함수
 def compute_diagnoses(state):
