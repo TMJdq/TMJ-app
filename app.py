@@ -349,11 +349,11 @@ elif st.session_state.step == 4:
         try:
             return yes_no_options.index(val)
         except ValueError:
-            return 2  # "선택 안 함"
+            return 2  # "선택 안 함" 기본 인덱스
 
     with st.container(border=True):
         st.markdown("**아래 중 해당되는 통증 유형을 선택해주세요.**")
-        st.session_state.pain_types = st.selectbox(
+        st.selectbox(
             label="통증 유형 선택",
             options=pain_type_options,
             index=get_selectbox_index("pain_types"),
@@ -362,23 +362,23 @@ elif st.session_state.step == 4:
 
         st.markdown("---")
 
-        pain_type = st.session_state.pain_types
+        pain_type = st.session_state.get("pain_types", "선택 안 함")
 
         if pain_type in ["넓은 부위의 통증", "근육 통증"]:
             st.markdown("#### 💬 근육/넓은 부위 관련")
 
             st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("muscle_movement_pain"),
                 key="muscle_movement_pain"
             )
 
             st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("muscle_pressure_2s"),
                 key="muscle_pressure_2s"
             )
@@ -386,26 +386,27 @@ elif st.session_state.step == 4:
             if st.session_state.get("muscle_pressure_2s") == "예":
                 st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
                 st.radio(
-                    "",
-                    yes_no_options,
+                    label="",
+                    options=yes_no_options,
                     index=get_radio_index("muscle_referred_pain"),
                     key="muscle_referred_pain"
                 )
 
         elif pain_type == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
+
             st.markdown("**입을 벌릴 때나 움직일 때 통증이 있나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("tmj_movement_pain"),
                 key="tmj_movement_pain"
             )
 
             st.markdown("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("tmj_press_pain"),
                 key="tmj_press_pain"
             )
@@ -415,37 +416,37 @@ elif st.session_state.step == 4:
 
             st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("headache_temples"),
                 key="headache_temples"
             )
 
             st.markdown("**턱을 움직일 때 두통이 심해지나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("headache_with_jaw"),
                 key="headache_with_jaw"
             )
 
             st.markdown("**관자놀이 근육을 눌렀을 때 기존 두통이 재현되나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("headache_reproduce_by_pressure"),
                 key="headache_reproduce_by_pressure"
             )
 
             st.markdown("**해당 두통이 다른 의학적 진단으로 설명되지 않나요?**")
             st.radio(
-                "",
-                yes_no_options,
+                label="",
+                options=yes_no_options,
                 index=get_radio_index("headache_not_elsewhere"),
                 key="headache_not_elsewhere"
             )
 
-    # 선택하지 않은 유형의 답변 초기화
+    # 선택된 통증 유형에 따라 필요 없는 항목들은 '선택 안 함'으로 초기화
     if pain_type not in ["넓은 부위의 통증", "근육 통증"]:
         st.session_state["muscle_movement_pain"] = "선택 안 함"
         st.session_state["muscle_pressure_2s"] = "선택 안 함"
