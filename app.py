@@ -557,7 +557,7 @@ elif st.session_state.step == 5:
                 index=current_index,
                 key="crepitus_confirmed"
             )
-            st.session_state.crepitus_confirmed = selected_crepitus  # 세션 저장
+        
 
         # 턱 잠김 관련 조건
         show_lock_questions = (
