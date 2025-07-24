@@ -831,7 +831,7 @@ elif st.session_state.step == 7:
                 disabled=habit_none_checked
             )
 
-        # 선택 동기화 (없음 해제되면 나머지 선택 가능)
+        # '없음' 해제되면 나머지 항목 선택 해제
         if not habit_none_checked:
             for key in first_habits.values():
                 if key not in st.session_state:
@@ -873,264 +873,20 @@ elif st.session_state.step == 7:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            has_first_habit = any([
+            has_first = any([
                 st.session_state.get("habit_bruxism_night", False),
                 st.session_state.get("habit_clenching_day", False),
                 st.session_state.get("habit_clenching_night", False),
                 st.session_state.get("habit_none", False)
             ])
-            if has_first_habit or st.session_state.selected_habits:
+            if has_first:
                 go_next()
             else:
-                st.warning("최소 한 가지 이상 선택해주세요.")
+                st.warning("‘이갈이/이 악물기/없음’ 중에서 최소 한 가지를 선택해주세요.")
 
 
-# STEP 8: 귀 관련 증상 (기존 코드의 STEP 7)
+# STEP 8: 턱 운동 범위 및 관찰1 (Range of Motion & Observations)
 elif st.session_state.step == 8:
-    st.title("귀 관련 증상")
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("**다음 중 귀와 관련된 증상이 있으신가요?**")
-        ear_symptoms_list = [
-            "이명 (귀울림)", "귀가 먹먹한 느낌", "귀 통증", "청력 저하", "기타", "없음"
-        ]
-        
-        if 'selected_ear_symptoms' not in st.session_state:
-            st.session_state.selected_ear_symptoms = []
-
-        # "없음"이 선택되었는지 여부
-        none_selected = st.checkbox("없음", value=("없음" in st.session_state.selected_ear_symptoms), key="ear_symptom_none_checkbox")
-        if none_selected and "없음" not in st.session_state.selected_ear_symptoms:
-            st.session_state.selected_ear_symptoms = ["없음"]
-        elif not none_selected and "없음" in st.session_state.selected_ear_symptoms:
-            st.session_state.selected_ear_symptoms.remove("없음")
-
-        # "없음"이 선택되면 나머지 체크박스 비활성화
-        disabled_others = "없음" in st.session_state.selected_ear_symptoms
-
-        for symptom in ear_symptoms_list[:-1]: # "없음" 제외
-            checkbox_key = f"ear_symptom_{symptom.replace(' ', '_').replace('(', '').replace(')', '')}"
-            if st.checkbox(symptom, value=(symptom in st.session_state.selected_ear_symptoms), key=checkbox_key, disabled=disabled_others):
-                if symptom not in st.session_state.selected_ear_symptoms and not disabled_others:
-                    st.session_state.selected_ear_symptoms.append(symptom)
-            else:
-                if symptom in st.session_state.selected_ear_symptoms:
-                    st.session_state.selected_ear_symptoms.remove(symptom)
-        
-        if "기타" in st.session_state.selected_ear_symptoms and not disabled_others:
-            st.text_input("기타 귀 관련 증상을 입력해주세요:", value=st.session_state.get('ear_symptom_other', ''), key="ear_symptom_other")
-        else:
-            if 'ear_symptom_other' in st.session_state:
-                st.session_state.ear_symptom_other = ""
-
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("이전 단계"):
-            go_back()
-    with col2:
-        if st.button("다음 단계로 이동 👉"):
-            # 최소 하나라도 선택되었는지 확인
-            if not st.session_state.selected_ear_symptoms:
-                st.warning("귀 관련 증상을 한 가지 이상 선택하거나 '없음'을 선택해주세요.")
-            elif "없음" in st.session_state.selected_ear_symptoms and len(st.session_state.selected_ear_symptoms) > 1:
-                st.warning("'없음'과 다른 증상을 동시에 선택할 수 없습니다. 다시 확인해주세요.")
-            else:
-                go_next()
-
-# STEP 9: 경추/목/어깨 관련 증상 (기존 코드의 STEP 8)
-elif st.session_state.step == 9:
-    st.title("경추/목/어깨 관련 증상")
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("**다음 중의 증상이 있으신가요?**")
-        
-        none_selected_neck = st.checkbox("없음", value=st.session_state.get('neck_none', False), key="neck_none")
-        
-        disabled_others_neck = st.session_state.get('neck_none', False)
-
-        st.checkbox("목 통증", value=st.session_state.get('neck_pain', False), key="neck_pain", disabled=disabled_others_neck)
-        st.checkbox("어깨 통증", value=st.session_state.get('shoulder_pain', False), key="shoulder_pain", disabled=disabled_others_neck)
-        st.checkbox("뻣뻣함(강직감)", value=st.session_state.get('stiffness', False), key="stiffness", disabled=disabled_others_neck)
-        
-        
-        st.session_state.neck_shoulder_symptoms = {
-            "목 통증": st.session_state.get('neck_pain', False),
-            "어깨 통증": st.session_state.get('shoulder_pain', False),
-            "뻣뻣함(강직감)": st.session_state.get('stiffness', False),
-        }
-
-        st.markdown("---")
-        st.markdown("**목 외상 관련 이력이 있으신가요?**")
-        st.radio(
-            label="",
-            options=["예", "아니오", "선택 안 함"],
-            index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')) if 'neck_trauma_radio' in st.session_state else 2,
-            key="neck_trauma_radio",
-            label_visibility="collapsed"
-        )
-    
-        if st.session_state.get('neck_trauma_radio') == "예":
-            st.markdown("있다면 자세히 적어주세요:")
-            st.text_input(label="", value=st.session_state.get('trauma_detail', ''), key="trauma_detail", label_visibility="collapsed")
-        else:
-            if 'trauma_detail' in st.session_state:
-                st.session_state.trauma_detail = ""
-        
-        st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
-
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("이전 단계"):
-            go_back()
-    with col2:
-        if st.button("다음 단계로 이동 👉"):
-            trauma_selected = st.session_state.get('neck_trauma_radio') in ["예", "아니오"]
-            symptoms_selected = st.session_state.get('neck_none', False) or \
-                                st.session_state.get('neck_pain', False) or \
-                                st.session_state.get('shoulder_pain', False) or \
-                                st.session_state.get('stiffness', False)
-            
-            # '없음'과 다른 증상이 동시에 선택되었는지 확인
-            if st.session_state.get('neck_none', False) and (st.session_state.get('neck_pain', False) or st.session_state.get('shoulder_pain', False) or st.session_state.get('stiffness', False)):
-                st.warning("'없음'과 다른 증상을 동시에 선택할 수 없습니다. 다시 확인해주세요.")
-            elif not symptoms_selected:
-                st.warning("증상에서 최소 하나를 선택하거나 '없음'을 체크해주세요.")
-            elif not trauma_selected:
-                st.warning("목 외상 여부를 선택해주세요.")
-            else:
-                go_next()
-
-# STEP 10: 정서적 스트레스 이력 (기존 코드의 STEP 9)
-elif st.session_state.step == 10:
-    st.title("정서적 스트레스 이력")
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("**스트레스, 불안, 우울감 등을 많이 느끼시나요?**")
-        st.radio(
-            label="",
-            options=["예", "아니오", "기타", "선택 안 함"],
-            index=["예", "아니오", "기타", "선택 안 함"].index(st.session_state.get('stress_radio', '선택 안 함')) if 'stress_radio' in st.session_state else 3,
-            key="stress_radio",
-            label_visibility="collapsed"
-        )
-    
-        if st.session_state.stress_radio == "기타":
-            st.markdown("**기타 의견:**")
-            st.text_input(label="", value=st.session_state.get('stress_other_input', ''), key="stress_other_input", label_visibility="collapsed")
-            st.session_state.stress_other = st.session_state.stress_other_input
-        else:
-            if 'stress_other_input' in st.session_state:
-                st.session_state.stress_other_input = ""
-            st.session_state.stress_other = ""
-    
-        st.markdown("---")
-        st.markdown("**있다면 간단히 기재해 주세요:**")
-        st.text_area(
-            label="",
-            value=st.session_state.get('stress_detail', ''),
-            key="stress_detail",
-            placeholder="예: 최근 업무 스트레스, 가족 문제 등",
-            label_visibility="collapsed"
-        )
-        st.session_state.stress = st.session_state.stress_radio
-
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("이전 단계"):
-            go_back()
-    with col2:
-        if st.button("다음 단계로 이동 👉"):
-            if st.session_state.stress_radio == '선택 안 함':
-                st.warning("스트레스 여부를 선택해주세요.")
-            else:
-                go_next()
-
-# STEP 11: 과거 의과적 이력 (Past Medical History) (기존 코드의 STEP 10)
-elif st.session_state.step == 11:
-    st.title("과거 의과적 이력 (Past Medical History)")
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("**과거에 앓았던 질환, 입원 등 주요 의학적 이력이 있다면 적어주세요:**")
-        st.text_area(label="", value=st.session_state.get('past_history', ''), key="past_history", label_visibility="collapsed")
-        st.markdown("---")
-        st.markdown("**현재 복용 중인 약이 있다면 적어주세요:**")
-        st.text_area(label="", value=st.session_state.get('current_medications', ''), key="current_medications", label_visibility="collapsed")
-    
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("이전 단계"):
-            go_back()
-    with col2:
-        if st.button("다음 단계로 이동 👉"):
-            go_next()
-
-# STEP 12: 과거 치과적 이력 (Past Dental History) (기존 코드의 STEP 11)
-elif st.session_state.step == 12:
-    st.title("과거 치과적 이력 (Past Dental History)")
-    st.markdown("---")
-    with st.container(border=True):
-        # 교정치료
-        st.markdown("**교정치료(치아 교정) 경험**")
-        st.radio(
-            label="",
-            options=["예", "아니오", "기타", "선택 안 함"],
-            index=["예", "아니오", "기타", "선택 안 함"].index(st.session_state.get('ortho_exp', '선택 안 함')) if 'ortho_exp' in st.session_state else 3,
-            key="ortho_exp",
-            label_visibility="collapsed"
-        )
-        if st.session_state.ortho_exp == "기타":
-            st.markdown("**기타: 교정치료 관련 내용 입력**")
-            st.text_input(label="", value=st.session_state.get('ortho_exp_other', ''), key="ortho_exp_other", label_visibility="collapsed")
-        else:
-            if 'ortho_exp_other' in st.session_state:
-                st.session_state.ortho_exp_other = ""
-        
-        st.markdown("**예라면 언제, 얼마나 받았는지 적어주세요:**")
-        st.text_input(label="", value=st.session_state.get('ortho_detail', ''), key="ortho_detail", label_visibility="collapsed")
-    
-        # 보철치료
-        st.markdown("---")
-        st.markdown("**보철치료(의치, 브리지, 임플란트 등) 경험**")
-        st.radio(
-            label="",
-            options=["예", "아니오", "기타", "선택 안 함"],
-            index=["예", "아니오", "기타", "선택 안 함"].index(st.session_state.get('prosth_exp', '선택 안 함')) if 'prosth_exp' in st.session_state else 3,
-            key="prosth_exp",
-            label_visibility="collapsed"
-        )
-        if st.session_state.prosth_exp == "기타":
-            st.markdown("**기타: 보철치료 관련 내용 입력**")
-            st.text_input(label="", value=st.session_state.get('prosth_exp_other', ''), key="prosth_exp_other", label_visibility="collapsed")
-        else:
-            if 'prosth_exp_other' in st.session_state:
-                st.session_state.prosth_exp_other = ""
-        
-        st.markdown("**예라면 어떤 치료였는지 적어주세요:**")
-        st.text_input(label="", value=st.session_state.get('prosth_detail', ''), key="prosth_detail", label_visibility="collapsed")
-    
-        # 기타 치과 치료
-        st.markdown("---")
-        st.markdown("**기타 치과 치료 이력 (주요 치과 시술, 수술 등)**")
-        st.text_area(label="", value=st.session_state.get('other_dental', ''), key="other_dental", label_visibility="collapsed")
-    
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("이전 단계"):
-            go_back()
-    with col2:
-        if st.button("다음 단계로 이동 👉"):
-            if st.session_state.ortho_exp == '선택 안 함' or st.session_state.prosth_exp == '선택 안 함':
-                st.warning("교정치료 및 보철치료 항목을 모두 선택해주세요.")
-            else:
-                go_next()
-
-# STEP 13: 턱 운동 범위 및 관찰1 (Range of Motion & Observations) (기존 코드의 STEP 12)
-elif st.session_state.step == 13:
     st.title("턱 운동 범위 및 관찰 (Range of Motion & Observations)")
     st.markdown("---")
     st.markdown(
@@ -1163,8 +919,9 @@ elif st.session_state.step == 13:
         if st.button("다음 단계로 이동 👉"):
             go_next()
 
-# STEP 14: 턱 운동 범위 및 관찰2 (Range of Motion & Observations) (기존 코드의 STEP 13)
-elif st.session_state.step == 14:
+
+# STEP 9: 턱 운동 범위 및 관찰2 (Range of Motion & Observations)
+elif st.session_state.step == 9:
     st.title("턱 운동 범위 및 관찰 (Range of Motion & Observations)")
     st.markdown("---")
     st.markdown(
@@ -1212,9 +969,10 @@ elif st.session_state.step == 14:
     with col2:
         if st.button("다음 단계로 이동 👉"):
             go_next()
+
   
-# STEP 15: 턱 운동 범위 및 관찰3 (Range of Motion & Observations) (기존 코드의 STEP 14)
-elif st.session_state.step == 15:
+# STEP 10: 턱 운동 범위 및 관찰3 (Range of Motion & Observations) (기존 코드의 STEP 14)
+elif st.session_state.step == 10:
     st.title("턱 운동 범위 및 관찰 (Range of Motion & Observations)")
     st.markdown("---")
     st.markdown(
@@ -1269,8 +1027,306 @@ elif st.session_state.step == 15:
     with col2:
         if st.button("다음 단계로 이동 👉"):
             go_next()
+
+            
+# STEP 11: 귀 관련 증상 (기존 코드의 STEP 7)
+elif st.session_state.step == 11:
+    st.title("귀 관련 증상")
+    st.markdown("---")
+    with st.container(border=True):
+        st.markdown("**다음 중 귀와 관련된 증상이 있으신가요?**")
+        ear_symptoms_list = [
+            "이명 (귀울림)", "귀가 먹먹한 느낌", "귀 통증", "청력 저하", "기타", "없음"
+        ]
+        
+        if 'selected_ear_symptoms' not in st.session_state:
+            st.session_state.selected_ear_symptoms = []
+
+        # "없음"이 선택되었는지 여부
+        none_selected = st.checkbox("없음", value=("없음" in st.session_state.selected_ear_symptoms), key="ear_symptom_none_checkbox")
+        if none_selected and "없음" not in st.session_state.selected_ear_symptoms:
+            st.session_state.selected_ear_symptoms = ["없음"]
+        elif not none_selected and "없음" in st.session_state.selected_ear_symptoms:
+            st.session_state.selected_ear_symptoms.remove("없음")
+
+        # "없음"이 선택되면 나머지 체크박스 비활성화
+        disabled_others = "없음" in st.session_state.selected_ear_symptoms
+
+        for symptom in ear_symptoms_list[:-1]: # "없음" 제외
+            checkbox_key = f"ear_symptom_{symptom.replace(' ', '_').replace('(', '').replace(')', '')}"
+            if st.checkbox(symptom, value=(symptom in st.session_state.selected_ear_symptoms), key=checkbox_key, disabled=disabled_others):
+                if symptom not in st.session_state.selected_ear_symptoms and not disabled_others:
+                    st.session_state.selected_ear_symptoms.append(symptom)
+            else:
+                if symptom in st.session_state.selected_ear_symptoms:
+                    st.session_state.selected_ear_symptoms.remove(symptom)
+        
+        if "기타" in st.session_state.selected_ear_symptoms and not disabled_others:
+            st.text_input("기타 귀 관련 증상을 입력해주세요:", value=st.session_state.get('ear_symptom_other', ''), key="ear_symptom_other")
+        else:
+            if 'ear_symptom_other' in st.session_state:
+                st.session_state.ear_symptom_other = ""
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            # 최소 하나라도 선택되었는지 확인
+            if not st.session_state.selected_ear_symptoms:
+                st.warning("귀 관련 증상을 한 가지 이상 선택하거나 '없음'을 선택해주세요.")
+            elif "없음" in st.session_state.selected_ear_symptoms and len(st.session_state.selected_ear_symptoms) > 1:
+                st.warning("'없음'과 다른 증상을 동시에 선택할 수 없습니다. 다시 확인해주세요.")
+            else:
+                go_next()
+                
+
+# STEP 12: 경추/목/어깨 관련 증상 (기존 코드의 STEP 8)
+elif st.session_state.step == 12:
+    st.title("경추/목/어깨 관련 증상")
+    st.markdown("---")
+    
+    with st.container(border=True):
+        st.markdown("**다음 중의 증상이 있으신가요?**")
+        
+        none_selected_neck = st.checkbox("없음", value=st.session_state.get('neck_none', False), key="neck_none")
+        disabled_others_neck = st.session_state.get('neck_none', False)
+
+        st.checkbox("목 통증", value=st.session_state.get('neck_pain', False), key="neck_pain", disabled=disabled_others_neck)
+        st.checkbox("어깨 통증", value=st.session_state.get('shoulder_pain', False), key="shoulder_pain", disabled=disabled_others_neck)
+        st.checkbox("뻣뻣함(강직감)", value=st.session_state.get('stiffness', False), key="stiffness", disabled=disabled_others_neck)
+
+        st.session_state.neck_shoulder_symptoms = {
+            "목 통증": st.session_state.get('neck_pain', False),
+            "어깨 통증": st.session_state.get('shoulder_pain', False),
+            "뻣뻣함(강직감)": st.session_state.get('stiffness', False),
+        }
+
+    st.markdown("---")
+    with st.container(border=True):
+        st.markdown("**다음 중 해당되는 증상이 있다면 모두 선택해주세요. (복수 선택 가능)**")
+        st.session_state.additional_symptoms = {
+            "등 상부 통증": st.checkbox("등 상부 통증", key="upper_back_pain"),
+            "두개저 통증 (머리 뒤통수 밑)": st.checkbox("두개저 통증", key="occipital_pain"),
+            "측두부 통증 (관자놀이)": st.checkbox("측두부 통증", key="temple_pain"),
+            "턱 아래 통증 (설골 주변)": st.checkbox("턱 아래 통증", key="under_jaw_pain"),
+        }
+
+    st.markdown("---")
+    with st.container(border=True):
+        st.markdown("**목 외상 관련 이력이 있으신가요?**")
+        st.radio(
+            label="",
+            options=["예", "아니오", "선택 안 함"],
+            index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')) if 'neck_trauma_radio' in st.session_state else 2,
+            key="neck_trauma_radio",
+            label_visibility="collapsed"
+        )
+
+        if st.session_state.get('neck_trauma_radio') == "예":
+            st.markdown("있다면 자세히 적어주세요:")
+            st.text_input(label="", value=st.session_state.get('trauma_detail', ''), key="trauma_detail", label_visibility="collapsed")
+        else:
+            if 'trauma_detail' in st.session_state:
+                st.session_state.trauma_detail = ""
+
+        st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            trauma_selected = st.session_state.get('neck_trauma_radio') in ["예", "아니오"]
+            symptoms_selected = st.session_state.get('neck_none', False) or \
+                                st.session_state.get('neck_pain', False) or \
+                                st.session_state.get('shoulder_pain', False) or \
+                                st.session_state.get('stiffness', False)
+            
+            if st.session_state.get('neck_none', False) and (st.session_state.get('neck_pain', False) or st.session_state.get('shoulder_pain', False) or st.session_state.get('stiffness', False)):
+                st.warning("'없음'과 다른 증상을 동시에 선택할 수 없습니다. 다시 확인해주세요.")
+            elif not symptoms_selected:
+                st.warning("증상에서 최소 하나를 선택하거나 '없음'을 체크해주세요.")
+            elif not trauma_selected:
+                st.warning("목 외상 여부를 선택해주세요.")
+            else:
+                go_next()
+
+
+# STEP 13: 정서적 스트레스 이력
+elif st.session_state.step == 13:
+    st.title("정서적 스트레스 이력")
+    st.markdown("---")
+    with st.container(border=True):
+        st.markdown("**스트레스, 불안, 우울감 등을 많이 느끼시나요?**")
+        st.radio(
+            label="",
+            options=["예", "아니오", "기타", "선택 안 함"],
+            index=["예", "아니오", "기타", "선택 안 함"].index(st.session_state.get('stress_radio', '선택 안 함')) if 'stress_radio' in st.session_state else 3,
+            key="stress_radio",
+            label_visibility="collapsed"
+        )
+    
+        if st.session_state.stress_radio == "기타":
+            st.markdown("**기타 의견:**")
+            st.text_input(label="", value=st.session_state.get('stress_other_input', ''), key="stress_other_input", label_visibility="collapsed")
+            st.session_state.stress_other = st.session_state.stress_other_input
+        else:
+            if 'stress_other_input' in st.session_state:
+                st.session_state.stress_other_input = ""
+            st.session_state.stress_other = ""
+    
+        st.markdown("---")
+        st.markdown("**있다면 간단히 기재해 주세요:**")
+        st.text_area(
+            label="",
+            value=st.session_state.get('stress_detail', ''),
+            key="stress_detail",
+            placeholder="예: 최근 업무 스트레스, 가족 문제 등",
+            label_visibility="collapsed"
+        )
+        st.session_state.stress = st.session_state.stress_radio
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            if st.session_state.stress_radio == '선택 안 함':
+                st.warning("스트레스 여부를 선택해주세요.")
+            else:
+                go_next()
+
+
+# STEP 14: 과거 치과적 이력 (Past Dental History)
+elif st.session_state.step == 14:
+    st.title("과거 치과적 이력 (Past Dental History)")
+    st.markdown("---")
+    with st.container(border=True):
+        # 교정치료
+        st.markdown("**교정치료(치아 교정) 경험**")
+        st.radio(
+            label="",
+            options=["예", "아니오", "기타", "선택 안 함"],
+            index=["예", "아니오", "기타", "선택 안 함"].index(st.session_state.get('ortho_exp', '선택 안 함')) if 'ortho_exp' in st.session_state else 3,
+            key="ortho_exp",
+            label_visibility="collapsed"
+        )
+        if st.session_state.ortho_exp == "기타":
+            st.markdown("**기타: 교정치료 관련 내용 입력**")
+            st.text_input(label="", value=st.session_state.get('ortho_exp_other', ''), key="ortho_exp_other", label_visibility="collapsed")
+        else:
+            if 'ortho_exp_other' in st.session_state:
+                st.session_state.ortho_exp_other = ""
+        
+        st.markdown("**예라면 언제, 얼마나 받았는지 적어주세요:**")
+        st.text_input(label="", value=st.session_state.get('ortho_detail', ''), key="ortho_detail", label_visibility="collapsed")
+
+        # 보철치료
+        st.markdown("---")
+        st.markdown("**보철치료(의치, 브리지, 임플란트 등) 경험**")
+        st.radio(
+            label="",
+            options=["예", "아니오", "기타", "선택 안 함"],
+            index=["예", "아니오", "기타", "선택 안 함"].index(st.session_state.get('prosth_exp', '선택 안 함')) if 'prosth_exp' in st.session_state else 3,
+            key="prosth_exp",
+            label_visibility="collapsed"
+        )
+        if st.session_state.prosth_exp == "기타":
+            st.markdown("**기타: 보철치료 관련 내용 입력**")
+            st.text_input(label="", value=st.session_state.get('prosth_exp_other', ''), key="prosth_exp_other", label_visibility="collapsed")
+        else:
+            if 'prosth_exp_other' in st.session_state:
+                st.session_state.prosth_exp_other = ""
+
+        st.markdown("**예라면 어떤 치료였는지 적어주세요:**")
+        st.text_input(label="", value=st.session_state.get('prosth_detail', ''), key="prosth_detail", label_visibility="collapsed")
+
+        # 기타 치과 치료
+        st.markdown("---")
+        st.markdown("**기타 치과 치료 이력 (주요 치과 시술, 수술 등)**")
+        st.text_area(label="", value=st.session_state.get('other_dental', ''), key="other_dental", label_visibility="collapsed")
+
+        # 추가 질문: 턱관절 질환 치료 이력
+        st.markdown("---")
+        st.markdown("**이전에 턱관절 질환 치료를 받은 적 있나요?**")
+        st.radio(
+            label="",
+            options=["예", "아니오", "선택 안 함"],
+            index=["예", "아니오", "선택 안 함"].index(st.session_state.get('tmd_treatment_history', '선택 안 함')) if 'tmd_treatment_history' in st.session_state else 2,
+            key="tmd_treatment_history",
+            label_visibility="collapsed"
+        )
+
+        if st.session_state.tmd_treatment_history == "예":
+            st.text_input(
+                "어떤 치료를 받으셨나요?",
+                value=st.session_state.get('tmd_treatment_detail', ''),
+                key="tmd_treatment_detail",
+                placeholder="예: 물리치료, 약물치료, 장치치료 등"
+            )
+
+            st.text_input(
+                "해당 치료에 대한 반응(효과나 문제점 등):",
+                value=st.session_state.get('tmd_treatment_response', ''),
+                key="tmd_treatment_response",
+                placeholder="선택 사항입니다. 예: 효과가 없었음, 일시적으로 완화됨 등"
+            )
+
+            st.text_input(
+                "현재 복용 중인 턱관절 관련 약물이 있다면 입력해주세요:",
+                value=st.session_state.get('tmd_current_medications', ''),
+                key="tmd_current_medications",
+                placeholder="선택 사항입니다. 예: 근이완제, 진통제 등"
+            )
+        else:
+            st.session_state.tmd_treatment_detail = ""
+            st.session_state.tmd_treatment_response = ""
+            st.session_state.tmd_current_medications = ""
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            if st.session_state.ortho_exp == '선택 안 함' or st.session_state.prosth_exp == '선택 안 함':
+                st.warning("교정치료 및 보철치료 항목을 모두 선택해주세요.")
+            else:
+                go_next()
+
+
+
+# STEP 15: 과거 의과적 이력 (Past Medical History) (기존 코드의 STEP 10)
+elif st.session_state.step == 15:
+    st.title("과거 의과적 이력 (Past Medical History)")
+    st.markdown("---")
+    with st.container(border=True):
+        st.markdown("**과거에 앓았던 질환, 입원 등 주요 의학적 이력이 있다면 적어주세요:**")
+        st.text_area(label="", value=st.session_state.get('past_history', ''), key="past_history", label_visibility="collapsed")
+        st.markdown("---")
+        st.markdown("**현재 복용 중인 약이 있다면 적어주세요:**")
+        st.text_area(label="", value=st.session_state.get('current_medications', ''), key="current_medications", label_visibility="collapsed")
+    
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            go_next()
+
+
   
-# STEP 16: 자극 검사 (기존 코드의 STEP 15)
+# STEP 16: 자극 검사
 elif st.session_state.step == 16:
     st.title("자극 검사 (Provocation Tests)")
     st.markdown("---")
@@ -1303,7 +1359,8 @@ elif st.session_state.step == 16:
         if st.button("다음 단계로 이동 👉"):
             go_next()
 
-# STEP 17: 결과 (기존 코드의 STEP 16)
+
+# STEP 17: 결과
 elif st.session_state.step == 17:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
