@@ -410,8 +410,8 @@ elif st.session_state.step == 4:
         if pain_type in ["넓은 부위의 통증", "근육 통증"]:
             st.markdown("#### 💬 근육/넓은 부위 관련")
 
-           
-            st.radio("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**",
+            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
+            st.radio(
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("muscle_movement_pain_value", yes_no_options),
@@ -419,9 +419,9 @@ elif st.session_state.step == 4:
                 on_change=update_muscle_movement_pain
             )
 
-    
+            st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
             # Store the widget's temporary value in a local variable for immediate use
-            muscle_2s_choice_temp = st.radio("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**",
+            muscle_2s_choice_temp = st.radio(
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("muscle_pressure_2s_value", yes_no_options),
@@ -431,8 +431,8 @@ elif st.session_state.step == 4:
 
             # Use the persistent session state value for conditional display
             if st.session_state.muscle_pressure_2s_value == "예":
-            
-                st.radio("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**",
+                st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
+                st.radio(
                     label="",
                     options=yes_no_options,
                     index=get_radio_index("muscle_referred_pain_value", yes_no_options),
@@ -447,8 +447,8 @@ elif st.session_state.step == 4:
         elif pain_type == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
 
-          
-            st.radio("**입을 벌릴 때나 움직일 때 통증이 있나요?**",
+            st.markdown("**입을 벌릴 때나 움직일 때 통증이 있나요?**")
+            st.radio(
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("tmj_movement_pain_value", yes_no_options),
@@ -456,8 +456,8 @@ elif st.session_state.step == 4:
                 on_change=update_tmj_movement_pain
             )
 
-       
-            st.radio("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**",
+            st.markdown("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**")
+            st.radio(
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("tmj_press_pain_value", yes_no_options),
@@ -468,8 +468,8 @@ elif st.session_state.step == 4:
         elif pain_type == "두통":
             st.markdown("#### 💬 두통 관련")
 
-        
-            st.radio("**두통이 관자놀이 부위에서 발생하나요?**",
+            st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
+            st.radio(
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("headache_temples_value", yes_no_options),
