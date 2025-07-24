@@ -643,125 +643,66 @@ elif st.session_state.step == 5:
 
                 
 # STEP 6: 빈도 및 시기, 강도
-elif st.session_state.step == 5:
-    st.title("현재 증상 (턱관절 소리 및 잠김 증상)")
+elif st.session_state.step == 6:
+    st.title("현재 증상 (빈도 및 시기)")
     st.markdown("---")
 
-    st.session_state.setdefault("tmj_sound", "선택 안 함")
-    st.session_state.setdefault("crepitus_confirmed", "선택 안 함")
-    st.session_state.setdefault("tmj_click_context", [])
-    st.session_state.setdefault("jaw_locked_now", "선택 안 함")
-    st.session_state.setdefault("jaw_unlock_possible", "선택 안 함")
-    st.session_state.setdefault("jaw_locked_past", "선택 안 함")
-    st.session_state.setdefault("mao_fits_3fingers", "선택 안 함")
+    with st.container(border=True):
+        st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
+        freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
+        freq = st.radio("", freq_opts, index=5, key="frequency_choice")
 
-    joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
-    selected_sound = st.radio(
-        "턱에서 나는 소리가 있나요?",
-        options=joint_sound_options,
-        index=joint_sound_options.index(st.session_state.tmj_sound)
-    )
-    st.session_state.tmj_sound = selected_sound
+        if freq == "기타":
+            st.text_input("기타 빈도:", key="frequency_other_text")
+        else:
+            st.session_state.frequency_other_text = ""
 
-    if selected_sound == "딸깍소리":
-        st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
-        click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
-        updated_context = []
-        for option in click_options:
-            key = f"click_{option}"
-            is_checked = option in st.session_state.tmj_click_context
-            if st.checkbox(f"- {option}", value=is_checked, key=key):
-                updated_context.append(option)
-        st.session_state.tmj_click_context = updated_context
-
-    elif selected_sound == "사각사각소리(크레피투스)":
-        crepitus_options = ["예", "아니오", "선택 안 함"]
-        st.session_state.setdefault("crepitus_confirmed", "선택 안 함")
-
-        st.radio(
-            "사각사각소리 확실 여부",
-            options=crepitus_options,
-            key="crepitus_confirmed",
-            value=st.session_state.crepitus_confirmed
-        )
-
-    show_lock_questions = (
-        st.session_state.tmj_sound == "사각사각소리(크레피투스)" and
-        st.session_state.crepitus_confirmed == "아니오"
-    )
-
-    if show_lock_questions:
         st.markdown("---")
-        st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
-        st.radio(
-            "턱이 현재 걸려있나요?",
-            options=["예", "아니오", "선택 안 함"],
-            key="jaw_locked_now"
-        )
+        st.markdown("**주로 어느 시간대에 발생하나요?**")
+        st.checkbox("아침", value=st.session_state.get("time_morning", False), key="time_morning")
+        st.checkbox("오후", value=st.session_state.get("time_afternoon", False), key="time_afternoon")
+        st.checkbox("저녁", value=st.session_state.get("time_evening", False), key="time_evening")
+        st.checkbox("기타 시간대", value=st.session_state.get("time_other", False), key="time_other")
 
-        if st.session_state.jaw_locked_now == "예":
-            st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
-            st.radio(
-                "잠김 해소 여부",
-                options=["예", "아니오", "선택 안 함"],
-                key="jaw_unlock_possible"
-            )
+        if st.session_state.get("time_other"):
+            st.text_input("기타 시간대:", key="time_other_text")
+        else:
+            st.session_state.time_other_text = ""
 
-        elif st.session_state.jaw_locked_now == "아니오":
-            st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
-            st.radio(
-                "과거 잠김 경험 여부",
-                options=["예", "아니오", "선택 안 함"],
-                key="jaw_locked_past"
-            )
-
-            if st.session_state.jaw_locked_past == "예":
-                st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
-                st.radio(
-                    "MAO 시 손가락 3개 가능 여부",
-                    options=["예", "아니오", "선택 안 함"],
-                    key="mao_fits_3fingers"
-                )
-
-    with st.expander("🧪 세션 상태 확인"):
-        st.json(st.session_state)
+        st.markdown("---")
+        st.markdown("**(통증이 있을 시) 현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
+        st.slider("통증 정도 선택", 0, 10, value=st.session_state.get("pain_level", 0), key="pain_level")
 
     st.markdown("---")
     col1, col2 = st.columns(2)
-
     with col1:
         if st.button("이전 단계"):
             go_back()
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            errors = []
+            freq_valid = (
+                freq not in ["선택 안 함", "기타"]
+                or (freq == "기타" and st.session_state.frequency_other_text.strip() != "")
+            )
 
-            if st.session_state.tmj_sound == "선택 안 함":
-                errors.append("턱관절 소리 여부를 선택해주세요.")
+            time_valid = (
+                st.session_state.time_morning or
+                st.session_state.time_afternoon or
+                st.session_state.time_evening or
+                (st.session_state.time_other and st.session_state.time_other_text.strip() != "")
+            )
 
-            if st.session_state.tmj_sound == "딸깍소리" and not st.session_state.tmj_click_context:
-                errors.append("딸깍소리가 언제 나는지 최소 1개 이상 선택해주세요.")
-
-            if st.session_state.tmj_sound == "사각사각소리(크레피투스)" and st.session_state.crepitus_confirmed == "선택 안 함":
-                errors.append("사각사각소리가 확실한지 여부를 선택해주세요.")
-
-            if show_lock_questions:
-                if st.session_state.jaw_locked_now == "선택 안 함":
-                    errors.append("현재 턱 잠김 여부를 선택해주세요.")
-                if st.session_state.jaw_locked_now == "예" and st.session_state.jaw_unlock_possible == "선택 안 함":
-                    errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
-                if st.session_state.jaw_locked_now == "아니오":
-                    if st.session_state.jaw_locked_past == "선택 안 함":
-                        errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
-                    elif st.session_state.jaw_locked_past == "예" and st.session_state.mao_fits_3fingers == "선택 안 함":
-                        errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
-
-            if errors:
-                for err in errors:
-                    st.warning(err)
+            if freq_valid and time_valid:
+                go_next()
             else:
-                st.session_state.step = 6
+                if not freq_valid and not time_valid:
+                    st.warning("빈도와 시간대 항목을 모두 입력하거나 선택해주세요.")
+                elif not freq_valid:
+                    st.warning("빈도 항목을 입력하거나 선택해주세요.")
+                else:
+                    st.warning("시간대 항목을 입력하거나 선택해주세요.")
+
 
 
 # STEP 7: 습관
