@@ -4,17 +4,7 @@ import datetime
 import os
 from PIL import Image
 
-# --- 페이지 설정 ---
-st.set_page_config(
-    page_title="턱관절 자가 문진 시스템 | 스마트 헬스케어",
-    layout="wide", 
-    initial_sidebar_state="collapsed",
-    menu_items={
-        'About': '이 앱은 턱관절 자가 문진을 위한 도구입니다.'
-    }
-)
 
-# --- 세션 상태 초기화 ---
 if 'step' not in st.session_state:
     st.session_state.step = 0
     st.session_state.validation_errors = {}
@@ -36,6 +26,18 @@ if 'step' not in st.session_state:
 
     for key, default in diagnosis_keys.items():
         st.session_state[key] = default
+
+        
+# --- 페이지 설정 ---
+st.set_page_config(
+    page_title="턱관절 자가 문진 시스템 | 스마트 헬스케어",
+    layout="wide", 
+    initial_sidebar_state="collapsed",
+    menu_items={
+        'About': '이 앱은 턱관절 자가 문진을 위한 도구입니다.'
+    }
+)
+
 
 # --- 헬퍼 함수 ---
 def go_next():
