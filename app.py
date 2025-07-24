@@ -1036,7 +1036,7 @@ elif st.session_state.step == 11:
 
     with st.container(border=True):
         st.markdown(
-            "<span style='color:red;'>아래 항목은 실제 측정 및 검사가 필요할 수 있으며, 가능하신 부분만 기입해 주시면 됩니다. 나머지는 진료 중 확인할 수 있습니다.</span>",
+            "<span style='color:red;'>아래 항목은 검사가 필요한 항목으로, 진료 중 확인할 수 있습니다.</span>",
             unsafe_allow_html=True
         )
 
@@ -1413,6 +1413,123 @@ elif st.session_state.step == 17:
     with col2:
         if st.button("다음 단계로 이동 👉"):
             go_next()
+
+
+# STEP 18: 기능 평가
+elif st.session_state.step == 18:
+    st.title("기능 평가 (Functional Impact)")
+    st.markdown("---")
+
+    with st.container(border=True):
+        st.markdown("**턱관절 증상으로 인해 일상생활(음식 섭취, 말하기, 하품 등)에 불편함을 느끼시나요?**")
+        st.radio(
+            label="일상생활 영향",
+            options=["전혀 불편하지 않다", "약간 불편하다", "자주 불편하다", "매우 불편하다", "선택 안 함"],
+            index=["전혀 불편하지 않다", "약간 불편하다", "자주 불편하다", "매우 불편하다", "선택 안 함"].index(
+                st.session_state.get("impact_daily", "선택 안 함")
+            ),
+            key="impact_daily",
+            label_visibility="collapsed"
+        )
+
+        st.markdown("---")
+
+        st.markdown("**턱관절 증상으로 인해 직장 업무나 학업 성과에 영향을 받은 적이 있나요?**")
+        st.radio(
+            label="직장/학교 영향",
+            options=[
+                "전혀 영향 없음",
+                "약간 집중에 어려움 있음",
+                "자주 집중이 힘들고 성과 저하 경험",
+                "매우 큰 영향으로 일/학업 중단 고려한 적 있음",
+                "선택 안 함"
+            ],
+            index=[
+                "전혀 영향 없음",
+                "약간 집중에 어려움 있음",
+                "자주 집중이 힘들고 성과 저하 경험",
+                "매우 큰 영향으로 일/학업 중단 고려한 적 있음",
+                "선택 안 함"
+            ].index(st.session_state.get("impact_work", "선택 안 함")),
+            key="impact_work",
+            label_visibility="collapsed"
+        )
+
+        st.markdown("---")
+
+        st.markdown("**턱관절 증상이 귀하의 전반적인 삶의 질에 얼마나 영향을 미치고 있다고 느끼시나요?**")
+        st.radio(
+            label="삶의 질 영향",
+            options=[
+                "전혀 영향을 미치지 않음",
+                "약간 영향을 미침",
+                "영향을 많이 받음",
+                "심각하게 삶의 질 저하",
+                "선택 안 함"
+            ],
+            index=[
+                "전혀 영향을 미치지 않음",
+                "약간 영향을 미침",
+                "영향을 많이 받음",
+                "심각하게 삶의 질 저하",
+                "선택 안 함"
+            ].index(st.session_state.get("impact_quality_of_life", "선택 안 함")),
+            key="impact_quality_of_life",
+            label_visibility="collapsed"
+        )
+
+        st.markdown("---")
+
+        st.markdown("**최근 2주간 수면의 질은 어떠셨나요?**")
+        st.radio(
+            label="수면 질",
+            options=["매우 좋음", "보통", "나쁨", "매우 나쁨", "선택 안 함"],
+            index=["매우 좋음", "보통", "나쁨", "매우 나쁨", "선택 안 함"].index(
+                st.session_state.get("sleep_quality", "선택 안 함")
+            ),
+            key="sleep_quality",
+            label_visibility="collapsed"
+        )
+
+        st.markdown("**수면의 질이 턱관절 증상(통증, 근육 경직 등)에 영향을 준다고 느끼시나요?**")
+        st.radio(
+            label="수면과 턱관절 질환 연관성",
+            options=["그렇다", "아니다", "잘 모르겠다", "선택 안 함"],
+            index=["그렇다", "아니다", "잘 모르겠다", "선택 안 함"].index(
+                st.session_state.get("sleep_tmd_relation", "선택 안 함")
+            ),
+            key="sleep_tmd_relation",
+            label_visibility="collapsed"
+        )
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+
+    with col2:
+        if st.button("제출 👉"):
+            errors = []
+
+            if st.session_state.get("impact_daily") == "선택 안 함":
+                errors.append("일상생활 영향 여부를 선택해주세요.")
+            if st.session_state.get("impact_work") == "해당 없음 / 선택 안 함":
+                errors.append("직장/학교 영향 여부를 선택해주세요.")
+            if st.session_state.get("impact_quality_of_life") == "선택 안 함":
+                errors.append("삶의 질 영향 여부를 선택해주세요.")
+            if st.session_state.get("sleep_quality") == "선택 안 함":
+                errors.append("수면의 질을 선택해주세요.")
+            if st.session_state.get("sleep_tmd_relation") == "선택 안 함":
+                errors.append("수면과 턱관절 연관성 여부를 선택해주세요.")
+
+            if errors:
+                for err in errors:
+                    st.warning(err)
+            else:
+                go_next()
+
 
 
 # STEP 18: 결과
