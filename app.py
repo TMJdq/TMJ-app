@@ -512,7 +512,7 @@ elif st.session_state.step == 5:
     st.title("현재 증상 (턱관절 소리 및 잠김 증상)")
     st.markdown("---")
 
-    # 세션 기본값 설정
+    # 세션 기본값 설정 (최초 1회만)
     if "tmj_sound" not in st.session_state:
         st.session_state.tmj_sound = "선택 안 함"
     if "crepitus_confirmed" not in st.session_state:
@@ -523,14 +523,14 @@ elif st.session_state.step == 5:
     st.session_state.setdefault("jaw_locked_past", "선택 안 함")
     st.session_state.setdefault("mao_fits_3fingers", "선택 안 함")
 
-    # 턱 소리 라디오 질문
+    # 턱 소리 라디오 질문: key만 사용, index 제거
     joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
     selected_sound = st.radio(
         "턱에서 나는 소리가 있나요?",
         options=joint_sound_options,
-        index=joint_sound_options.index(st.session_state.tmj_sound)
+        key="tmj_sound"
     )
-    st.session_state.tmj_sound = selected_sound  # 세션 저장
+    # st.session_state.tmj_sound에 자동 저장됨
 
     # 딸깍소리 선택 시
     if st.session_state.tmj_sound == "딸깍소리":
@@ -547,11 +547,8 @@ elif st.session_state.step == 5:
     # 사각사각소리(크레피투스) 선택 시
     elif st.session_state.tmj_sound == "사각사각소리(크레피투스)":
         crepitus_options = ["예", "아니오", "선택 안 함"]
-
-        if "crepitus_confirmed" not in st.session_state:
-            st.session_state.crepitus_confirmed = "선택 안 함"
-
-        selected = st.radio(
+        # key만 사용, index 제거
+        st.radio(
             "사각사각소리 확실 여부",
             options=crepitus_options,
             key="crepitus_confirmed"
