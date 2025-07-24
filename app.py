@@ -196,7 +196,7 @@ elif st.session_state.step == 1:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 0
     with col2:
         if st.button("다음 단계로 이동 👉"):
             st.session_state.validation_errors = {} 
@@ -213,7 +213,7 @@ elif st.session_state.step == 1:
                 mandatory_fields_filled = False
             
             if mandatory_fields_filled:
-                go_next()
+                st.session_state.step = 2
             else:
                 st.rerun()
 
@@ -262,7 +262,7 @@ elif st.session_state.step == 2:
 
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 1
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
