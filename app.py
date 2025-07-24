@@ -17,9 +17,25 @@ st.set_page_config(
 # --- 세션 상태 초기화 ---
 if 'step' not in st.session_state:
     st.session_state.step = 0
-    # 사용자 데이터는 기존 st.session_state.<key> 방식으로 유지
-    # st.session_state.validation_errors 딕셔너리 추가
     st.session_state.validation_errors = {}
+
+    # ✅ 진단 관련 키를 항상 세션에 포함되도록 기본값 설정
+    diagnosis_keys = {
+        "muscle_pressure_2s": "선택 안 함",
+        "muscle_referred_pain": "선택 안 함",
+        "tmj_press_pain": "선택 안 함",
+        "headache_temples": "선택 안 함",
+        "headache_with_jaw": "선택 안 함",
+        "headache_reproduce_by_pressure": "선택 안 함",
+        "headache_not_elsewhere": "선택 안 함",
+        "crepitus_confirmed": "선택 안 함",
+        "mao_fits_3fingers": "선택 안 함",
+        "jaw_locked_now": "선택 안 함",
+        "tmj_sound": "선택 안 함"
+    }
+
+    for key, default in diagnosis_keys.items():
+        st.session_state[key] = default
 
 # --- 헬퍼 함수 ---
 def go_next():
@@ -550,7 +566,7 @@ elif st.session_state.step == 5:
                 for err in errors:
                     st.warning(err)
             else:
-                st.session_state.step = 7
+                st.session_state.step = 6
 
 
 # STEP 6: 빈도 및 시기, 강도
