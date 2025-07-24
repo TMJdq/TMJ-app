@@ -460,23 +460,21 @@ elif st.session_state.step == 5:
 
         # 딸깍소리 조건
         if st.session_state.tmj_sound == "딸깍소리":
-            st.markdown("#### 📌 딸깍 소리 빈도 선택")
+            st.markdown("#### 📌 딸깍 소리가 나는 상황을 모두 선택하세요")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
             st.session_state.setdefault("tmj_click_context", [])
 
-            # ✅ multiselect: value 생략, key만 지정
-            st.multiselect("언제 딸깍 소리가 나나요?",
-                           options=click_options,
-                           key="tmj_click_context")
-
-            # checkbox로 추가 정보 수집 (필요 시 유지)
             updated_context = []
             for option in click_options:
                 key = f"click_{option}"
-                is_selected = option in st.session_state.tmj_click_context
-                if st.checkbox(option, value=is_selected, key=key):
+                is_checked = option in st.session_state.tmj_click_context
+                if st.checkbox(f"- {option}", value=is_checked, key=key):
                     updated_context.append(option)
-            st.session_state.tmj_click_context = updated_context
+
+            st.session_state["tmj_click_context"] = updated_context
+
+        else:
+            st.session_state["tmj_click_context"] = []
 
         # 사각사각소리 조건
         if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
@@ -490,7 +488,6 @@ elif st.session_state.step == 5:
             )
         else:
             st.session_state["crepitus_confirmed"] = "선택 안 함"
-
 
         # 턱 잠김 관련 조건
         show_lock_questions = (
@@ -559,6 +556,9 @@ elif st.session_state.step == 5:
             if st.session_state.tmj_sound == "선택 안 함":
                 errors.append("턱관절 소리 여부를 선택해주세요.")
 
+            if st.session_state.tmj_sound == "딸깍소리" and not st.session_state.tmj_click_context:
+                errors.append("딸깍소리가 언제 나는지 최소 1개 이상 선택해주세요.")
+
             if st.session_state.tmj_sound == "사각사각소리(크레피투스)" and st.session_state.get("crepitus_confirmed") == "선택 안 함":
                 errors.append("사각사각소리가 확실한지 여부를 선택해주세요.")
 
@@ -577,11 +577,7 @@ elif st.session_state.step == 5:
                 for err in errors:
                     st.warning(err)
             else:
-                if st.session_state.tmj_sound != "딸깍소리":
-                    st.session_state.tmj_click_context = []
-
                 st.session_state.step = 6
-
 
 # STEP 6: 빈도 및 시기, 강도
 elif st.session_state.step == 6:
