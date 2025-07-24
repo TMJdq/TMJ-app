@@ -609,7 +609,7 @@ elif st.session_state.step == 5:
     st.markdown("---")
 
     with st.container(border=True):
-        # 턱관절 소리
+        # 턱관절 소리 질문
         st.markdown("**턱에서 나는 소리가 있나요?**")
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
         st.radio(
@@ -620,38 +620,23 @@ elif st.session_state.step == 5:
             label_visibility="collapsed"
         )
 
-        # 딸깍소리 관련 추가 질문
+        # 딸깍소리 세부 상황 질문
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
 
-            context_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
+            context_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때"]
             if "tmj_click_context" not in st.session_state:
                 st.session_state.tmj_click_context = []
 
-            selected = st.session_state.tmj_click_context
-            updated = []
-
+            updated_context = []
             for option in context_options:
                 key = f"click_{option}"
-                is_selected = option in selected
-                disabled = "모두" in selected and option != "모두"
+                is_selected = option in st.session_state.tmj_click_context
 
-                if st.checkbox(option, value=is_selected, key=key, disabled=disabled):
-                    updated.append(option)
+                if st.checkbox(option, value=is_selected, key=key):
+                    updated_context.append(option)
 
-            # '모두' 선택 시 단독으로 유지
-            if "모두" in updated:
-                updated = ["모두"]
-
-            # '모두' 해제 시 전체 초기화
-            if "모두" in selected and "모두" not in updated:
-                updated = []
-                for option in context_options:
-                    cb_key = f"click_{option}"
-                    if cb_key in st.session_state:
-                        del st.session_state[cb_key]
-
-            st.session_state.tmj_click_context = updated
+            st.session_state.tmj_click_context = updated_context
         else:
             st.session_state.tmj_click_context = []
 
@@ -668,8 +653,8 @@ elif st.session_state.step == 5:
             label_visibility="collapsed"
         )
 
-        # 턱 잠김 해소 관련 질문
-        if st.session_state.jaw_locked_now == "예":
+        # 잠김 해소 여부
+        if st.session_state.get("jaw_locked_now") == "예":
             st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
             st.radio(
                 label="잠김 해소 여부",
@@ -680,7 +665,7 @@ elif st.session_state.step == 5:
             )
 
         # 과거 턱 잠김 여부
-        elif st.session_state.jaw_locked_now == "아니오":
+        elif st.session_state.get("jaw_locked_now") == "아니오":
             st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
             st.radio(
                 label="과거 잠김 경험 여부",
@@ -713,17 +698,17 @@ elif st.session_state.step == 5:
             if st.session_state.tmj_sound == "선택 안 함":
                 errors.append("턱관절 소리 여부를 선택해주세요.")
 
-            if st.session_state.jaw_locked_now == "선택 안 함":
+            if st.session_state.get("jaw_locked_now") == "선택 안 함":
                 errors.append("현재 턱 잠김 여부를 선택해주세요.")
 
-            if st.session_state.jaw_locked_now == "예":
+            if st.session_state.get("jaw_locked_now") == "예":
                 if st.session_state.get("jaw_unlock_possible") == "선택 안 함":
                     errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
 
-            elif st.session_state.jaw_locked_now == "아니오":
+            elif st.session_state.get("jaw_locked_now") == "아니오":
                 if st.session_state.get("jaw_locked_past") == "선택 안 함":
                     errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
-                elif st.session_state.jaw_locked_past == "예" and \
+                elif st.session_state.get("jaw_locked_past") == "예" and \
                      st.session_state.get("mao_fits_3fingers") == "선택 안 함":
                     errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
 
@@ -743,11 +728,11 @@ elif st.session_state.step == 6:
     with st.container(border=True):
         # 빈도
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
-        frequency_options = ["매일", "주 2~3회", "기타", "선택 안 함"]
+        frequency_options = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
         selected_frequency = st.radio(
             label="빈도 선택",
             options=frequency_options,
-            index=3,  # "선택 안 함" 기본 선택
+            index=5,  # "선택 안 함" 기본 선택
             key="frequency_choice",
             label_visibility="collapsed"
         )
@@ -828,33 +813,27 @@ elif st.session_state.step == 7:
             "이갈이 - 밤(수면 중)": "habit_bruxism_night",
             "이 악물기 - 낮": "habit_clenching_day",
             "이 악물기 - 밤(수면 중)": "habit_clenching_night",
-            "없음": "habit_none"
         }
 
-        none_selected = st.session_state.get("habit_none", False)
+        # '없음' 항목 체크박스
+        habit_none = st.checkbox("없음", key="habit_none")
 
-        # 없음 먼저 처리
-        st.session_state.habit_none = st.checkbox(
-            "없음",
-            value=none_selected,
-            key="habit_none"
-        )
-
-        # 없음 해제 시 나머지 선택값 초기화
-        if not st.session_state.habit_none and none_selected:
-            for k in ["habit_bruxism_night", "habit_clenching_day", "habit_clenching_night"]:
-                st.session_state[k] = False
-
-        # 나머지 보기
+        # 다른 항목 선택
         for label, key in first_habits.items():
-            if label == "없음":
-                continue
-            st.session_state[key] = st.checkbox(
+            val = st.checkbox(
                 label,
-                value=st.session_state.get(key, False),
                 key=key,
-                disabled=st.session_state.habit_none
+                disabled=habit_none
             )
+
+        # '없음'이 체크되지 않은 상태에서 다른 항목 중 하나라도 체크되면 없음 해제
+        if not habit_none and any(st.session_state.get(k, False) for k in first_habits.values()):
+            st.session_state.habit_none = False
+
+        # '없음'이 체크되었을 경우 다른 항목 모두 False로 초기화
+        if habit_none:
+            for k in first_habits.values():
+                st.session_state[k] = False
 
         st.markdown("---")
         st.markdown("**다음 중 해당되는 습관이 있다면 모두 선택해주세요.**")
@@ -871,19 +850,18 @@ elif st.session_state.step == 7:
             st.session_state.selected_habits = []
 
         for habit in additional_habits:
-            checkbox_key = f"habit_{habit.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_').replace('-', '_').replace('.', '_').replace(':', '')}"
-            if st.checkbox(habit, value=(habit in st.session_state.selected_habits), key=checkbox_key):
-                if habit not in st.session_state.selected_habits:
-                    st.session_state.selected_habits.append(habit)
-            else:
-                if habit in st.session_state.selected_habits:
-                    st.session_state.selected_habits.remove(habit)
+            key = f"habit_{habit.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_').replace('-', '_').replace('.', '').replace(':', '')}"
+            checked = st.checkbox(habit, key=key, value=(habit in st.session_state.selected_habits))
+            if checked and habit not in st.session_state.selected_habits:
+                st.session_state.selected_habits.append(habit)
+            elif not checked and habit in st.session_state.selected_habits:
+                st.session_state.selected_habits.remove(habit)
 
+        # 기타 선택 시 입력란 표시
         if "기타" in st.session_state.selected_habits:
-            st.text_input("기타 습관을 입력해주세요:", value=st.session_state.get('habit_other_detail', ''), key="habit_other_detail")
+            st.text_input("기타 습관을 입력해주세요:", key="habit_other_detail")
         else:
-            if 'habit_other_detail' in st.session_state:
-                st.session_state.habit_other_detail = ""
+            st.session_state.habit_other_detail = ""
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -904,7 +882,6 @@ elif st.session_state.step == 7:
                 go_next()
             else:
                 st.warning("최소 한 가지 이상 선택해주세요.")
-
 
 
 # STEP 8: 귀 관련 증상 (기존 코드의 STEP 7)
