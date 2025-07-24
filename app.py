@@ -81,11 +81,18 @@ def compute_diagnoses(state):
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     # 진단이 하나도 안 된 경우
-    filtered = [v for v in state.values() if v not in ("선택 안 함", None)]
+    relevant_keys = [
+        "muscle_pressure_2s", "muscle_referred_pain", "tmj_press_pain",
+        "headache_temples", "headache_with_jaw", "headache_reproduce_by_pressure",
+        "headache_not_elsewhere", "crepitus_confirmed", "mao_fits_3fingers",
+        "jaw_locked_now", "tmj_sound"
+    ]
+    filtered = [state.get(k) for k in relevant_keys if state.get(k) not in ("선택 안 함", None)]
     if not diagnoses and filtered:
-        diagnoses.append("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환")
+        diagnoses.append("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
 
     return diagnoses
+
 
 
 # 총 단계 수 (0부터 시작)
