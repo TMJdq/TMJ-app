@@ -515,6 +515,7 @@ elif st.session_state.step == 5:
     # 세션 기본값 설정 (최초 1회만)
     if "tmj_sound" not in st.session_state:
         st.session_state.tmj_sound = "선택 안 함"
+    # Moved initialization here to ensure it's always set
     if "crepitus_confirmed" not in st.session_state:
         st.session_state.crepitus_confirmed = "선택 안 함"
     st.session_state.setdefault("tmj_click_context", [])
@@ -551,7 +552,7 @@ elif st.session_state.step == 5:
         st.radio(
             "사각사각소리 확실 여부",
             options=crepitus_options,
-            key="crepitus_confirmed"
+            key="crepitus_confirmed" # This key is now consistently available
         )
 
     # 턱 잠김 조건 질문 보여줄지 판단
@@ -614,6 +615,7 @@ elif st.session_state.step == 5:
             if st.session_state.tmj_sound == "딸깍소리" and not st.session_state.tmj_click_context:
                 errors.append("딸깍소리가 언제 나는지 최소 1개 이상 선택해주세요.")
 
+            # Validation for crepitus_confirmed is now correctly placed
             if st.session_state.tmj_sound == "사각사각소리(크레피투스)" and st.session_state.crepitus_confirmed == "선택 안 함":
                 errors.append("사각사각소리가 확실한지 여부를 선택해주세요.")
 
@@ -633,7 +635,6 @@ elif st.session_state.step == 5:
                     st.warning(err)
             else:
                 st.session_state.step = 6
-
 
 
                 
