@@ -36,9 +36,9 @@ def compute_diagnoses(state):
     diagnoses = []
 
     # 1. 근육통 (Myalgia)
-    if state.get("muscle_pressure_2s") == "아니오" or (
-        state.get("muscle_pressure_2s") == "예" and state.get("muscle_referred_pain") == "아니오"
-    ):
+    if state.get("muscle_pressure_2s") == "아니오":
+        diagnoses.append("근육통 (Myalgia)")
+    elif state.get("muscle_pressure_2s") == "예" and state.get("muscle_referred_pain") == "아니오":
         diagnoses.append("근육통 (Myalgia)")
 
     # 2. 국소 근육통 (Local Myalgia)
@@ -53,32 +53,31 @@ def compute_diagnoses(state):
     if state.get("tmj_press_pain") == "예":
         diagnoses.append("관절통 (Arthralgia)")
 
-    # 5. TMD에 기인한 두통 (Headache attributed to TMD)
-    if all(state.get(k) == "예" for k in [
+    # 5. TMD에 기인한 두통
+    headache_keys = [
         "headache_temples",
         "headache_with_jaw",
         "headache_reproduce_by_pressure",
         "headache_not_elsewhere"
-    ]):
+    ]
+    if all(state.get(k) == "예" for k in headache_keys):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
+    # 6. 퇴행성 관절 질환
     if state.get("crepitus_confirmed") == "예":
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7. 감소 없는 디스크 변위 (Disc Displacement without Reduction)
+    # 7-8. 디스크 변위 (감소 없음)
     if state.get("mao_fits_3fingers") == "예":
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-
-    # 8. 감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction w/ Limitation)
-    if state.get("mao_fits_3fingers") == "아니오":
+    elif state.get("mao_fits_3fingers") == "아니오":
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
-    # 9. 감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)
+    # 9. 감소 동반 간헐적 잠금 디스크 변위
     if state.get("jaw_locked_now") == "예":
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
-    # 10. 감소 동반 디스크 변위 (Disc Displacement with Reduction)
+    # 10. 감소 동반 디스크 변위
     if state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
@@ -1426,6 +1425,7 @@ elif st.session_state.step == 18:
 elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
+    st.write("🧪 진단 전 입력 상태 확인", {k: st.session_state.get(k) for k in st.session_state.keys() if not k.startswith("_")})
 
     results = compute_diagnoses(st.session_state)
 
