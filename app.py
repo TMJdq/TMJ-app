@@ -83,7 +83,7 @@ def compute_diagnoses(state):
     # 진단이 하나도 안 된 경우
     filtered = [v for v in state.values() if v not in ("선택 안 함", None)]
     if not diagnoses and filtered:
-        diagnoses.append("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
+        diagnoses.append("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환")
 
     return diagnoses
 
@@ -1409,3 +1409,4 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.experimental_rerun()
+
