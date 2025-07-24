@@ -447,8 +447,8 @@ elif st.session_state.step == 4:
         elif pain_type == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
 
-            st.markdown("**입을 벌릴 때나 움직일 때 통증이 있나요?**")
-            st.radio(
+          
+            st.radio("**입을 벌릴 때나 움직일 때 통증이 있나요?**",
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("tmj_movement_pain_value", yes_no_options),
@@ -456,8 +456,8 @@ elif st.session_state.step == 4:
                 on_change=update_tmj_movement_pain
             )
 
-            st.markdown("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**")
-            st.radio(
+       
+            st.radio("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**",
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("tmj_press_pain_value", yes_no_options),
@@ -468,8 +468,8 @@ elif st.session_state.step == 4:
         elif pain_type == "두통":
             st.markdown("#### 💬 두통 관련")
 
-            st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
-            st.radio(
+        
+            st.radio("**두통이 관자놀이 부위에서 발생하나요?**",
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("headache_temples_value", yes_no_options),
