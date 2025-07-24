@@ -78,7 +78,7 @@ def compute_diagnoses(state):
 
     # 10. 딸깍소리 → 감소 동반 디스크 변위
     if state.get("tmj_sound") and "딸깍" in state.get("tmj_sound"):
-    diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
+        diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
 
