@@ -576,24 +576,21 @@ elif st.session_state.step == 5:
     st.markdown("---")
 
     # 세션 기본값 설정 (최초 1회만)
-    # 실제 데이터를 저장할 변수들은 여기서 초기화하고, 위젯 키와는 다르게 이름을 지정
     st.session_state.setdefault("tmj_sound_value", "선택 안 함")
     st.session_state.setdefault("crepitus_confirmed_value", "선택 안 함")
-    st.session_state.setdefault("tmj_click_context", []) # 이 항목은 체크박스이므로 리스트로 관리
-    st.session_state.setdefault("jaw_locked_now_value", "선택 안 함") # _value 추가
-    st.session_state.setdefault("jaw_unlock_possible_value", "선택 안 함") # _value 추가
-    st.session_state.setdefault("jaw_locked_past_value", "선택 안 함") # _value 추가
-    st.session_state.setdefault("mao_fits_3fingers_value", "선택 안 함") # _value 추가
+    st.session_state.setdefault("tmj_click_context", [])  # 체크박스이므로 리스트로 관리
+    st.session_state.setdefault("jaw_locked_now_value", "선택 안 함")
+    st.session_state.setdefault("jaw_unlock_possible_value", "선택 안 함")
+    st.session_state.setdefault("jaw_locked_past_value", "선택 안 함")
+    st.session_state.setdefault("mao_fits_3fingers_value", "선택 안 함")
 
-    # Helper function to get the index for radio buttons based on the stored value
     def get_radio_index(key_value, options):
         val = st.session_state.get(key_value, "선택 안 함")
         try:
             return options.index(val)
         except ValueError:
-            return options.index("선택 안 함") # Fallback to "선택 안 함" if value is not in options
+            return options.index("선택 안 함")
 
-    # --- Callbacks for updating persistent session state from widget keys ---
     def update_tmj_sound():
         st.session_state.tmj_sound_value = st.session_state.tmj_sound_widget_key
 
@@ -612,19 +609,16 @@ elif st.session_state.step == 5:
     def update_mao_fits_3fingers():
         st.session_state.mao_fits_3fingers_value = st.session_state.mao_fits_3fingers_widget_key
 
-
-    # --- 턱 소리 라디오 질문 ---
     joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
 
     st.radio(
         "**턱에서 나는 소리가 있나요?**",
         options=joint_sound_options,
-        key="tmj_sound_widget_key", # 위젯을 위한 별도 키
-        index=get_radio_index("tmj_sound_value", joint_sound_options), # 저장된 값으로 초기화
-        on_change=update_tmj_sound # on_change 콜백 추가
+        key="tmj_sound_widget_key",
+        index=get_radio_index("tmj_sound_value", joint_sound_options),
+        on_change=update_tmj_sound
     )
 
-    # st.session_state.tmj_sound_value 값을 사용하여 로직 제어
     if st.session_state.tmj_sound_value == "딸깍소리":
         st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
         click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
@@ -636,21 +630,19 @@ elif st.session_state.step == 5:
                 updated_context.append(option)
         st.session_state.tmj_click_context = updated_context
 
-    # --- 사각사각소리(크레피투스) 선택 시 ---
     elif st.session_state.tmj_sound_value == "사각사각소리(크레피투스)":
         crepitus_options = ["예", "아니오", "선택 안 함"]
 
         st.radio(
             "**사각사각소리가 확실하게 느껴지나요?**",
             options=crepitus_options,
-            key="crepitus_confirmed_widget_key", # 위젯을 위한 별도 키
-            index=get_radio_index("crepitus_confirmed_value", crepitus_options), # 저장된 값으로 초기화
-            on_change=update_crepitus_confirmed # on_change 콜백 추가
+            key="crepitus_confirmed_widget_key",
+            index=get_radio_index("crepitus_confirmed_value", crepitus_options),
+            on_change=update_crepitus_confirmed
         )
 
-    # 턱 잠김 조건 질문 보여줄지 판단 (이제 tmj_sound_value와 crepitus_confirmed_value 사용)
     show_lock_questions = (
-        st.session_state.tmj_sound_value == "사각사각소리(크repitus)" and
+        st.session_state.tmj_sound_value == "사각사각소리(크레피투스)" and
         st.session_state.crepitus_confirmed_value == "아니오"
     )
 
@@ -660,72 +652,61 @@ elif st.session_state.step == 5:
         st.radio(
             "턱이 현재 걸려있나요?",
             options=["예", "아니오", "선택 안 함"],
-            key="jaw_locked_now_widget_key", # _widget_key 추가
-            index=get_radio_index("jaw_locked_now_value", ["예", "아니오", "선택 안 함"]), # _value 사용
-            on_change=update_jaw_locked_now # on_change 콜백 추가
+            key="jaw_locked_now_widget_key",
+            index=get_radio_index("jaw_locked_now_value", ["예", "아니오", "선택 안 함"]),
+            on_change=update_jaw_locked_now
         )
 
-        # 조건부 질문은 _value를 참조하도록 변경
         if st.session_state.jaw_locked_now_value == "예":
             st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
             st.radio(
                 "잠김 해소 여부",
                 options=["예", "아니오", "선택 안 함"],
-                key="jaw_unlock_possible_widget_key", # _widget_key 추가
-                index=get_radio_index("jaw_unlock_possible_value", ["예", "아니오", "선택 안 함"]), # _value 사용
-                on_change=update_jaw_unlock_possible # on_change 콜백 추가
+                key="jaw_unlock_possible_widget_key",
+                index=get_radio_index("jaw_unlock_possible_value", ["예", "아니오", "선택 안 함"]),
+                on_change=update_jaw_unlock_possible
             )
-        else: # "아니오"나 "선택 안 함"일 경우 초기화
-            st.session_state.jaw_unlock_possible_value = "선택 안 함"
-
-
-        # 조건부 질문은 _value를 참조하도록 변경
-        # Fixed: "아니 오" changed to "아니오"
         elif st.session_state.jaw_locked_now_value == "아니오":
             st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
             st.radio(
                 "한 번이라도 경험했다면 '예'를 선택해주세요.",
                 options=["예", "아니오", "선택 안 함"],
-                key="jaw_locked_past_widget_key", # _widget_key 추가
-                index=get_radio_index("jaw_locked_past_value", ["예", "아니오", "선택 안 함"]), # _value 사용
-                on_change=update_jaw_locked_past # on_change 콜백 추가
+                key="jaw_locked_past_widget_key",
+                index=get_radio_index("jaw_locked_past_value", ["예", "아니오", "선택 안 함"]),
+                on_change=update_jaw_locked_past
             )
 
-            # 조건부 질문은 _value를 참조하도록 변경
             if st.session_state.jaw_locked_past_value == "예":
                 st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
                 st.radio(
                     "MAO 시 손가락 3개 가능 여부",
                     options=["예", "아니오", "선택 안 함"],
-                    key="mao_fits_3fingers_widget_key", # _widget_key 추가
-                    index=get_radio_index("mao_fits_3fingers_value", ["예", "아니오", "선택 안 함"]), # _value 사용
-                    on_change=update_mao_fits_3fingers # on_change 콜백 추가
+                    key="mao_fits_3fingers_widget_key",
+                    index=get_radio_index("mao_fits_3fingers_value", ["예", "아니오", "선택 안 함"]),
+                    on_change=update_mao_fits_3fingers
                 )
-            else: # "아니오"나 "선택 안 함"일 경우 초기화
+            else:
                 st.session_state.mao_fits_3fingers_value = "선택 안 함"
-        else: # jaw_locked_now_value가 "선택 안 함"일 경우 관련 모든 값 초기화
+
+        else:  # "선택 안 함" 등 기타 경우
+            st.session_state.jaw_unlock_possible_value = "선택 안 함"
             st.session_state.jaw_locked_past_value = "선택 안 함"
             st.session_state.mao_fits_3fingers_value = "선택 안 함"
 
-
-    # show_lock_questions가 False일 때, 관련 모든 값 초기화
-    if not show_lock_questions:
+    else:
         st.session_state.jaw_locked_now_value = "선택 안 함"
         st.session_state.jaw_unlock_possible_value = "선택 안 함"
         st.session_state.jaw_locked_past_value = "선택 안 함"
         st.session_state.mao_fits_3fingers_value = "선택 안 함"
-    # 딸깍소리가 아닌 경우 tmj_click_context 초기화 (이전 로직에서 누락되어 추가)
+
     if st.session_state.tmj_sound_value != "딸깍소리":
         st.session_state.tmj_click_context = []
 
-
-    # 세션 확인용 (디버깅 목적)
     with st.expander("🧪 세션 상태 확인"):
         st.json(st.session_state)
 
     st.markdown("---")
     col1, col2 = st.columns(2)
-
     with col1:
         if st.button("이전 단계"):
             go_back()
@@ -734,7 +715,6 @@ elif st.session_state.step == 5:
         if st.button("다음 단계로 이동 👉"):
             errors = []
 
-            # 이제 실제 데이터를 저장하는 _value 변수를 검사
             if st.session_state.tmj_sound_value == "선택 안 함":
                 errors.append("턱관절 소리 여부를 선택해주세요.")
 
@@ -744,7 +724,7 @@ elif st.session_state.step == 5:
             if st.session_state.tmj_sound_value == "사각사각소리(크레피투스)" and st.session_state.crepitus_confirmed_value == "선택 안 함":
                 errors.append("사각사각소리가 확실한지 여부를 선택해주세요.")
 
-            if show_lock_questions: # show_lock_questions는 변경된 변수 이름을 사용합니다.
+            if show_lock_questions:
                 if st.session_state.jaw_locked_now_value == "선택 안 함":
                     errors.append("현재 턱 잠김 여부를 선택해주세요.")
                 if st.session_state.jaw_locked_now_value == "예" and st.session_state.jaw_unlock_possible_value == "선택 안 함":
@@ -760,6 +740,7 @@ elif st.session_state.step == 5:
                     st.warning(err)
             else:
                 st.session_state.step = 6
+
                 
 # STEP 6: 빈도 및 시기, 강도
 elif st.session_state.step == 6:
