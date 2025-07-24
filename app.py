@@ -1365,6 +1365,8 @@ elif st.session_state.step == 19:
         "TMD에 기인한 두통 (Headache attributed to TMD)": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다."
     }
 
+    st.write("디버그용 진단 결과:", results)
+
     if not results:
         st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
