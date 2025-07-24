@@ -59,14 +59,12 @@ def compute_diagnoses(state):
     def is_yes(val): return val == "예"
     def is_no(val): return val == "아니오"
 
-    # 세션 상태 키는 모두 _value가 붙은 형태로 맞추었습니다.
     if is_no(state.get("muscle_pressure_2s_value")):
         diagnoses.append("근육통 (Myalgia)")
     elif is_yes(state.get("muscle_pressure_2s_value")):
         if is_yes(state.get("muscle_referred_pain_value")):
             diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
         elif is_no(state.get("muscle_referred_pain_value")):
-            diagnoses.append("근육통 (Myalgia)")
             diagnoses.append("국소 근육통 (Local Myalgia)")
 
     if is_yes(state.get("tmj_press_pain_value")):
@@ -96,6 +94,7 @@ def compute_diagnoses(state):
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
+
 
 
 
