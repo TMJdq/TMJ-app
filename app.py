@@ -395,7 +395,7 @@ elif st.session_state.step == 4:
     with st.container(border=True):
         st.markdown("**아래 중 해당되는 통증 유형을 선택해주세요.**")
         st.selectbox(
-           
+            label="",
             options=pain_type_options,
             index=get_selectbox_index("pain_types_value", pain_type_options), # Initialize from persistent value
             key="pain_types_widget_key", # Unique widget key
@@ -660,16 +660,16 @@ elif st.session_state.step == 5:
         if st.session_state.jaw_locked_now_value == "예":
             st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
             st.radio(
-                "잠김 해소 여부",
+                "**해당 증상은 저절로 또는 조작으로 풀리나요?**",
                 options=["예", "아니오", "선택 안 함"],
                 key="jaw_unlock_possible_widget_key",
                 index=get_radio_index("jaw_unlock_possible_value", ["예", "아니오", "선택 안 함"]),
                 on_change=update_jaw_unlock_possible
             )
         elif st.session_state.jaw_locked_now_value == "아니오":
-            st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
+          
             st.radio(
-                "한 번이라도 경험했다면 '예'를 선택해주세요.",
+                "**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**",
                 options=["예", "아니오", "선택 안 함"],
                 key="jaw_locked_past_widget_key",
                 index=get_radio_index("jaw_locked_past_value", ["예", "아니오", "선택 안 함"]),
@@ -677,9 +677,9 @@ elif st.session_state.step == 5:
             )
 
             if st.session_state.jaw_locked_past_value == "예":
-                st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
+               
                 st.radio(
-                    "MAO 시 손가락 3개 가능 여부",
+                    "**입을 최대한 벌렸을 때 (MAO), 손가락 3개가 들어가나요?**",
                     options=["예", "아니오", "선택 안 함"],
                     key="mao_fits_3fingers_widget_key",
                     index=get_radio_index("mao_fits_3fingers_value", ["예", "아니오", "선택 안 함"]),
@@ -688,7 +688,7 @@ elif st.session_state.step == 5:
             else:
                 st.session_state.mao_fits_3fingers_value = "선택 안 함"
 
-        else:  # "선택 안 함" 등 기타 경우
+        else:  
             st.session_state.jaw_unlock_possible_value = "선택 안 함"
             st.session_state.jaw_locked_past_value = "선택 안 함"
             st.session_state.mao_fits_3fingers_value = "선택 안 함"
