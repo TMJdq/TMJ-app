@@ -673,9 +673,9 @@ elif st.session_state.step == 5:
 
     if show_lock_questions:
         st.markdown("---")
-        st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
+       
         st.radio(
-            "턱이 현재 걸려있나요?",
+            "**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**",
             options=["예", "아니오", "선택 안 함"],
             key="jaw_locked_now_widget_key",
             index=get_radio_index("jaw_locked_now_value", ["예", "아니오", "선택 안 함"]),
@@ -683,7 +683,7 @@ elif st.session_state.step == 5:
         )
 
         if st.session_state.jaw_locked_now_value == "예":
-            st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
+            
             st.radio(
                 "**해당 증상은 저절로 또는 조작으로 풀리나요?**",
                 options=["예", "아니오", "선택 안 함"],
