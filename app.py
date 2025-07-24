@@ -41,9 +41,6 @@ def compute_diagnoses(state):
     def is_no(value):
         return value == "아니오"
 
-    def is_valid(value):
-        return value in ["예", "아니오"]
-
     # 1~3. 근육통 관련 진단 (배타적)
     if is_no(state.get("muscle_pressure_2s")):
         diagnoses.append("근육통 (Myalgia)")
@@ -59,25 +56,25 @@ def compute_diagnoses(state):
         diagnoses.append("관절통 (Arthralgia)")
 
     # 5. TMD에 기인한 두통
-    if all(state.get(k) == "예" for k in [
-        "headache_temples",
-        "headache_with_jaw",
-        "headache_reproduce_by_pressure",
-        "headache_not_elsewhere"
-    ]):
+    if (
+        is_yes(state.get("headache_temples"))
+        and is_yes(state.get("headache_with_jaw"))
+        and is_yes(state.get("headache_reproduce_by_pressure"))
+        and is_yes(state.get("headache_not_elsewhere"))
+    ):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
+    # 6. 퇴행성 관절 질환
     if is_yes(state.get("crepitus_confirmed")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7 & 8. 감소 없는 디스크 변위
+    # 7 & 8. 디스크 변위 (감소 없는)
     if is_yes(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
     elif is_no(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
-    # 9. 감소 동반 간헐적 잠금 디스크 변위
+    # 9. 간헐적 잠금 디스크 변위
     if is_yes(state.get("jaw_locked_now")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
@@ -86,7 +83,6 @@ def compute_diagnoses(state):
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
-
 
 
 
