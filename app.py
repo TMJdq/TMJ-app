@@ -410,8 +410,8 @@ elif st.session_state.step == 4:
         if pain_type in ["넓은 부위의 통증", "근육 통증"]:
             st.markdown("#### 💬 근육/넓은 부위 관련")
 
-            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
-            st.radio(
+           
+            st.radio("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**",
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("muscle_movement_pain_value", yes_no_options),
@@ -419,9 +419,9 @@ elif st.session_state.step == 4:
                 on_change=update_muscle_movement_pain
             )
 
-            st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
+    
             # Store the widget's temporary value in a local variable for immediate use
-            muscle_2s_choice_temp = st.radio(
+            muscle_2s_choice_temp = st.radio("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**",
                 label="",
                 options=yes_no_options,
                 index=get_radio_index("muscle_pressure_2s_value", yes_no_options),
@@ -431,8 +431,8 @@ elif st.session_state.step == 4:
 
             # Use the persistent session state value for conditional display
             if st.session_state.muscle_pressure_2s_value == "예":
-                st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
-                st.radio(
+            
+                st.radio("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**",
                     label="",
                     options=yes_no_options,
                     index=get_radio_index("muscle_referred_pain_value", yes_no_options),
