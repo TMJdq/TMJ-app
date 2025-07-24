@@ -458,22 +458,24 @@ elif st.session_state.step == 5:
             label_visibility="collapsed"
         )
 
+        # 딸깍소리 조건
         if st.session_state.tmj_sound == "딸깍소리":
-            st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
-            context_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때"]
-            if "tmj_click_context" not in st.session_state:
-                st.session_state.tmj_click_context = []
+            st.markdown("#### 📌 딸깍 소리 빈도 선택")
+            click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
+            st.multiselect("언제 딸깍 소리가 나나요?",
+                           options=click_options,
+                           key="tmj_click_context",
+                           value=st.session_state.get("tmj_click_context", []))
 
             updated_context = []
-            for option in context_options:
+            for option in click_options:
                 key = f"click_{option}"
                 is_selected = option in st.session_state.tmj_click_context
                 if st.checkbox(option, value=is_selected, key=key):
                     updated_context.append(option)
             st.session_state.tmj_click_context = updated_context
-        else:
-            st.session_state.tmj_click_context = []
 
+        # 사각사각소리 조건
         if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
             st.markdown("**사각사각소리가 확실히 느껴지나요?**")
             st.radio(
@@ -486,6 +488,7 @@ elif st.session_state.step == 5:
         else:
             st.session_state["crepitus_confirmed"] = "선택 안 함"
 
+        # 턱 잠김 관련 조건
         show_lock_questions = (
             st.session_state.tmj_sound == "사각사각소리(크레피투스)" and
             st.session_state.get("crepitus_confirmed") == "아니오"
@@ -540,6 +543,7 @@ elif st.session_state.step == 5:
 
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             go_back()
@@ -569,6 +573,9 @@ elif st.session_state.step == 5:
                 for err in errors:
                     st.warning(err)
             else:
+                if st.session_state.tmj_sound != "딸깍소리":
+                    st.session_state.tmj_click_context = []
+
                 st.session_state.step = 6
 
 
