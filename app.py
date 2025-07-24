@@ -216,8 +216,7 @@ def generate_pdf_report(state, diagnosis_results):
     return pdf_output_path
 
 # 총 단계 수 (0부터 시작)
-# 기존 0-16단계 + 새로운 0단계(Welcome) = 총 18단계 (0-17)
-total_steps = 18 
+total_steps = 20 
 
 # --- 사이드바 ---
 st.sidebar.markdown("# 시스템 정보")
@@ -1532,8 +1531,8 @@ elif st.session_state.step == 18:
 
 
 
-# STEP 18: 결과
-elif st.session_state.step == 18:
+# STEP 19: 결과
+elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
 
