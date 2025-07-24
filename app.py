@@ -550,7 +550,7 @@ elif st.session_state.step == 5:
                 for err in errors:
                     st.warning(err)
             else:
-                st.session_state.step = 6
+                st.session_state.step = 7
 
 
 # STEP 6: 빈도 및 시기, 강도
