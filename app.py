@@ -449,8 +449,10 @@ elif st.session_state.step == 5:
     st.markdown("---")
 
     with st.container(border=True):
-        # 세션 키 기본값 설정
-        st.session_state.setdefault("tmj_sound", "선택 안 함")
+        # ✅ 세션 키 초기값 명시적으로 설정
+        if "tmj_sound" not in st.session_state:
+            st.session_state.tmj_sound = "선택 안 함"
+
         st.session_state.setdefault("tmj_click_context", [])
         st.session_state.setdefault("crepitus_confirmed", "선택 안 함")
         st.session_state.setdefault("jaw_locked_now", "선택 안 함")
@@ -458,18 +460,18 @@ elif st.session_state.step == 5:
         st.session_state.setdefault("jaw_locked_past", "선택 안 함")
         st.session_state.setdefault("mao_fits_3fingers", "선택 안 함")
 
-        # 턱 소리 종류
-        st.markdown("**턱에서 나는 소리가 있나요?**")
+        # ✅ 라디오 버튼 표시
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
-
-        st.radio(
+        selected_sound = st.radio(
             "턱에서 나는 소리가 있나요?",
             options=joint_sound_options,
-            key="tmj_sound"
+            index=joint_sound_options.index(st.session_state.tmj_sound)
         )
 
+        # ✅ 선택 시 세션 업데이트
+        st.session_state.tmj_sound = selected_sound
 
-        # 딸깍소리 관련
+        # ✅ 딸깍소리 관련 질문
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
@@ -481,17 +483,16 @@ elif st.session_state.step == 5:
                     updated_context.append(option)
             st.session_state.tmj_click_context = updated_context
 
-        # 사각사각소리 관련
+        # ✅ 사각사각소리 관련
         if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
             st.markdown("**사각사각소리가 확실히 느껴지나요?**")
             st.radio(
-                label="사각사각소리 확실 여부",
+                "사각사각소리 확실 여부",
                 options=["예", "아니오", "선택 안 함"],
-                key="crepitus_confirmed",
-                label_visibility="collapsed"
+                key="crepitus_confirmed"
             )
 
-        # 턱 잠김 조건
+        # ✅ 턱 잠김 조건
         show_lock_questions = (
             st.session_state.tmj_sound == "사각사각소리(크레피투스)" and
             st.session_state.crepitus_confirmed == "아니오"
@@ -501,38 +502,38 @@ elif st.session_state.step == 5:
             st.markdown("---")
             st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
             st.radio(
-                label="턱이 현재 걸려있나요?",
+                "턱이 현재 걸려있나요?",
                 options=["예", "아니오", "선택 안 함"],
-                key="jaw_locked_now",
-                label_visibility="collapsed"
+                key="jaw_locked_now"
             )
 
             if st.session_state.jaw_locked_now == "예":
                 st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
                 st.radio(
-                    label="잠김 해소 여부",
+                    "잠김 해소 여부",
                     options=["예", "아니오", "선택 안 함"],
-                    key="jaw_unlock_possible",
-                    label_visibility="collapsed"
+                    key="jaw_unlock_possible"
                 )
 
             elif st.session_state.jaw_locked_now == "아니오":
                 st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
                 st.radio(
-                    label="과거 잠김 경험 여부",
+                    "과거 잠김 경험 여부",
                     options=["예", "아니오", "선택 안 함"],
-                    key="jaw_locked_past",
-                    label_visibility="collapsed"
+                    key="jaw_locked_past"
                 )
 
                 if st.session_state.jaw_locked_past == "예":
                     st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
                     st.radio(
-                        label="MAO 시 손가락 3개 가능 여부",
+                        "MAO 시 손가락 3개 가능 여부",
                         options=["예", "아니오", "선택 안 함"],
-                        key="mao_fits_3fingers",
-                        label_visibility="collapsed"
+                        key="mao_fits_3fingers"
                     )
+
+    # ✅ 세션 확인용
+    with st.expander("🧪 세션 상태 확인"):
+        st.json(st.session_state)
 
     st.markdown("---")
     col1, col2 = st.columns(2)
