@@ -35,18 +35,27 @@ def go_back():
 def compute_diagnoses(state):
     diagnoses = []
 
+    def is_yes(value):
+        return value == "예"
+
+    def is_no(value):
+        return value == "아니오"
+
+    def is_valid(value):
+        return value in ["예", "아니오"]
+
     # 1~3. 근육통 관련 진단 (배타적)
-    if state.get("muscle_pressure_2s") == "아니오":
+    if is_no(state.get("muscle_pressure_2s")):
         diagnoses.append("근육통 (Myalgia)")
-    elif state.get("muscle_pressure_2s") == "예":
-        if state.get("muscle_referred_pain") == "예":
+    elif is_yes(state.get("muscle_pressure_2s")):
+        if is_yes(state.get("muscle_referred_pain")):
             diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
-        elif state.get("muscle_referred_pain") == "아니오":
+        elif is_no(state.get("muscle_referred_pain")):
             diagnoses.append("근육통 (Myalgia)")
             diagnoses.append("국소 근육통 (Local Myalgia)")
 
     # 4. 관절통 (Arthralgia)
-    if state.get("tmj_press_pain") == "예":
+    if is_yes(state.get("tmj_press_pain")):
         diagnoses.append("관절통 (Arthralgia)")
 
     # 5. TMD에 기인한 두통 (Headache attributed to TMD)
@@ -56,47 +65,28 @@ def compute_diagnoses(state):
         "headache_reproduce_by_pressure",
         "headache_not_elsewhere"
     ]
-    if all(state.get(k) == "예" for k in headache_keys):
+    if all(is_yes(state.get(k)) for k in headache_keys):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
     # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
-    if state.get("crepitus_confirmed") == "예":
+    if is_yes(state.get("crepitus_confirmed")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
     # 7 & 8. 감소 없는 디스크 변위 (MAO 기반, 딸깍/잠김과 구분)
-    if state.get("mao_fits_3fingers") == "예":
+    if is_yes(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-    elif state.get("mao_fits_3fingers") == "아니오":
+    elif is_no(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
     # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if (
-        state.get("mao_fits_3fingers") not in ["예", "아니오"] and  # 중복 방지
-        state.get("jaw_locked_now") == "예"
-    ):
+    if not is_valid(state.get("mao_fits_3fingers")) and is_yes(state.get("jaw_locked_now")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 10. 감소 동반 디스크 변위 (딸깍소리 기반)
-    if (
-        state.get("mao_fits_3fingers") not in ["예", "아니오"] and
-        state.get("tmj_sound") == "딸깍소리"
-    ):
+    if not is_valid(state.get("mao_fits_3fingers")) and state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
-    # 진단 없음 메시지 (입력은 있었지만 조건 불충분한 경우)
-    diagnosis_keys = [
-        "muscle_pressure_2s", "muscle_referred_pain", "tmj_press_pain",
-        "headache_temples", "headache_with_jaw", "headache_reproduce_by_pressure",
-        "headache_not_elsewhere", "crepitus_confirmed", "mao_fits_3fingers",
-        "jaw_locked_now", "tmj_sound"
-    ]
-    has_valid_input = any(state.get(k) in ["예", "아니오"] for k in diagnosis_keys)
-
-    if not diagnoses and has_valid_input:
-        diagnoses.append("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
-
     return diagnoses
-
 
 
 
