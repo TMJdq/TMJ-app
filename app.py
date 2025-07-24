@@ -2,7 +2,7 @@ import streamlit as st
 from fpdf import FPDF
 import datetime
 import os
-from PIL import Image # Pillow 라이브러리 추가
+from PIL import Image
 
 # --- 페이지 설정 ---
 st.set_page_config(
@@ -403,10 +403,6 @@ elif st.session_state.step == 3:
         else:
             st.session_state.pain_quality_other = ""
 
-        st.markdown("---")
-        st.markdown("**현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
-        st.slider("통증 정도 선택", 0, 10, value=st.session_state.get('pain_level', 0), key="pain_level")
-
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
@@ -443,67 +439,103 @@ elif st.session_state.step == 4:
         # 근육 또는 넓은 부위 통증 관련 질문
         if "넓은 부위의 통증" in st.session_state.pain_types or "근육 통증" in st.session_state.pain_types:
             st.markdown("#### 💬 근육/넓은 부위 관련")
+
+            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있습니까?**")
             st.radio(
-                "입을 벌릴 때나 턱을 움직일 때 통증이 있습니까?",
+                label="입을 벌릴 때나 턱을 움직일 때 통증이 있습니까?",
                 options=options,
                 index=default_index,
-                key="muscle_movement_pain"
+                key="muscle_movement_pain",
+                label_visibility="collapsed"
             )
+
+            st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
             st.radio(
-                "근육을 2초간 눌렀을 때 통증이 느껴지나요?",
+                label="근육을 2초간 눌렀을 때 통증이 느껴지나요?",
                 options=options,
                 index=default_index,
-                key="muscle_pressure_2s"
+                key="muscle_pressure_2s",
+                label_visibility="collapsed"
             )
+
             if st.session_state.get("muscle_pressure_2s") == "예":
+                st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
                 st.radio(
-                    "근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?",
+                    label="근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?",
                     options=options,
                     index=default_index,
-                    key="muscle_referred_pain"
+                    key="muscle_referred_pain",
+                    label_visibility="collapsed"
                 )
             st.markdown("---")
 
         # 턱관절 관련 질문
         if "턱관절 통증" in st.session_state.pain_types:
             st.markdown("#### 💬 턱관절 관련")
+
+            st.markdown("**입을 벌릴 때나 움직일 때 턱관절에 통증이 있습니까?**")
             st.radio(
-                "입을 벌릴 때나 움직일 때 턱관절에 통증이 있습니까?",
+                label="입을 벌릴 때나 움직일 때 턱관절에 통증이 있습니까?",
                 options=options,
                 index=default_index,
-                key="tmj_movement_pain"
+                key="tmj_movement_pain",
+                label_visibility="collapsed"
             )
+
+            st.markdown("**턱관절 부위를 눌렀을 때 통증이 있습니까?**")
             st.radio(
-                "턱관절 부위를 눌렀을 때 통증이 있습니까?",
+                label="턱관절 부위를 눌렀을 때 통증이 있습니까?",
                 options=options,
                 index=default_index,
-                key="tmj_press_pain"
+                key="tmj_press_pain",
+                label_visibility="collapsed"
             )
             st.markdown("---")
 
         # 두통 관련 질문
         if "두통" in st.session_state.pain_types:
             st.markdown("#### 💬 두통 관련")
+
+            st.markdown("**두통이 관자놀이 부위에서 발생합니까?**")
             st.radio(
-                "두통이 관자놀이 부위에서 발생합니까?",
+                label="두통이 관자놀이 부위에서 발생합니까?",
                 options=options,
                 index=default_index,
-                key="headache_temples"
+                key="headache_temples",
+                label_visibility="collapsed"
             )
+
+            st.markdown("**턱을 움직일 때 두통이 심해지나요?**")
             st.radio(
-                "턱을 움직일 때 두통이 심해지나요?",
+                label="턱을 움직일 때 두통이 심해지나요?",
                 options=options,
                 index=default_index,
-                key="headache_with_jaw"
+                key="headache_with_jaw",
+                label_visibility="collapsed"
             )
+
+            st.markdown("**관자놀이 근육을 눌렀을 때 기존 두통이 재현되나요?**")
             st.radio(
-                "해당 두통이 다른 의학적 진단으로 설명되지 않나요?",
+                label="관자놀이 근육을 눌렀을 때 기존 두통이 재현되나요?",
                 options=options,
                 index=default_index,
-                key="headache_not_elsewhere"
+                key="headache_reproduce_by_pressure",
+                label_visibility="collapsed"
             )
+
+            st.markdown("**해당 두통이 다른 의학적 진단으로 설명되지 않나요?**")
+            st.radio(
+                label="해당 두통이 다른 의학적 진단으로 설명되지 않나요?",
+                options=options,
+                index=default_index,
+                key="headache_not_elsewhere",
+                label_visibility="collapsed"
+            )
+
             st.markdown("---")
 
+
+    # 네비게이션 버튼 영역
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
@@ -538,6 +570,8 @@ elif st.session_state.step == 4:
                         errors.append("두통: 관자놀이 여부를 선택해주세요.")
                     if st.session_state.get("headache_with_jaw") == "선택 안 함":
                         errors.append("두통: 턱 움직임 시 두통 악화 여부를 선택해주세요.")
+                    if st.session_state.get("headache_reproduce_by_pressure") == "선택 안 함":
+                        errors.append("두통: 관자놀이 압통 시 두통 재현 여부를 선택해주세요.")
                     if st.session_state.get("headache_not_elsewhere") == "선택 안 함":
                         errors.append("두통: 다른 진단 여부를 선택해주세요.")
 
@@ -545,35 +579,141 @@ elif st.session_state.step == 4:
                     for err in errors:
                         st.warning(err)
                 else:
-                    go_next()
+                    st.session_state.step = 6
 
 
-
-
-# STEP 5: 빈도 및 시기 (기존 코드의 STEP 4)
+# STEP 5
 elif st.session_state.step == 5:
+    st.title("현재 증상 (턱관절 소리 및 잠김 증상)")
+    st.markdown("---")
+
+    with st.container(border=True):
+        st.markdown("**턱에서 나는 소리가 있나요?**")
+        joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
+        st.radio(
+            label="턱 소리 종류",
+            options=joint_sound_options,
+            index=3,  # "선택 안 함" 기본 선택
+            key="tmj_sound",
+            label_visibility="collapsed"
+        )
+
+        if st.session_state.tmj_sound == "딸깍소리":
+            st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
+            st.session_state.tmj_click_context = st.multiselect(
+                "딸깍소리 발생 상황",
+                ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"],
+                default=st.session_state.get("tmj_click_context", [])
+            )
+        else:
+            st.session_state.tmj_click_context = []
+
+        st.markdown("---")
+        st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
+        lock_options = ["예", "아니오", "선택 안 함"]
+        st.radio(
+            label="턱이 현재 걸려있나요?",
+            options=lock_options,
+            index=2,
+            key="jaw_locked_now",
+            label_visibility="collapsed"
+        )
+
+        if st.session_state.get("jaw_locked_now") == "예":
+            st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
+            st.radio(
+                label="잠김 해소 여부",
+                options=["예", "아니오", "선택 안 함"],
+                index=2,
+                key="jaw_unlock_possible",
+                label_visibility="collapsed"
+            )
+        elif st.session_state.get("jaw_locked_now") == "아니오":
+            st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
+            st.radio(
+                label="과거 잠김 경험 여부",
+                options=["예", "아니오", "선택 안 함"],
+                index=2,
+                key="jaw_locked_past",
+                label_visibility="collapsed"
+            )
+
+            if st.session_state.get("jaw_locked_past") == "예":
+                st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
+                st.radio(
+                    label="MAO 시 손가락 3개 가능 여부",
+                    options=["예", "아니오", "선택 안 함"],
+                    index=2,
+                    key="mao_fits_3fingers",
+                    label_visibility="collapsed"
+                )
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            errors = []
+
+            if st.session_state.tmj_sound == "선택 안 함":
+                errors.append("턱관절 소리 여부를 선택해주세요.")
+            if st.session_state.get("jaw_locked_now") == "선택 안 함":
+                errors.append("현재 턱 잠김 여부를 선택해주세요.")
+
+            if st.session_state.get("jaw_locked_now") == "예":
+                if st.session_state.get("jaw_unlock_possible") == "선택 안 함":
+                    errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
+            elif st.session_state.get("jaw_locked_now") == "아니오":
+                if st.session_state.get("jaw_locked_past") == "선택 안 함":
+                    errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
+                elif st.session_state.get("jaw_locked_past") == "예" and \
+                     st.session_state.get("mao_fits_3fingers") == "선택 안 함":
+                    errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
+
+            if errors:
+                for err in errors:
+                    st.warning(err)
+            else:
+                # STEP6으로 바로 이동하도록 보장
+                st.session_state.step = 6
+
+
+# STEP 6: 빈도 및 시기, 강도
+elif st.session_state.step == 6:
     st.title("현재 증상 (빈도 및 시기)")
     st.markdown("---")
+
     with st.container(border=True):
+        # 빈도
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
-        # 체크박스 상태를 세션 상태에 직접 저장
         st.checkbox("매일", value=st.session_state.get('frequency_매일', False), key="frequency_매일")
         st.checkbox("주 2~3회", value=st.session_state.get('frequency_주_2_3회', False), key="frequency_주_2_3회")
         st.checkbox("기타", value=st.session_state.get('frequency_기타', False), key="frequency_기타")
-        
+
         if st.session_state.get('frequency_기타', False):
             st.text_input("기타 빈도:", value=st.session_state.get('frequency_other_text', ''), key="frequency_other_text")
 
         st.markdown("---")
+
+        # 시간대
         st.markdown("**주로 어느 시간대에 발생하나요?**")
         st.checkbox("아침", value=st.session_state.get('time_morning', False), key="time_morning")
         st.checkbox("오후", value=st.session_state.get('time_afternoon', False), key="time_afternoon")
         st.checkbox("저녁", value=st.session_state.get('time_evening', False), key="time_evening")
         st.checkbox("기타 시간대", value=st.session_state.get('time_other', False), key="time_other")
-        
+
         if st.session_state.get('time_other', False):
             st.text_input("기타 시간대:", value=st.session_state.get('time_other_text', ''), key="time_other_text")
-    
+
+        st.markdown("---")
+
+        # 통증 정도
+        st.markdown("**(통증이 있을 시)현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
+        st.slider("통증 정도 선택", 0, 10, value=st.session_state.get('pain_level', 0), key="pain_level")
+
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
@@ -581,18 +721,16 @@ elif st.session_state.step == 5:
             go_back()
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            # 유효성 검사를 위해 각 체크박스 상태 확인
             freq_valid = st.session_state.get('frequency_매일', False) or \
                          st.session_state.get('frequency_주_2_3회', False) or \
                          (st.session_state.get('frequency_기타', False) and st.session_state.get('frequency_other_text', '').strip() != "")
-            
+
             time_valid = st.session_state.get('time_morning', False) or \
                          st.session_state.get('time_afternoon', False) or \
                          st.session_state.get('time_evening', False) or \
                          (st.session_state.get('time_other', False) and st.session_state.get('time_other_text', '').strip() != "")
 
             if freq_valid and time_valid:
-                # 상태 저장 로직은 기존 코드가 이미 처리하므로 별도 추가 없음
                 go_next()
             else:
                 if not freq_valid and not time_valid:
@@ -602,8 +740,9 @@ elif st.session_state.step == 5:
                 else:
                     st.warning("시간대 항목을 입력하거나 선택해주세요.")
 
-# STEP 6: 습관 (기존 코드의 STEP 5)
-elif st.session_state.step == 6:
+
+# STEP 7: 습관
+elif st.session_state.step == 7:
     st.title("습관 (Habits)")
     st.markdown("---")
     with st.container(border=True):
@@ -648,113 +787,6 @@ elif st.session_state.step == 6:
             else:
                 st.warning("한 가지 이상 선택해주세요.")
 
-
-# STEP 7: 두통 관련 증상
-elif st.session_state.step == 7:
-    st.title("두통 관련 증상")
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("**두통이 있나요?**")
-        st.radio(
-            label="두통이 있나요?",
-            options=["예", "아니오", "기타", "선택 안 함"],
-            key="headache_option",
-            index=3,
-            label_visibility="collapsed"
-        )
-        if st.session_state.get('headache_option') == "기타":
-            st.text_input("기타 내용:", value=st.session_state.get('headache_other', ''), key="headache_other")
-        else:
-            st.session_state.headache_other = ""
-
-        st.markdown("---")
-        st.markdown("**위치(예: 관자놀이, 뒤통수 등):**")
-        st.checkbox("관자놀이", value=st.session_state.get('loc_temples', False), key="loc_temples")
-        st.checkbox("뒤통수", value=st.session_state.get('loc_occipital', False), key="loc_occipital")
-        st.checkbox("기타", value=st.session_state.get('loc_other', False), key="loc_other")
-        if st.session_state.loc_other:
-            st.text_input("기타 위치:", value=st.session_state.get('loc_other_detail', ''), key="loc_other_detail")
-        else:
-            st.session_state.loc_other_detail = ""
-
-        st.markdown("---")
-        st.markdown("**두통을 얼마나 자주 경험합니까?**")
-        st.radio(
-            label="두통 빈도",
-            options=["매일", "일주일에 여러번", "가끔", "드물게", "기타", "선택 안 함"],
-            key="headache_freq",
-            index=5,
-            label_visibility="collapsed"
-        )
-        if st.session_state.get('headache_freq') == "기타":
-            st.text_input("기타 빈도:", value=st.session_state.get('headache_freq_other', ''), key="headache_freq_other")
-        else:
-            st.session_state.headache_freq_other = ""
-
-        st.markdown("---")
-        st.markdown("**양상(예: 욱신거림, 압박감, 긴장성 등):**")
-        st.radio(
-            label="두통 양상",
-            options=["욱신거림", "압박감", "긴장성", "기타", "선택 안 함"],
-            key="headache_type",
-            index=4,
-            label_visibility="collapsed"
-        )
-        if st.session_state.get('headache_type') == "기타":
-            st.text_input("기타 양상:", value=st.session_state.get('headache_type_other', ''), key="headache_type_other")
-        else:
-            st.session_state.headache_type_other = ""
-
-        st.markdown("---")
-        st.markdown("**악화 요인(예: 스트레스, 씹기, 자세 등):**")
-        st.radio(
-            label="악화 요인",
-            options=["스트레스", "씹기", "자세", "기타", "선택 안 함"],
-            key="aggravating",
-            index=4,
-            label_visibility="collapsed"
-        )
-        if st.session_state.get('aggravating') == "기타":
-            st.text_input("기타 악화 요인:", value=st.session_state.get('aggravating_other', ''), key="aggravating_other")
-        else:
-            st.session_state.aggravating_other = ""
-
-        st.markdown("---")
-        st.markdown("**완화 요인(예: 휴식, 약물, 마사지 등):**")
-        st.radio(
-            label="완화 요인",
-            options=["휴식", "약물", "마사지", "기타", "선택 안 함"],
-            key="relieving",
-            index=4,
-            label_visibility="collapsed"
-        )
-        if st.session_state.get('relieving') == "기타":
-            st.text_input("기타 완화 요인:", value=st.session_state.get('relieving_other', ''), key="relieving_other")
-        else:
-            st.session_state.relieving_other = ""
-
-        st.markdown("---")
-        st.markdown("**현재 두통의 강도를 선택해주세요. (0=없음, 10=극심한 통증)**")
-        st.slider("통증 정도", 0, 10, value=st.session_state.get('headache_scale', 0), key="headache_scale")
-
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("이전 단계"):
-            go_back()
-    with col2:
-        if st.button("다음 단계로 이동 👉"):
-            if st.session_state.get('headache_option') == "선택 안 함":
-                st.warning("두통 유무를 선택해주세요.")
-            elif st.session_state.headache_option == "아니오" and (
-                st.session_state.get('loc_temples', False) or
-                st.session_state.get('loc_occipital', False) or
-                st.session_state.get('loc_other', False) or
-                st.session_state.get('headache_freq') not in ["선택 안 함", "드물게"]
-            ):
-                st.warning("두통이 없다고 선택했지만, 위치나 빈도에 응답하셨습니다. 다시 확인해주세요.")
-            else:
-                go_next()
 
 
 # STEP 8: 귀 관련 증상 (기존 코드의 STEP 7)
@@ -817,17 +849,15 @@ elif st.session_state.step == 9:
     with st.container(border=True):
         st.markdown("**다음 중의 증상이 있으신가요?**")
         
-        # '없음' 체크박스
         none_selected_neck = st.checkbox("없음", value=st.session_state.get('neck_none', False), key="neck_none")
-        # '없음'이 선택되면 다른 체크박스 비활성화
+        
         disabled_others_neck = st.session_state.get('neck_none', False)
 
-        # 각 체크박스 상태를 세션 상태에 저장 (개별 키 사용)
         st.checkbox("목 통증", value=st.session_state.get('neck_pain', False), key="neck_pain", disabled=disabled_others_neck)
         st.checkbox("어깨 통증", value=st.session_state.get('shoulder_pain', False), key="shoulder_pain", disabled=disabled_others_neck)
         st.checkbox("뻣뻣함(강직감)", value=st.session_state.get('stiffness', False), key="stiffness", disabled=disabled_others_neck)
         
-        # 실제 값을 저장할 딕셔너리 업데이트
+        
         st.session_state.neck_shoulder_symptoms = {
             "목 통증": st.session_state.get('neck_pain', False),
             "어깨 통증": st.session_state.get('shoulder_pain', False),
@@ -851,7 +881,6 @@ elif st.session_state.step == 9:
             if 'trauma_detail' in st.session_state:
                 st.session_state.trauma_detail = ""
         
-        # neck_trauma 상태는 neck_trauma_radio 값으로 설정
         st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
 
     st.markdown("---")
