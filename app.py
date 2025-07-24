@@ -44,6 +44,9 @@ def compute_diagnoses(state):
     def is_valid(value):
         return value in ["예", "아니오"]
 
+    def is_missing_or_unselected(value):
+        return value in [None, "", "선택 안 함"]
+
     # 1~3. 근육통 관련 진단 (배타적)
     if is_no(state.get("muscle_pressure_2s")):
         diagnoses.append("근육통 (Myalgia)")
@@ -72,19 +75,29 @@ def compute_diagnoses(state):
     if is_yes(state.get("crepitus_confirmed")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7 & 8. 감소 없는 디스크 변위 (MAO 기반, 딸깍/잠김과 구분)
+    # 7 & 8. 감소 없는 디스크 변위 (MAO 기반)
     if is_yes(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
     elif is_no(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
-    # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if not is_valid(state.get("mao_fits_3fingers")) and is_yes(state.get("jaw_locked_now")):
+    # 9. 감소 동반 간헐적 잠금 디스크 변위 (MAO 입력 없음 + 잠김)
+    if is_missing_or_unselected(state.get("mao_fits_3fingers")) and is_yes(state.get("jaw_locked_now")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
-    # 10. 감소 동반 디스크 변위 (딸깍소리 기반)
-    if not is_valid(state.get("mao_fits_3fingers")) and state.get("tmj_sound") == "딸깍소리":
+    # 10. 감소 동반 디스크 변위 (MAO 입력 없음 + 딸깍소리)
+    if is_missing_or_unselected(state.get("mao_fits_3fingers")) and state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
+
+    # 최소 1개 이상 유효 응답이 있었는지 여부 (step 19에서 활용 가능)
+    state["_has_valid_diagnosis_input"] = any(
+        is_valid(state.get(k)) for k in [
+            "muscle_pressure_2s", "muscle_referred_pain", "tmj_press_pain",
+            "headache_temples", "headache_with_jaw",
+            "headache_reproduce_by_pressure", "headache_not_elsewhere",
+            "crepitus_confirmed", "mao_fits_3fingers", "jaw_locked_now"
+        ]
+    ) or state.get("tmj_sound") in ["딸깍소리", "사각사각소리(크레피투스)"]
 
     return diagnoses
 
@@ -1359,6 +1372,7 @@ elif st.session_state.step == 19:
     st.markdown("---")
 
     results = compute_diagnoses(st.session_state)
+    has_input = st.session_state.get("_has_valid_diagnosis_input", False)
 
     dc_tmd_explanations = {
         "근육통 (Myalgia)": "→ 턱 주변 근육에서 발생하는 통증으로, 움직임이나 압박 시 통증이 심해지는 증상입니다.",
@@ -1373,9 +1387,9 @@ elif st.session_state.step == 19:
         "TMD에 기인한 두통 (Headache attributed to TMD)": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다."
     }
 
-   
-
-    if not results:
+    if not has_input:
+        st.warning("⚠️ 진단을 위한 입력 정보가 부족하여 결과를 도출할 수 없습니다.")
+    elif not results:
         st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
         if len(results) == 1:
@@ -1396,3 +1410,4 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+
