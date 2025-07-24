@@ -36,10 +36,11 @@ def compute_diagnoses(state):
     diagnoses = []
 
     # 1. 근육통 (Myalgia)
-    if state.get("muscle_pressure_2s") == "아니오":
-        diagnoses.append("근육통 (Myalgia)")
-    elif state.get("muscle_pressure_2s") == "예" and state.get("muscle_referred_pain") == "아니오":
-        diagnoses.append("근육통 (Myalgia)")
+    if state.get("muscle_pressure_2s") in ["예", "아니오"]:
+        if state["muscle_pressure_2s"] == "아니오":
+            diagnoses.append("근육통 (Myalgia)")
+        elif state["muscle_pressure_2s"] == "예" and state.get("muscle_referred_pain") == "아니오":
+            diagnoses.append("근육통 (Myalgia)")
 
     # 2. 국소 근육통 (Local Myalgia)
     if state.get("muscle_referred_pain") == "아니오":
@@ -67,7 +68,7 @@ def compute_diagnoses(state):
     if state.get("crepitus_confirmed") == "예":
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7-8. 디스크 변위 (감소 없음)
+    # 7-8. 디스크 변위
     if state.get("mao_fits_3fingers") == "예":
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
     elif state.get("mao_fits_3fingers") == "아니오":
@@ -1425,7 +1426,24 @@ elif st.session_state.step == 18:
 elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
-    st.write("🧪 진단 전 입력 상태 확인", {k: st.session_state.get(k) for k in st.session_state.keys() if not k.startswith("_")})
+    
+    def compute_diagnoses(state):
+    st.write("🔍 진단 대상 입력값 점검")
+    debug_keys = [
+        "muscle_pressure_2s",
+        "muscle_referred_pain",
+        "tmj_press_pain",
+        "headache_temples",
+        "headache_with_jaw",
+        "headache_reproduce_by_pressure",
+        "headache_not_elsewhere",
+        "crepitus_confirmed",
+        "mao_fits_3fingers",
+        "jaw_locked_now",
+        "tmj_sound",
+    ]
+    st.write({k: state.get(k) for k in debug_keys})
+
 
     results = compute_diagnoses(st.session_state)
 
