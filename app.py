@@ -49,7 +49,7 @@ def go_back():
     st.session_state.step -= 1
     st.session_state.validation_errors = {} # 이전 단계로 돌아갈 때 에러 초기화
 
-st.write("세션 상태 전체 확인:", st.session_state)
+
 
 
 # 진단 함수
@@ -702,8 +702,7 @@ elif st.session_state.step == 5:
     if st.session_state.tmj_sound_value != "딸깍소리":
         st.session_state.tmj_click_context = []
 
-    with st.expander("🧪 세션 상태 확인"):
-        st.json(st.session_state)
+   
 
     st.markdown("---")
     col1, col2 = st.columns(2)
