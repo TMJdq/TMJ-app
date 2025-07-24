@@ -301,7 +301,7 @@ elif st.session_state.step == 1:
             if 'email' in st.session_state.validation_errors:
                 st.error(st.session_state.validation_errors['email'])
         with col_phone:
-            st.text_input("연락처 (선택 사항)", value=st.session_state.get('phone', ''), key="phone", placeholder="예: 010-1234-5678 (숫자만 입력)")
+            st.text_input("연락처 (선택 사항)", value=st.session_state.get('phone', ''), key="phone", placeholder="예: 01012345678 (숫자만 입력)")
             # 연락처는 선택 사항이므로 유효성 검사에서 제외
 
         st.markdown("---") # 선택 사항 구분선
@@ -614,7 +614,7 @@ elif st.session_state.step == 5:
         st.radio(
             label="턱 소리 종류",
             options=joint_sound_options,
-            index=3,  # "선택 안 함" 기본 선택
+            index=3,
             key="tmj_sound",
             label_visibility="collapsed"
         )
@@ -622,17 +622,33 @@ elif st.session_state.step == 5:
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
             all_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
-            selected = st.session_state.get("tmj_click_context", [])
+
+            if "tmj_click_context" not in st.session_state:
+                st.session_state.tmj_click_context = []
+
             updated_selected = []
+            모두_체크됨 = "모두" in st.session_state.tmj_click_context
 
             for option in all_options:
-                disabled = "모두" in selected and option != "모두"
-                checked = option in selected
-                if st.checkbox(option, value=checked, key=f"click_{option}", disabled=disabled):
+                disabled = 모두_체크됨 and option != "모두"
+                key = f"click_{option}"
+                checked = option in st.session_state.tmj_click_context
+                if st.checkbox(option, value=checked, key=key, disabled=disabled):
                     updated_selected.append(option)
 
-            # '모두'가 선택된 경우 다른 항목 제거
+            if "모두" in st.session_state.tmj_click_context and "모두" not in updated_selected:
+                updated_selected = []
+                for option in all_options:
+                    cb_key = f"click_{option}"
+                    if cb_key in st.session_state:
+                        st.session_state[cb_key] = False
+
             if "모두" in updated_selected:
+                for option in all_options:
+                    if option != "모두":
+                        cb_key = f"click_{option}"
+                        if cb_key in st.session_state:
+                            st.session_state[cb_key] = False
                 updated_selected = ["모두"]
 
             st.session_state.tmj_click_context = updated_selected
@@ -711,6 +727,7 @@ elif st.session_state.step == 5:
                 st.session_state.step = 6
 
 
+
 # STEP 6: 빈도 및 시기, 강도
 elif st.session_state.step == 6:
     st.title("현재 증상 (빈도 및 시기)")
@@ -719,12 +736,23 @@ elif st.session_state.step == 6:
     with st.container(border=True):
         # 빈도
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
-        st.checkbox("매일", value=st.session_state.get('frequency_매일', False), key="frequency_매일")
-        st.checkbox("주 2~3회", value=st.session_state.get('frequency_주_2_3회', False), key="frequency_주_2_3회")
-        st.checkbox("기타", value=st.session_state.get('frequency_기타', False), key="frequency_기타")
+        frequency_options = ["매일", "주 2~3회", "기타", "선택 안 함"]
+        selected_frequency = st.radio(
+            label="빈도 선택",
+            options=frequency_options,
+            index=3,  # "선택 안 함" 기본 선택
+            key="frequency_choice",
+            label_visibility="collapsed"
+        )
 
-        if st.session_state.get('frequency_기타', False):
-            st.text_input("기타 빈도:", value=st.session_state.get('frequency_other_text', ''), key="frequency_other_text")
+        if selected_frequency == "기타":
+            st.text_input(
+                "기타 빈도:",
+                value=st.session_state.get('frequency_other_text', ''),
+                key="frequency_other_text"
+            )
+        else:
+            st.session_state.frequency_other_text = ""
 
         st.markdown("---")
 
@@ -736,7 +764,11 @@ elif st.session_state.step == 6:
         st.checkbox("기타 시간대", value=st.session_state.get('time_other', False), key="time_other")
 
         if st.session_state.get('time_other', False):
-            st.text_input("기타 시간대:", value=st.session_state.get('time_other_text', ''), key="time_other_text")
+            st.text_input(
+                "기타 시간대:",
+                value=st.session_state.get('time_other_text', ''),
+                key="time_other_text"
+            )
 
         st.markdown("---")
 
@@ -746,19 +778,24 @@ elif st.session_state.step == 6:
 
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             go_back()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            freq_valid = st.session_state.get('frequency_매일', False) or \
-                         st.session_state.get('frequency_주_2_3회', False) or \
-                         (st.session_state.get('frequency_기타', False) and st.session_state.get('frequency_other_text', '').strip() != "")
+            freq_valid = (
+                selected_frequency in ["매일", "주 2~3회"]
+                or (selected_frequency == "기타" and st.session_state.get('frequency_other_text', '').strip() != "")
+            )
 
-            time_valid = st.session_state.get('time_morning', False) or \
-                         st.session_state.get('time_afternoon', False) or \
-                         st.session_state.get('time_evening', False) or \
-                         (st.session_state.get('time_other', False) and st.session_state.get('time_other_text', '').strip() != "")
+            time_valid = (
+                st.session_state.get('time_morning', False) or
+                st.session_state.get('time_afternoon', False) or
+                st.session_state.get('time_evening', False) or
+                (st.session_state.get('time_other', False) and st.session_state.get('time_other_text', '').strip() != "")
+            )
 
             if freq_valid and time_valid:
                 go_next()
@@ -775,22 +812,58 @@ elif st.session_state.step == 6:
 elif st.session_state.step == 7:
     st.title("습관 (Habits)")
     st.markdown("---")
+
     with st.container(border=True):
+        st.markdown("**다음 중 해당되는 습관이 있나요?**")
+
+        # 첫 번째 질문 보기 목록
+        first_habits = {
+            "이갈이 - 밤(수면 중)": "habit_bruxism_night",
+            "이 악물기 - 낮": "habit_clenching_day",
+            "이 악물기 - 밤(수면 중)": "habit_clenching_night",
+            "없음": "habit_none"
+        }
+
+        none_selected = st.session_state.get("habit_none", False)
+
+        # 없음 먼저 처리
+        st.session_state.habit_none = st.checkbox(
+            "없음",
+            value=none_selected,
+            key="habit_none"
+        )
+
+        # 없음 해제 시 나머지 선택값 초기화
+        if not st.session_state.habit_none and none_selected:
+            for k in ["habit_bruxism_night", "habit_clenching_day", "habit_clenching_night"]:
+                st.session_state[k] = False
+
+        # 나머지 보기
+        for label, key in first_habits.items():
+            if label == "없음":
+                continue
+            st.session_state[key] = st.checkbox(
+                label,
+                value=st.session_state.get(key, False),
+                key=key,
+                disabled=st.session_state.habit_none
+            )
+
+        st.markdown("---")
         st.markdown("**다음 중 해당되는 습관이 있다면 모두 선택해주세요.**")
-        habits = [
-            "이갈이 - 밤(수면 중)", "이 악물기 - 낮", "이 악물기 - 밤(수면 중)",
+
+        additional_habits = [
             "옆으로 자는 습관", "코골이", "껌 씹기",
             "단단한 음식 선호(예: 견과류, 딱딱한 사탕 등)", "한쪽으로만 씹기",
             "혀 내밀기 및 밀기(이를 밀거나 입술 사이로 내미는 습관)", "손톱/입술/볼 물기",
             "손가락 빨기", "턱 괴기", "거북목/머리 앞으로 빼기",
             "음주", "흡연", "카페인", "기타"
         ]
-        
+
         if 'selected_habits' not in st.session_state:
             st.session_state.selected_habits = []
 
-        # 기존 selected_habits 리스트를 기반으로 체크박스 상태 초기화
-        for habit in habits:
+        for habit in additional_habits:
             checkbox_key = f"habit_{habit.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_').replace('-', '_').replace('.', '_').replace(':', '')}"
             if st.checkbox(habit, value=(habit in st.session_state.selected_habits), key=checkbox_key):
                 if habit not in st.session_state.selected_habits:
@@ -801,21 +874,29 @@ elif st.session_state.step == 7:
 
         if "기타" in st.session_state.selected_habits:
             st.text_input("기타 습관을 입력해주세요:", value=st.session_state.get('habit_other_detail', ''), key="habit_other_detail")
-        else: # '기타' 체크 해제 시 내용 초기화
+        else:
             if 'habit_other_detail' in st.session_state:
                 st.session_state.habit_other_detail = ""
-    
+
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
             go_back()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            if st.session_state.selected_habits:
+            # 첫 질문 중 최소 하나 또는 기타 습관 중 최소 하나 선택 시 통과
+            has_first_habit = any([
+                st.session_state.get("habit_bruxism_night", False),
+                st.session_state.get("habit_clenching_day", False),
+                st.session_state.get("habit_clenching_night", False),
+                st.session_state.get("habit_none", False)
+            ])
+            if has_first_habit or st.session_state.selected_habits:
                 go_next()
             else:
-                st.warning("한 가지 이상 선택해주세요.")
+                st.warning("최소 한 가지 이상 선택해주세요.")
 
 
 
