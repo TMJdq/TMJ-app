@@ -217,7 +217,7 @@ def generate_pdf_report(state, diagnosis_results):
 
 # 총 단계 수 (0부터 시작)
 # 기존 0-16단계 + 새로운 0단계(Welcome) = 총 18단계 (0-17)
-total_steps = 17 
+total_steps = 18 
 
 # --- 사이드바 ---
 st.sidebar.markdown("# 시스템 정보")
