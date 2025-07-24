@@ -395,7 +395,7 @@ elif st.session_state.step == 4:
     with st.container(border=True):
         st.markdown("**아래 중 해당되는 통증 유형을 선택해주세요.**")
         st.selectbox(
-            label="통증 유형 선택",
+           
             options=pain_type_options,
             index=get_selectbox_index("pain_types_value", pain_type_options), # Initialize from persistent value
             key="pain_types_widget_key", # Unique widget key
