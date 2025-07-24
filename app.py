@@ -603,12 +603,13 @@ elif st.session_state.step == 4:
                     st.session_state.step = 6
 
 
-# STEP 5
+# STEP 5: 턱관절 소리 및 잠김
 elif st.session_state.step == 5:
     st.title("현재 증상 (턱관절 소리 및 잠김 증상)")
     st.markdown("---")
 
     with st.container(border=True):
+        # 턱관절 소리
         st.markdown("**턱에서 나는 소리가 있나요?**")
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
         st.radio(
@@ -619,43 +620,44 @@ elif st.session_state.step == 5:
             label_visibility="collapsed"
         )
 
+        # 딸깍소리 관련 추가 질문
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
-            all_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
 
+            context_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
             if "tmj_click_context" not in st.session_state:
                 st.session_state.tmj_click_context = []
 
-            updated_selected = []
-            모두_체크됨 = "모두" in st.session_state.tmj_click_context
+            selected = st.session_state.tmj_click_context
+            updated = []
 
-            for option in all_options:
-                disabled = 모두_체크됨 and option != "모두"
+            for option in context_options:
                 key = f"click_{option}"
-                checked = option in st.session_state.tmj_click_context
-                if st.checkbox(option, value=checked, key=key, disabled=disabled):
-                    updated_selected.append(option)
+                is_selected = option in selected
+                disabled = "모두" in selected and option != "모두"
 
-            if "모두" in st.session_state.tmj_click_context and "모두" not in updated_selected:
-                updated_selected = []
-                for option in all_options:
+                if st.checkbox(option, value=is_selected, key=key, disabled=disabled):
+                    updated.append(option)
+
+            # '모두' 선택 시 단독으로 유지
+            if "모두" in updated:
+                updated = ["모두"]
+
+            # '모두' 해제 시 전체 초기화
+            if "모두" in selected and "모두" not in updated:
+                updated = []
+                for option in context_options:
                     cb_key = f"click_{option}"
                     if cb_key in st.session_state:
-                        st.session_state[cb_key] = False
+                        del st.session_state[cb_key]
 
-            if "모두" in updated_selected:
-                for option in all_options:
-                    if option != "모두":
-                        cb_key = f"click_{option}"
-                        if cb_key in st.session_state:
-                            st.session_state[cb_key] = False
-                updated_selected = ["모두"]
-
-            st.session_state.tmj_click_context = updated_selected
+            st.session_state.tmj_click_context = updated
         else:
             st.session_state.tmj_click_context = []
 
         st.markdown("---")
+
+        # 현재 턱 잠김 여부
         st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
         lock_options = ["예", "아니오", "선택 안 함"]
         st.radio(
@@ -666,7 +668,8 @@ elif st.session_state.step == 5:
             label_visibility="collapsed"
         )
 
-        if st.session_state.get("jaw_locked_now") == "예":
+        # 턱 잠김 해소 관련 질문
+        if st.session_state.jaw_locked_now == "예":
             st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
             st.radio(
                 label="잠김 해소 여부",
@@ -675,7 +678,9 @@ elif st.session_state.step == 5:
                 key="jaw_unlock_possible",
                 label_visibility="collapsed"
             )
-        elif st.session_state.get("jaw_locked_now") == "아니오":
+
+        # 과거 턱 잠김 여부
+        elif st.session_state.jaw_locked_now == "아니오":
             st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
             st.radio(
                 label="과거 잠김 경험 여부",
@@ -707,16 +712,18 @@ elif st.session_state.step == 5:
 
             if st.session_state.tmj_sound == "선택 안 함":
                 errors.append("턱관절 소리 여부를 선택해주세요.")
-            if st.session_state.get("jaw_locked_now") == "선택 안 함":
+
+            if st.session_state.jaw_locked_now == "선택 안 함":
                 errors.append("현재 턱 잠김 여부를 선택해주세요.")
 
-            if st.session_state.get("jaw_locked_now") == "예":
+            if st.session_state.jaw_locked_now == "예":
                 if st.session_state.get("jaw_unlock_possible") == "선택 안 함":
                     errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
-            elif st.session_state.get("jaw_locked_now") == "아니오":
+
+            elif st.session_state.jaw_locked_now == "아니오":
                 if st.session_state.get("jaw_locked_past") == "선택 안 함":
                     errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
-                elif st.session_state.get("jaw_locked_past") == "예" and \
+                elif st.session_state.jaw_locked_past == "예" and \
                      st.session_state.get("mao_fits_3fingers") == "선택 안 함":
                     errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
 
