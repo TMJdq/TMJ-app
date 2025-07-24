@@ -620,14 +620,35 @@ elif st.session_state.step == 5:
         )
 
         if st.session_state.tmj_sound == "딸깍소리":
-            st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
-            st.session_state.tmj_click_context = st.multiselect(
-                "딸깍소리 발생 상황",
-                ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"],
-                default=st.session_state.get("tmj_click_context", [])
-            )
-        else:
-            st.session_state.tmj_click_context = []
+    st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
+
+    all_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때", "모두"]
+    selected = st.session_state.get("tmj_click_context", [])
+
+    updated_selected = []
+
+    for option in all_options:
+        # 각 항목을 체크박스로 표시
+        checked = option in selected
+        new_checked = st.checkbox(option, value=checked, key=f"click_{option}")
+
+        if new_checked:
+            updated_selected.append(option)
+
+    # '모두'가 선택되면 나머지 자동 해제
+    if "모두" in updated_selected:
+        updated_selected = ["모두"]
+        # 다른 checkbox들의 상태도 비활성화 필요
+        for option in all_options:
+            if option != "모두":
+                st.session_state[f"click_{option}"] = False
+    else:
+        # '모두' 체크 해제
+        st.session_state["click_모두"] = False
+
+    st.session_state.tmj_click_context = updated_selected
+else:
+    st.session_state.tmj_click_context = []
 
         st.markdown("---")
         st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
