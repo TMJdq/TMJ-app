@@ -1427,23 +1427,6 @@ elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
     
-    def compute_diagnoses(state):
-    st.write("🔍 진단 대상 입력값 점검")
-    debug_keys = [
-        "muscle_pressure_2s",
-        "muscle_referred_pain",
-        "tmj_press_pain",
-        "headache_temples",
-        "headache_with_jaw",
-        "headache_reproduce_by_pressure",
-        "headache_not_elsewhere",
-        "crepitus_confirmed",
-        "mao_fits_3fingers",
-        "jaw_locked_now",
-        "tmj_sound",
-    ]
-    st.write({k: state.get(k) for k in debug_keys})
-
 
     results = compute_diagnoses(st.session_state)
 
