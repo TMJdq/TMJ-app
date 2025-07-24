@@ -452,7 +452,7 @@ elif st.session_state.step == 5:
         st.radio(
             label="턱 소리 종류",
             options=joint_sound_options,
-            index=3,
+            index=joint_sound_options.index(st.session_state.get("tmj_sound", "선택 안 함")),
             key="tmj_sound",
             label_visibility="collapsed"
         )
@@ -478,7 +478,7 @@ elif st.session_state.step == 5:
             st.radio(
                 label="사각사각소리 확실 여부",
                 options=["예", "아니오", "선택 안 함"],
-                index=2,
+                index=["예", "아니오", "선택 안 함"].index(st.session_state.get("crepitus_confirmed", "선택 안 함")),
                 key="crepitus_confirmed",
                 label_visibility="collapsed"
             )
@@ -497,7 +497,7 @@ elif st.session_state.step == 5:
             st.radio(
                 label="턱이 현재 걸려있나요?",
                 options=lock_options,
-                index=2,
+                index=lock_options.index(st.session_state.get("jaw_locked_now", "선택 안 함")),
                 key="jaw_locked_now",
                 label_visibility="collapsed"
             )
@@ -507,7 +507,7 @@ elif st.session_state.step == 5:
                 st.radio(
                     label="잠김 해소 여부",
                     options=["예", "아니오", "선택 안 함"],
-                    index=2,
+                    index=["예", "아니오", "선택 안 함"].index(st.session_state.get("jaw_unlock_possible", "선택 안 함")),
                     key="jaw_unlock_possible",
                     label_visibility="collapsed"
                 )
@@ -517,7 +517,7 @@ elif st.session_state.step == 5:
                 st.radio(
                     label="과거 잠김 경험 여부",
                     options=["예", "아니오", "선택 안 함"],
-                    index=2,
+                    index=["예", "아니오", "선택 안 함"].index(st.session_state.get("jaw_locked_past", "선택 안 함")),
                     key="jaw_locked_past",
                     label_visibility="collapsed"
                 )
@@ -527,7 +527,7 @@ elif st.session_state.step == 5:
                     st.radio(
                         label="MAO 시 손가락 3개 가능 여부",
                         options=["예", "아니오", "선택 안 함"],
-                        index=2,
+                        index=["예", "아니오", "선택 안 함"].index(st.session_state.get("mao_fits_3fingers", "선택 안 함")),
                         key="mao_fits_3fingers",
                         label_visibility="collapsed"
                     )
