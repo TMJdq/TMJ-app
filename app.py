@@ -35,14 +35,15 @@ def go_back():
 def compute_diagnoses(state):
     diagnoses = []
 
-    # 1~3. 근육통 관련 진단은 배타적으로 처리
-    if state.get("muscle_pressure_2s") in ["예", "아니오"]:
+    # 1~3. 근육통 관련 진단 (배타적)
+    if state.get("muscle_pressure_2s") == "아니오":
+        diagnoses.append("근육통 (Myalgia)")
+    elif state.get("muscle_pressure_2s") == "예":
         if state.get("muscle_referred_pain") == "예":
             diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
         elif state.get("muscle_referred_pain") == "아니오":
-            diagnoses.append("국소 근육통 (Local Myalgia)")
-        else:
             diagnoses.append("근육통 (Myalgia)")
+            diagnoses.append("국소 근육통 (Local Myalgia)")
 
     # 4. 관절통 (Arthralgia)
     if state.get("tmj_press_pain") == "예":
@@ -62,18 +63,24 @@ def compute_diagnoses(state):
     if state.get("crepitus_confirmed") == "예":
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7 & 8. 감소 없는 디스크 변위 (MAO 기반)
+    # 7 & 8. 감소 없는 디스크 변위 (MAO 기반, 딸깍/잠김과 구분)
     if state.get("mao_fits_3fingers") == "예":
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
     elif state.get("mao_fits_3fingers") == "아니오":
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
     # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if state.get("jaw_locked_now") == "예":
+    if (
+        state.get("mao_fits_3fingers") not in ["예", "아니오"] and  # 중복 방지
+        state.get("jaw_locked_now") == "예"
+    ):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 10. 감소 동반 디스크 변위 (딸깍소리 기반)
-    if state.get("tmj_sound") == "딸깍소리":
+    if (
+        state.get("mao_fits_3fingers") not in ["예", "아니오"] and
+        state.get("tmj_sound") == "딸깍소리"
+    ):
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     # 진단 없음 메시지 (입력은 있었지만 조건 불충분한 경우)
@@ -89,6 +96,7 @@ def compute_diagnoses(state):
         diagnoses.append("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
 
     return diagnoses
+
 
 
 
