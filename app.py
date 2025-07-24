@@ -40,180 +40,70 @@ dc_tmd_explanations = {
     "Degenerative joint disease": "퇴행성 관절 질환: 관절 연골의 마모나 퇴행으로 인해 통증, 마찰음, 기능 제한이 발생합니다."
 }
 
+# 진단 트리
+def compute_diagnoses(state):
+    diagnoses = []
 
-# --- PDF 생성 함수 ---
-def generate_pdf_report(state, diagnosis_results):
-    pdf = FPDF()
-    pdf.add_page()
+    # 주호소
+    complaint = state.get("chief_complaint")
+    is_pain_related = complaint in [
+        "턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)",
+        "턱 움직임 관련 두통"
+    ]
+    is_joint_related = complaint == "턱관절 소리/잠김"
 
-    # 한글 폰트 설정 (malgun.ttf 파일이 코드와 같은 디렉토리에 있어야 합니다.)
-    try:
-        pdf.add_font('malgun', '', 'malgun.ttf', uni=True)
-        pdf.set_font('malgun', '', 12)
-    except RuntimeError:
-        st.warning("⚠️ 'malgun.ttf' 폰트를 찾을 수 없습니다. PDF에 한글이 깨져 보일 수 있습니다. 해당 폰트 파일을 스크립트와 같은 폴더에 넣어주세요.")
-        pdf.set_font('helvetica', '', 12) # 대체 폰트
+    # 1. 근육통 (Myalgia)
+    if is_pain_related:
+        if "넓은 부위의 통증" in state.get("pain_types", []) or "근육 통증" in state.get("pain_types", []):
+            if state.get("muscle_pressure_2s") == "아니오" or (
+                state.get("muscle_pressure_2s") == "예" and state.get("muscle_referred_pain") == "아니오"):
+                diagnoses.append("근육통 (Myalgia)")
 
-    pdf.cell(0, 10, txt="턱관절 자가 문진 상세 보고서", ln=True, align='C')
-    pdf.ln(10)
+    # 2. 국소 근육통 (Local Myalgia)
+    if is_pain_related and state.get("muscle_referred_pain") == "아니오":
+        diagnoses.append("국소 근육통 (Local Myalgia)")
 
-    # --- 환자 기본 정보 ---
-    pdf.set_font('malgun', '', 10)
-    pdf.cell(0, 7, txt="--- 📋 환자 기본 정보 ---", ln=True)
-    pdf.multi_cell(0, 5, txt=f"이름: {state.get('name', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"생년월일: {state.get('birthdate', datetime.date(1900,1,1)).strftime('%Y년 %m월 %d일')}")
-    pdf.multi_cell(0, 5, txt=f"성별: {state.get('gender', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"이메일: {state.get('email', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"연락처: {state.get('phone', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"주소: {state.get('address', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"직업: {state.get('occupation', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"내원 목적: {state.get('visit_reason', '미입력')}")
-    pdf.ln(5)
+    # 3. 방사성 근막통 (Myofascial Pain with Referral)
+    if is_pain_related and state.get("muscle_referred_pain") == "예":
+        diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
 
-    # --- 설문 답변 요약 ---
-    pdf.cell(0, 7, txt="--- 📝 주요 설문 답변 ---", ln=True)
-    pdf.set_font('malgun', '', 9)
+    # 4. 관절통 (Arthralgia)
+    if is_pain_related:
+        if "턱관절 통증" in state.get("pain_types", []) and state.get("tmj_press_pain") == "예":
+            diagnoses.append("관절통 (Arthralgia)")
 
-    # 주 호소
-    pdf.multi_cell(0, 5, txt=f"주 호소: {state.get('chief_complaint', '미선택')}")
-    if state.get("chief_complaint") == "기타":
-        pdf.multi_cell(0, 5, txt=f"  - 기타 사유: {state.get('chief_complaint_other', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"첫 발생 시기: {state.get('onset', '미입력').strftime('%Y년 %m월 %d일')}")
+    # 5. TMD 관련 두통
+    if is_pain_related and "두통" in state.get("pain_types", []):
+        if all(state.get(k) == "예" for k in [
+            "headache_temples",
+            "headache_with_jaw",
+            "headache_reproduce_by_pressure",
+            "headache_not_elsewhere"
+        ]):
+            diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 통증 부위
-    pdf.multi_cell(0, 5, txt=f"통증 부위: {', '.join(state.get('selected_parts', ['없음']))}")
-    
-    # 통증 양상
-    pdf.multi_cell(0, 5, txt=f"통증 양상: {state.get('pain_quality', '미선택')}")
-    if state.get("pain_quality") == "기타":
-        pdf.multi_cell(0, 5, txt=f"  - 기타 양상: {state.get('pain_quality_other', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"현재 통증 정도 (0-10): {state.get('pain_level', '미선택')}")
+    # 6. 감소 동반 간헐적 잠금 디스크 변위
+    if is_joint_related and state.get("jaw_locked_now") == "예":
+        diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with intermittent locking)")
 
-    # 빈도 및 시기
-    freq_summary = []
-    if state.get('frequency', {}).get("매일"): freq_summary.append("매일")
-    if state.get('frequency', {}).get("주 2~3회"): freq_summary.append("주 2~3회")
-    if state.get('frequency', {}).get("기타"): freq_summary.append(f"기타({state.get('frequency', {}).get('기타')})")
-    pdf.multi_cell(0, 5, txt=f"증상 빈도: {', '.join(freq_summary) if freq_summary else '미선택'}")
+    # 7. 감소 없는 디스크 변위
+    if state.get("jaw_locked_past") == "예":
+        if state.get("mao_fits_3fingers") == "예":
+            diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
+        elif state.get("mao_fits_3fingers") == "아니오":
+            diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction w/ Limitation)")
 
-    time_summary = []
-    if state.get('time_of_day', {}).get("아침"): time_summary.append("아침")
-    if state.get('time_of_day', {}).get("오후"): time_summary.append("오후")
-    if state.get('time_of_day', {}).get("저녁"): time_summary.append("저녁")
-    if state.get('time_of_day', {}).get("기타"): time_summary.append(f"기타({state.get('time_of_day', {}).get('기타')})")
-    pdf.multi_cell(0, 5, txt=f"주로 발생 시간: {', '.join(time_summary) if time_summary else '미선택'}")
+    # 8. 퇴행성 관절 질환
+    if state.get("tmj_sound") == "사각사각소리(크레피투스)":
+        diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 습관
-    pdf.multi_cell(0, 5, txt=f"주요 습관: {', '.join(state.get('selected_habits', ['없음']))}")
-    if state.get('habit_other_detail'):
-        pdf.multi_cell(0, 5, txt=f"  - 기타 습관 상세: {state.get('habit_other_detail')}")
+    # 9. 감소 동반 디스크 변위
+    if state.get("tmj_sound") == "딸깍소리":
+        diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
-    # 두통 관련 증상
-    pdf.multi_cell(0, 5, txt=f"두통 유무: {state.get('headache_option', '미선택')}")
-    if state.get('headache_other'): pdf.multi_cell(0, 5, txt=f"  - 기타 두통 정보: {state.get('headache_other')}")
-    
-    headache_loc_summary = []
-    if state.get('loc_temples', False): headache_loc_summary.append("관자놀이")
-    if state.get('loc_occipital', False): headache_loc_summary.append("뒤통수")
-    if state.get('loc_other_detail'): headache_loc_summary.append(f"기타({state.get('loc_other_detail')})")
-    pdf.multi_cell(0, 5, txt=f"두통 위치: {', '.join(headache_loc_summary) if headache_loc_summary else '미선택'}")
-    
-    pdf.multi_cell(0, 5, txt=f"두통 빈도: {state.get('headache_freq', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"두통 양상: {state.get('headache_type', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"악화 요인: {state.get('aggravating', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"완화 요인: {state.get('relieving', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"두통 강도 (0-10): {state.get('headache_scale', '미선택')}")
+    return diagnoses
 
-    # 귀 관련 증상
-    pdf.multi_cell(0, 5, txt=f"귀 관련 증상: {', '.join(state.get('selected_ear_symptoms', ['없음']))}")
-    if state.get('ear_symptom_other'):
-        pdf.multi_cell(0, 5, txt=f"  - 기타 귀 증상 상세: {state.get('ear_symptom_other')}")
 
-    # 경추/목/어깨 관련 증상
-    neck_symptoms_summary = []
-    if state.get('neck_none'): neck_symptoms_summary.append("없음")
-    if state.get('neck_shoulder_symptoms', {}).get('neck_pain'): neck_symptoms_summary.append("목 통증")
-    if state.get('neck_shoulder_symptoms', {}).get('shoulder_pain'): neck_symptoms_summary.append("어깨 통증")
-    if state.get('neck_shoulder_symptoms', {}).get('stiffness'): neck_symptoms_summary.append("뻣뻣함(강직감)")
-    pdf.multi_cell(0, 5, txt=f"목/어깨 증상: {', '.join(neck_symptoms_summary) if neck_symptoms_summary else '미선택'}")
-    pdf.multi_cell(0, 5, txt=f"목 외상 이력: {state.get('neck_trauma', '미선택')}")
-    if state.get('neck_trauma') == '예':
-        pdf.multi_cell(0, 5, txt=f"  - 외상 상세: {state.get('trauma_detail', '미입력')}")
-
-    # 정서적 스트레스
-    pdf.multi_cell(0, 5, txt=f"스트레스 유무: {state.get('stress', '미선택')}")
-    if state.get('stress_other'): pdf.multi_cell(0, 5, txt=f"  - 기타 의견: {state.get('stress_other')}")
-    if state.get('stress_detail'): pdf.multi_cell(0, 5, txt=f"  - 상세 내용: {state.get('stress_detail')}")
-
-    # 과거 의과적 이력
-    pdf.multi_cell(0, 5, txt=f"과거 의과적 이력: {state.get('past_history', '없음')}")
-    pdf.multi_cell(0, 5, txt=f"현재 복용 약물: {state.get('current_medications', '없음')}")
-
-    # 과거 치과적 이력
-    pdf.multi_cell(0, 5, txt=f"교정치료 경험: {state.get('ortho_exp', '미선택')}")
-    if state.get('ortho_exp_other'): pdf.multi_cell(0, 5, txt=f"  - 기타 교정 상세: {state.get('ortho_exp_other')}")
-    if state.get('ortho_detail'): pdf.multi_cell(0, 5, txt=f"  - 교정 기간/내용: {state.get('ortho_detail')}")
-    pdf.multi_cell(0, 5, txt=f"보철치료 경험: {state.get('prosth_exp', '미선택')}")
-    if state.get('prosth_exp_other'): pdf.multi_cell(0, 5, txt=f"  - 기타 보철 상세: {state.get('prosth_exp_other')}")
-    if state.get('prosth_detail'): pdf.multi_cell(0, 5, txt=f"  - 보철 내용: {state.get('prosth_detail')}")
-    pdf.multi_cell(0, 5, txt=f"기타 치과 치료 이력: {state.get('other_dental', '없음')}")
-    
-    # 턱 운동 범위 및 관찰 (측정값은 사용자 입력이므로 그대로)
-    pdf.multi_cell(0, 5, txt=f"자발적 개구: {state.get('active_opening', '미입력')}, 통증: {state.get('active_pain', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"수동적 개구: {state.get('passive_opening', '미입력')}, 통증: {state.get('passive_pain', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"편위: {state.get('deviation', '미선택')}, 편향: {state.get('deflection', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"앞으로 내밀기(Protrusion): {state.get('protrusion', '미입력')}mm, 통증: {state.get('protrusion_pain', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"측방운동(우): {state.get('latero_right', '미입력')}mm, 통증: {state.get('latero_right_pain', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"측방운동(좌): {state.get('latero_left', '미입력')}mm, 통증: {state.get('latero_left_pain', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"교합: {state.get('occlusion', '미선택')}")
-    if state.get('occlusion') == '아니오':
-        pdf.multi_cell(0, 5, txt=f"  - 교합 어긋남: {state.get('occlusion_shift', '미선택')}")
-
-    # 턱관절 소리
-    pdf.multi_cell(0, 5, txt=f"TMJ 소리 (우-벌릴 때): {state.get('tmj_noise_right_open', '미선택')}")
-    if state.get('tmj_noise_right_open') == '기타':
-        pdf.multi_cell(0, 5, txt=f"  - 상세: {state.get('tmj_noise_right_open_other', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"TMJ 소리 (좌-벌릴 때): {state.get('tmj_noise_left_open', '미선택')}")
-    if state.get('tmj_noise_left_open') == '기타':
-        pdf.multi_cell(0, 5, txt=f"  - 상세: {state.get('tmj_noise_left_open_other', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"TMJ 소리 (우-다물 때): {state.get('tmj_noise_right_close', '미선택')}")
-    if state.get('tmj_noise_right_close') == '기타':
-        pdf.multi_cell(0, 5, txt=f"  - 상세: {state.get('tmj_noise_right_close_other', '미입력')}")
-    pdf.multi_cell(0, 5, txt=f"TMJ 소리 (좌-다물 때): {state.get('tmj_noise_left_close', '미선택')}")
-    if state.get('tmj_noise_left_close') == '기타':
-        pdf.multi_cell(0, 5, txt=f"  - 상세: {state.get('tmj_noise_left_close_other', '미입력')}")
-
-    # 자극 검사
-    pdf.multi_cell(0, 5, txt=f"오른쪽 어금니 물 때: {state.get('bite_right', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"왼쪽 어금니 물 때: {state.get('bite_left', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"압력 가하기(Loading Test): {state.get('loading_test', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"저항 검사(Resistance Test): {state.get('resistance_test', '미선택')}")
-    pdf.multi_cell(0, 5, txt=f"치아 마모(Attrition): {state.get('attrition', '미선택')}")
-
-    pdf.ln(5)
-
-    # 진단 결과
-    pdf.set_font('malgun', '', 12)
-    pdf.cell(0, 10, txt="--- ✨ 진단 결과 ---", ln=True)
-    
-    if not diagnosis_results:
-        pdf.multi_cell(0, 10, txt="DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.")
-    else:
-        for diagnosis, score in diagnosis_results:
-            desc = dc_tmd_explanations.get(diagnosis, "설명 없음")
-            pdf.multi_cell(0, 7, txt=f"진단명: {diagnosis}")
-            pdf.multi_cell(0, 7, txt=f"예상 확률: {score}%")
-            pdf.multi_cell(0, 7, txt=f"설명: {desc}")
-            pdf.ln(2)
-
-    pdf.ln(5)
-    pdf.set_font('malgun', '', 10)
-    pdf.multi_cell(0, 7, txt="본 보고서는 자가 문진 결과를 바탕으로 한 예비 진단입니다. 정확한 진단 및 치료를 위해서는 반드시 전문 의료기관을 방문하여 의사와 상담하시기 바랍니다.")
-    pdf.ln(10)
-
-    pdf_output_path = f"턱관절_문진보고서_{datetime.date.today()}.pdf"
-    pdf.output(pdf_output_path)
-    return pdf_output_path
 
 # 총 단계 수 (0부터 시작)
 total_steps = 20 
@@ -516,7 +406,7 @@ elif st.session_state.step == 4:
         if "두통" in st.session_state.pain_types:
             st.markdown("#### 💬 두통 관련")
 
-            st.markdown("**두통이 관자놀이 부위에서 발생하나요까?**")
+            st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
             st.radio(
                 label="두통이 관자놀이 부위에서 발생하나요?",
                 options=options,
@@ -1536,89 +1426,26 @@ elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
 
-    try:
-        results = compute_probability_scores(st.session_state)
-    except Exception as e:
-        st.error(f"진단 중 오류가 발생했습니다: {e}")
-        st.stop()
-    
-    st.subheader("💡 당신의 턱관절 건강 상태:")
-    # 진단 결과 메시지 및 색상 강조
-    overall_diagnosis = "DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다."
-    highest_score = 0
-    
-    for diagnosis, score in results:
-        if score > highest_score:
-            highest_score = score
-        if "Myalgia" == diagnosis and score > 50:
-            overall_diagnosis = "근육성 턱관절 통증 가능성이 높습니다."
-        elif "Arthralgia" == diagnosis and score > 50:
-            overall_diagnosis = "턱관절 관절염(관절 통증) 가능성이 높습니다."
-        elif "Headache attributed to TMD" == diagnosis and score > 50:
-            overall_diagnosis = "턱관절 관련 두통 가능성이 높습니다."
-        elif "Disc displacement with reduction" == diagnosis and score > 50:
-            overall_diagnosis = "턱관절 디스크 재위치 이탈(딸깍 소리) 가능성이 높습니다."
-        elif "Disc displacement without reduction" == diagnosis and score > 0: # 0%가 아니면 바로 표시
-            overall_diagnosis = "턱관절 디스크 비환원성 전위(입 벌림 제한) 가능성이 높습니다."
-            break # 이 경우 가장 심각한 것으로 간주하고 바로 표시
-        elif "Degenerative joint disease" == diagnosis and score > 50:
-            overall_diagnosis = "턱관절 퇴행성 관절 질환 가능성이 높습니다."
+    results = compute_probability_scores(st.session_state)
 
-    if highest_score >= 80:
-        st.error(f"## 🚨 {overall_diagnosis}")
-        st.markdown("---")
-        st.warning("🚨 **매우 높은 위험군입니다. 즉시 전문의와 상담할 것을 강력히 권장합니다.**")
-    elif highest_score >= 50:
-        st.warning(f"## ⚠️ {overall_diagnosis}")
-        st.markdown("---")
-        st.info("💡 **전문가와 상담을 고려해 볼 시기입니다.**")
-    elif highest_score > 0:
-        st.info(f"## 🌱 {overall_diagnosis}")
-        st.markdown("---")
-        st.success("👍 **경과를 관찰하며 관리하는 것이 좋습니다.**")
+    if not results:
+        st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
-        st.success(f"## ✅ {overall_diagnosis}")
+        diagnoses = [d[0] for d in results]
+        if len(diagnoses) == 1:
+            st.error(f"**{diagnoses[0]}**이(가) 의심됩니다.")
+        else:
+            st.error(f"**{', '.join(diagnoses)}**이(가) 의심됩니다.")
+
         st.markdown("---")
-        st.success("👍 **현재 문진 상 턱관절 질환 가능성이 낮습니다.**")
-        
-    st.markdown("---")
-    st.markdown("아래는 DC/TMD 기반 문진 결과를 바탕으로 예측된 질환 및 확률입니다.")
-    st.markdown("---")
-  
-    shown_diagnosis_details = False
-    for diagnosis, score in results:
-        if score > 0:
-            shown_diagnosis_details = True
-            desc = dc_tmd_explanations.get(diagnosis, "설명 없음")
-            st.markdown(f"### 🟠 {diagnosis}")
-            st.progress(score / 100.0) # 진행 바는 0.0 ~ 1.0
-            st.markdown(f"**예상 확률**: {score}%")
-            st.markdown(f"📝 {desc}")
+        for diagnosis, _ in results:
+            st.markdown(f"### 🔹 {diagnosis}")
+            desc_key = diagnosis.split(' (')[0]  # 영어 이름 추출
+            desc = dc_tmd_explanations.get(desc_key, "설명 없음")
+            st.info(f"📝 {desc}")
             st.markdown("---")
-  
-    if not shown_diagnosis_details:
-        st.info("세부 진단 기준에 부합하는 항목이 없습니다. 전반적으로 턱관절 질환 가능성이 낮음을 시사합니다.")
-  
-    st.markdown("---")
-    st.subheader("🏥 권장 사항")
-    if highest_score >= 50: # 높은 가능성 또는 매우 높은 가능성
-        st.markdown("""
-        * **전문가 상담 필수:** 가까운 치과, 구강내과 또는 턱관절 전문 병원을 방문하여 정확한 진단과 치료 계획을 세우는 것이 매우 중요합니다.
-        * **생활 습관 관리:** 턱관절에 부담을 줄 수 있는 딱딱하거나 질긴 음식 섭취를 피하고, 턱 괴는 습관, 이갈이/이 악물기 등을 의식적으로 줄이려 노력하세요.
-        * **스트레스 관리:** 스트레스는 턱관절 증상을 악화시키는 주요 요인입니다. 명상, 요가, 취미 활동 등을 통해 스트레스를 효과적으로 관리하는 방법을 찾아보세요.
-        * **온/냉찜질:** 턱 주변 근육 통증이 있을 경우 온찜질(근육 이완), 붓기가 있거나 급성 통증 시 냉찜질(염증 완화)이 도움이 될 수 있습니다.
-        """)
-    else: # 낮은 가능성 또는 정상 범위
-        st.markdown("""
-        * **정기적인 관찰:** 현재는 큰 문제가 없는 것으로 보이지만, 턱에서 소리가 나거나 통증이 느껴지는 등 새로운 증상이 나타나면 다시 문진을 시도하거나 전문가와 상담하세요.
-        * **턱 건강 유지 습관:** 올바른 자세 유지, 충분한 수면, 균형 잡힌 식사 등 전반적인 건강 관리가 턱 건강에도 중요합니다.
-        * **규칙적인 스트레칭:** 턱 주변 근육을 부드럽게 스트레칭하여 긴장을 완화하는 것이 좋습니다.
-        """)
 
-    st.markdown("---")
-    st.subheader("보고서 다운로드")
-    st.write("현재 문진 결과를 PDF 보고서로 다운로드할 수 있습니다.")
-
+    st.subheader("📄 PDF 보고서 다운로드")
     pdf_file_path = generate_pdf_report(st.session_state, results)
     with open(pdf_file_path, "rb") as pdf_file:
         st.download_button(
@@ -1627,13 +1454,13 @@ elif st.session_state.step == 19:
             file_name=os.path.basename(pdf_file_path),
             mime="application/pdf"
         )
-    
+
     st.markdown("---")
-    st.info("본 시스템의 진단은 참고용이며, 의료 진단을 대체할 수 없습니다. 정확한 진단과 치료를 위해서는 반드시 전문 의료기관을 방문하여 의사와 상담하세요.")
-    
+    st.info("※ 본 결과는 예비 진단이며, 전문의 상담을 반드시 권장합니다.")
+
     if st.button("처음으로 돌아가기", use_container_width=True):
         st.session_state.step = 0
-        # 모든 세션 상태 초기화 (필수)
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.experimental_rerun()
+
