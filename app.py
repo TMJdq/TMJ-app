@@ -458,9 +458,10 @@ elif st.session_state.step == 5:
         st.session_state.setdefault("jaw_locked_past", "선택 안 함")
         st.session_state.setdefault("mao_fits_3fingers", "선택 안 함")
 
+        # 턱 소리 종류 질문 (항상 출력)
         st.markdown("**턱에서 나는 소리가 있나요?**")
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
-        tmj_sound_selection = st.radio(
+        st.radio(
             label="턱 소리 종류",
             options=joint_sound_options,
             index=joint_sound_options.index(st.session_state.tmj_sound),
@@ -468,8 +469,8 @@ elif st.session_state.step == 5:
             label_visibility="collapsed"
         )
 
-        # 딸깍소리 관련
-        if tmj_sound_selection == "딸깍소리":
+        # 딸깍소리 관련 추가 질문
+        if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
             updated_context = []
@@ -480,8 +481,8 @@ elif st.session_state.step == 5:
                     updated_context.append(option)
             st.session_state.tmj_click_context = updated_context
 
-        # 사각사각소리 관련
-        if tmj_sound_selection == "사각사각소리(크레피투스)":
+        # 사각사각소리 관련 추가 질문
+        if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
             st.markdown("**사각사각소리가 확실히 느껴지나요?**")
             st.radio(
                 label="사각사각소리 확실 여부",
@@ -491,7 +492,7 @@ elif st.session_state.step == 5:
                 label_visibility="collapsed"
             )
 
-        # 턱 잠김 조건
+        # 턱 잠김 질문 조건
         show_lock_questions = (
             st.session_state.tmj_sound == "사각사각소리(크레피투스)" and
             st.session_state.crepitus_confirmed == "아니오"
