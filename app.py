@@ -59,17 +59,32 @@ def compute_diagnoses(state):
     def is_yes(val): return val == "예"
     def is_no(val): return val == "아니오"
 
+    # 1. 근육통 (Myalgia)
+    # - 근육 2초 압통 '아니오'인 경우 모두
+    # - 근육 2초 압통 '예'이고 5초 눌렀을 때 통증 퍼지지 않음('아니오')
     if is_no(state.get("muscle_pressure_2s_value")):
         diagnoses.append("근육통 (Myalgia)")
-    elif is_yes(state.get("muscle_pressure_2s_value")):
-        if is_yes(state.get("muscle_referred_pain_value")):
-            diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
-        elif is_no(state.get("muscle_referred_pain_value")):
-            diagnoses.append("국소 근육통 (Local Myalgia)")
+    elif is_yes(state.get("muscle_pressure_2s_value")) and is_no(state.get("muscle_referred_pain_value")):
+        diagnoses.append("근육통 (Myalgia)")
 
+    # 2. 국소 근육통 (Local Myalgia)
+    # - 근육 5초 눌렀을 때 통증 퍼지지 않음('아니오')
+    # ※ 위 1번 조건과 중복될 수 있으니 중복 방지 필요
+    # 하지만 여기서는 근육통(Myalgia)와 국소 근육통(Local Myalgia)을 별개로 추가함
+    if is_no(state.get("muscle_referred_pain_value")) and is_yes(state.get("muscle_pressure_2s_value")):
+        diagnoses.append("국소 근육통 (Local Myalgia)")
+
+    # 3. 방사성 근막통 (Myofascial Pain with Referral)
+    # - 근육 5초 눌렀을 때 통증 퍼짐('예')
+    if is_yes(state.get("muscle_referred_pain_value")):
+        diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
+
+    # 4. 관절통 (Arthralgia)
+    # - 턱관절 부위 눌렀을 때 기존 통증 재현('예')
     if is_yes(state.get("tmj_press_pain_value")):
         diagnoses.append("관절통 (Arthralgia)")
 
+    # 5. TMD에 기인한 두통 (Headache attributed to TMD)
     headache_keys = [
         "headache_temples_value",
         "headache_with_jaw_value",
@@ -79,17 +94,28 @@ def compute_diagnoses(state):
     if all(is_yes(state.get(k)) for k in headache_keys):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
+    # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
+    # - 사각사각소리 확실히 느껴짐('예')
     if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
+    # 7. 감소 없는 디스크 변위 (Disc Displacement without Reduction)
+    # - MAO 손가락 3개 들어감('예')
     if is_yes(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
+
+    # 8. 감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)
+    # - MAO 손가락 3개 안 들어감('아니오')
     elif is_no(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
+    # 9. 감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)
+    # - 현재 턱 걸림 증상 있음('예')
     if is_yes(state.get("jaw_locked_now_value")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
+    # 10. 감소 동반 디스크 변위 (Disc Displacement with Reduction)
+    # - 턱 소리 질문에 '딸깍소리' 답함
     if state.get("tmj_sound_value") and "딸깍" in state.get("tmj_sound_value"):
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
