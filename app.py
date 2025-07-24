@@ -777,6 +777,7 @@ elif st.session_state.step == 6:
             st.session_state.step = 5
         elif complaint == "기타 불편한 증상":
             st.session_state.step = 2
+        st.experimental_rerun()
 
     def go_next():
         freq = st.session_state.get("frequency_choice", "선택 안 함")
@@ -797,6 +798,7 @@ elif st.session_state.step == 6:
 
         if freq_valid and time_valid:
             st.session_state.step = 7
+            st.experimental_rerun()
         else:
             if not freq_valid and not time_valid:
                 st.warning("빈도와 시간대 항목을 모두 입력하거나 선택해주세요.")
@@ -837,6 +839,7 @@ elif st.session_state.step == 6:
         st.button("이전 단계", on_click=go_previous)
     with col2:
         st.button("다음 단계로 이동 👉", on_click=go_next)
+
 
 
 # STEP 7: 습관
