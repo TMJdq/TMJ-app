@@ -1371,23 +1371,8 @@ elif st.session_state.step == 19:
         "TMD에 기인한 두통 (Headache attributed to TMD)": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다."
     }
 
-    debug_keys = [
-        "muscle_pressure_2s",
-        "muscle_referred_pain",
-        "tmj_press_pain",
-        "headache_temples",
-        "headache_with_jaw",
-        "headache_reproduce_by_pressure",
-        "headache_not_elsewhere",
-        "crepitus_confirmed",
-        "mao_fits_3fingers",
-        "jaw_locked_now",
-        "tmj_sound"
-    ]
-    st.subheader("🧪 진단 입력값 확인용 로그")
-    st.write({k: st.session_state.get(k) for k in debug_keys})
+   
 
-    # 👇 들여쓰기 주의
     if not results:
         st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
@@ -1409,4 +1394,3 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.experimental_rerun()
-
