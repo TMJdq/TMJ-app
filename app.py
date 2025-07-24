@@ -526,7 +526,7 @@ elif st.session_state.step == 5:
         # 턱 소리 질문
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
         selected_sound = st.radio(
-            "턱에서 나는 소리가 있나요?",
+            "**턱에서 나는 소리가 있나요?**",
             options=joint_sound_options,
             index=joint_sound_options.index(st.session_state.tmj_sound),
         )
@@ -534,7 +534,7 @@ elif st.session_state.step == 5:
 
         # 딸깍소리 선택 시
         if st.session_state.tmj_sound == "딸깍소리":
-            st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
+            st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요.**")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
             updated_context = []
             for option in click_options:
@@ -548,7 +548,7 @@ elif st.session_state.step == 5:
         if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
             st.markdown("**사각사각소리가 확실히 느껴지나요?**")
             st.radio(
-                "사각사각소리 확실 여부",
+                "**사각사각소리가 확실히 느껴지나요?**",
                 options=["예", "아니오", "선택 안 함"],
                 key="crepitus_confirmed"
             )
