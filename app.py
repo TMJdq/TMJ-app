@@ -53,37 +53,37 @@ def compute_diagnoses(state):
     if state.get("tmj_press_pain") == "예":
         diagnoses.append("관절통 (Arthralgia)")
 
-    # 5. TMD에 기인한 두통
-    if "두통" in state.get("pain_types", []):
-        if all(state.get(k) == "예" for k in [
-            "headache_temples",
-            "headache_with_jaw",
-            "headache_reproduce_by_pressure",
-            "headache_not_elsewhere"
-        ]):
-            diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
+    # 5. TMD에 기인한 두통 (Headache attributed to TMD)
+    if all(state.get(k) == "예" for k in [
+        "headache_temples",
+        "headache_with_jaw",
+        "headache_reproduce_by_pressure",
+        "headache_not_elsewhere"
+    ]):
+        diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 6. 감소 동반 간헐적 잠금 디스크 변위
+    # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
+    if state.get("crepitus_confirmed") == "예":
+        diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
+
+    # 7. 감소 없는 디스크 변위 (Disc Displacement without Reduction)
+    if state.get("mao_fits_3fingers") == "예":
+        diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
+
+    # 8. 감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction w/ Limitation)
+    if state.get("mao_fits_3fingers") == "아니오":
+        diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
+
+    # 9. 감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)
     if state.get("jaw_locked_now") == "예":
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
-    # 7. 감소 없는 디스크 변위
-    if state.get("jaw_locked_past") == "예" and state.get("mao_fits_3fingers") == "예":
-        diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-
-    # 8. 감소 없는 디스크 변위 (개구 제한 동반)
-    if state.get("jaw_locked_past") == "예" and state.get("mao_fits_3fingers") == "아니오":
-        diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction w/ Limitation)")
-
-    # 9. 퇴행성 관절 질환
-    if state.get("tmj_sound") == "사각사각소리(크레피투스)":
-        diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
-
-    # 10. 감소 동반 디스크 변위
+    # 10. 감소 동반 디스크 변위 (Disc Displacement with Reduction)
     if state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
+
 
 
 
@@ -317,11 +317,11 @@ elif st.session_state.step == 4:
     st.title("현재 증상 (통증 분류 및 검사)")
     st.markdown("---")
     with st.container(border=True):
-        st.markdown("**아래 중 해당되는 통증 유형을 모두 선택해주세요.**")
-        st.session_state.pain_types = st.multiselect(
+        st.markdown("**아래 중 해당되는 통증 유형을 선택해주세요.**")
+        st.session_state.pain_types = st.selectbox(
             label="통증 유형 선택",
-            options=["넓은 부위의 통증", "근육 통증", "턱관절 통증", "두통"],
-            default=st.session_state.get("pain_types", []),
+            options=["선택 안 함", "넓은 부위의 통증", "근육 통증", "턱관절 통증", "두통"],
+            index=0,
         )
 
         st.markdown("---")
@@ -329,7 +329,7 @@ elif st.session_state.step == 4:
         default_index = 2  # "선택 안 함"
 
         # 근육 또는 넓은 부위 통증 관련 질문
-        if "넓은 부위의 통증" in st.session_state.pain_types or "근육 통증" in st.session_state.pain_types:
+        if st.session_state.pain_types in ["넓은 부위의 통증", "근육 통증"]:
             st.markdown("#### 💬 근육/넓은 부위 관련")
 
             st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
@@ -362,21 +362,21 @@ elif st.session_state.step == 4:
             st.markdown("---")
 
         # 턱관절 관련 질문
-        if "턱관절 통증" in st.session_state.pain_types:
+        elif st.session_state.pain_types == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
 
-            st.markdown("**입을 벌릴 때나 움직일 때 턱관절에 통증이 있나요?**")
+            st.markdown("**입을 벌릴 때나 움직일 때 통증이 있나요?**")
             st.radio(
-                label="입을 벌릴 때나 움직일 때 턱관절에 통증이 있나요?",
+                label="입을 벌릴 때나 움직일 때 통증이 있나요?",
                 options=options,
                 index=default_index,
                 key="tmj_movement_pain",
                 label_visibility="collapsed"
             )
 
-            st.markdown("**턱관절 부위를 눌렀을 때 통증이 있나요?**")
+            st.markdown("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**")
             st.radio(
-                label="턱관절 부위를 눌렀을 때 통증이 있습니까?",
+                label="턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?",
                 options=options,
                 index=default_index,
                 key="tmj_press_pain",
@@ -385,7 +385,7 @@ elif st.session_state.step == 4:
             st.markdown("---")
 
         # 두통 관련 질문
-        if "두통" in st.session_state.pain_types:
+        elif st.session_state.pain_types == "두통":
             st.markdown("#### 💬 두통 관련")
 
             st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
@@ -426,7 +426,6 @@ elif st.session_state.step == 4:
 
             st.markdown("---")
 
-
     # 네비게이션 버튼 영역
     col1, col2 = st.columns(2)
     with col1:
@@ -435,13 +434,12 @@ elif st.session_state.step == 4:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            if not st.session_state.pain_types:
-                st.warning("최소 하나의 통증 유형을 선택해주세요.")
+            if st.session_state.pain_types == "선택 안 함":
+                st.warning("통증 유형을 선택해주세요.")
             else:
                 errors = []
 
-                # 근육 관련 필수 확인
-                if "넓은 부위의 통증" in st.session_state.pain_types or "근육 통증" in st.session_state.pain_types:
+                if st.session_state.pain_types in ["넓은 부위의 통증", "근육 통증"]:
                     if st.session_state.get("muscle_movement_pain") == "선택 안 함":
                         errors.append("근육/넓은 부위: 입 벌릴 때 통증 여부를 선택해주세요.")
                     if st.session_state.get("muscle_pressure_2s") == "선택 안 함":
@@ -449,15 +447,13 @@ elif st.session_state.step == 4:
                     if st.session_state.get("muscle_pressure_2s") == "예" and st.session_state.get("muscle_referred_pain") == "선택 안 함":
                         errors.append("근육/넓은 부위: 5초간 통증 전이 여부를 선택해주세요.")
 
-                # 턱관절 관련 필수 확인
-                if "턱관절 통증" in st.session_state.pain_types:
+                elif st.session_state.pain_types == "턱관절 통증":
                     if st.session_state.get("tmj_movement_pain") == "선택 안 함":
                         errors.append("턱관절: 움직일 때 통증 여부를 선택해주세요.")
                     if st.session_state.get("tmj_press_pain") == "선택 안 함":
                         errors.append("턱관절: 눌렀을 때 통증 여부를 선택해주세요.")
 
-                # 두통 관련 필수 확인
-                if "두통" in st.session_state.pain_types:
+                elif st.session_state.pain_types == "두통":
                     if st.session_state.get("headache_temples") == "선택 안 함":
                         errors.append("두통: 관자놀이 여부를 선택해주세요.")
                     if st.session_state.get("headache_with_jaw") == "선택 안 함":
@@ -472,6 +468,7 @@ elif st.session_state.step == 4:
                         st.warning(err)
                 else:
                     st.session_state.step = 6
+
 
 
 # STEP 5: 턱관절 소리 및 잠김
@@ -494,7 +491,6 @@ elif st.session_state.step == 5:
         # 딸깍소리 세부 상황 질문
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍소리는 언제 발생하나요? (복수 선택 가능)**")
-
             context_options = ["입을 벌릴 때", "입을 닫을 때", "옆으로 움직일 때", "앞으로 움직일 때"]
             if "tmj_click_context" not in st.session_state:
                 st.session_state.tmj_click_context = []
@@ -503,58 +499,78 @@ elif st.session_state.step == 5:
             for option in context_options:
                 key = f"click_{option}"
                 is_selected = option in st.session_state.tmj_click_context
-
                 if st.checkbox(option, value=is_selected, key=key):
                     updated_context.append(option)
-
             st.session_state.tmj_click_context = updated_context
         else:
             st.session_state.tmj_click_context = []
 
-        st.markdown("---")
+        # 사각사각소리 상세 질문
+        if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
+            st.markdown("**사각사각소리가 확실히 느껴지나요?**")
+            st.radio(
+                label="사각사각소리 확실 여부",
+                options=["예", "아니오", "선택 안 함"],
+                index=2,
+                key="crepitus_confirmed",
+                label_visibility="collapsed"
+            )
+        else:
+            st.session_state["crepitus_confirmed"] = "선택 안 함"
 
-        # 현재 턱 잠김 여부
-        st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
-        lock_options = ["예", "아니오", "선택 안 함"]
-        st.radio(
-            label="턱이 현재 걸려있나요?",
-            options=lock_options,
-            index=2,
-            key="jaw_locked_now",
-            label_visibility="collapsed"
+        # 턱 잠김 질문 표시 조건
+        show_lock_questions = (
+            st.session_state.tmj_sound in ["딸깍소리", "없음"] or
+            (st.session_state.tmj_sound == "사각사각소리(크레피투스)" and st.session_state.get("crepitus_confirmed") == "아니오")
         )
 
-        # 잠김 해소 여부
-        if st.session_state.get("jaw_locked_now") == "예":
-            st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
+        if show_lock_questions:
+            st.markdown("---")
+            st.markdown("**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**")
+            lock_options = ["예", "아니오", "선택 안 함"]
             st.radio(
-                label="잠김 해소 여부",
-                options=["예", "아니오", "선택 안 함"],
+                label="턱이 현재 걸려있나요?",
+                options=lock_options,
                 index=2,
-                key="jaw_unlock_possible",
+                key="jaw_locked_now",
                 label_visibility="collapsed"
             )
 
-        # 과거 턱 잠김 여부
-        elif st.session_state.get("jaw_locked_now") == "아니오":
-            st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
-            st.radio(
-                label="과거 잠김 경험 여부",
-                options=["예", "아니오", "선택 안 함"],
-                index=2,
-                key="jaw_locked_past",
-                label_visibility="collapsed"
-            )
-
-            if st.session_state.get("jaw_locked_past") == "예":
-                st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
+            if st.session_state.get("jaw_locked_now") == "예":
+                st.markdown("**해당 증상은 저절로 또는 조작으로 풀리나요?**")
                 st.radio(
-                    label="MAO 시 손가락 3개 가능 여부",
+                    label="잠김 해소 여부",
                     options=["예", "아니오", "선택 안 함"],
                     index=2,
-                    key="mao_fits_3fingers",
+                    key="jaw_unlock_possible",
                     label_visibility="collapsed"
                 )
+
+            elif st.session_state.get("jaw_locked_now") == "아니오":
+                st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
+                st.radio(
+                    label="과거 잠김 경험 여부",
+                    options=["예", "아니오", "선택 안 함"],
+                    index=2,
+                    key="jaw_locked_past",
+                    label_visibility="collapsed"
+                )
+
+                if st.session_state.get("jaw_locked_past") == "예":
+                    st.markdown("**입을 최대한 벌렸을 때 (MAO), 손가락 3개(40mm)가 들어가나요?**")
+                    st.radio(
+                        label="MAO 시 손가락 3개 가능 여부",
+                        options=["예", "아니오", "선택 안 함"],
+                        index=2,
+                        key="mao_fits_3fingers",
+                        label_visibility="collapsed"
+                    )
+        else:
+            # 잠김 상태 초기화
+            st.session_state["jaw_locked_now"] = "선택 안 함"
+            st.session_state["jaw_unlock_possible"] = "선택 안 함"
+            st.session_state["jaw_locked_past"] = "선택 안 함"
+            st.session_state["mao_fits_3fingers"] = "선택 안 함"
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -569,26 +585,29 @@ elif st.session_state.step == 5:
             if st.session_state.tmj_sound == "선택 안 함":
                 errors.append("턱관절 소리 여부를 선택해주세요.")
 
-            if st.session_state.get("jaw_locked_now") == "선택 안 함":
-                errors.append("현재 턱 잠김 여부를 선택해주세요.")
+            if st.session_state.tmj_sound == "사각사각소리(크레피투스)" and st.session_state.get("crepitus_confirmed") == "선택 안 함":
+                errors.append("사각사각소리가 확실한지 여부를 선택해주세요.")
 
-            if st.session_state.get("jaw_locked_now") == "예":
-                if st.session_state.get("jaw_unlock_possible") == "선택 안 함":
-                    errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
+            if show_lock_questions:
+                if st.session_state.get("jaw_locked_now") == "선택 안 함":
+                    errors.append("현재 턱 잠김 여부를 선택해주세요.")
 
-            elif st.session_state.get("jaw_locked_now") == "아니오":
-                if st.session_state.get("jaw_locked_past") == "선택 안 함":
-                    errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
-                elif st.session_state.get("jaw_locked_past") == "예" and \
-                     st.session_state.get("mao_fits_3fingers") == "선택 안 함":
-                    errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
+                if st.session_state.get("jaw_locked_now") == "예":
+                    if st.session_state.get("jaw_unlock_possible") == "선택 안 함":
+                        errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
+
+                elif st.session_state.get("jaw_locked_now") == "아니오":
+                    if st.session_state.get("jaw_locked_past") == "선택 안 함":
+                        errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
+                    elif st.session_state.get("jaw_locked_past") == "예" and \
+                         st.session_state.get("mao_fits_3fingers") == "선택 안 함":
+                        errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
 
             if errors:
                 for err in errors:
                     st.warning(err)
             else:
                 st.session_state.step = 6
-
 
 
 # STEP 6: 빈도 및 시기, 강도
@@ -1411,16 +1430,16 @@ elif st.session_state.step == 19:
     results = compute_diagnoses(st.session_state)
 
     dc_tmd_explanations = {
-        "근육통": "→ 턱 주변 근육에서 발생하는 통증으로, 움직임이나 압박 시 통증이 심해지는 증상입니다.",
-        "국소 근육통": "→ 통증이 특정 근육 부위에만 국한되어 있고, 다른 부위로 퍼지지 않는 증상입니다.",
-        "방사성 근막통": "→ 특정 근육을 눌렀을 때 통증이 다른 부위로 방사되어 퍼지는 증상입니다.",
-        "관절통": "→ 턱관절 자체에 발생하는 통증으로, 움직이거나 누를 때 통증이 유발되는 상태입니다.",
-        "퇴행성 관절 질환": "→ 턱관절의 연골이나 뼈가 마모되거나 손상되어 통증과 기능 제한이 동반되는 상태입니다.",
-        "감소 없는 디스크 변위": "→ 턱관절 디스크가 비정상 위치에 있으며, 입을 벌려도 제자리로 돌아오지 않는 상태입니다.",
-        "감소 없는 디스크 변위 - 개구 제한 동반": "→ 디스크가 제자리로 돌아오지 않으며, 입 벌리기가 제한되는 상태입니다.",
-        "감소 동반 간헐적 잠금 디스크 변위": "→ 디스크가 움직일 때 딸깍소리가 나며, 일시적인 입 벌리기 장애가 간헐적으로 나타나는 상태입니다.",
-        "감소 동반 디스크 변위": "→ 입을 벌릴 때 디스크가 제자리로 돌아오며 딸깍소리가 나는 상태이며, 기능 제한은 없는 경우입니다.",
-        "TMD에 기인한 두통": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다.",
+        "근육통 (Myalgia)": "→ 턱 주변 근육에서 발생하는 통증으로, 움직임이나 압박 시 통증이 심해지는 증상입니다.",
+        "국소 근육통 (Local Myalgia)": "→ 통증이 특정 근육 부위에만 국한되어 있고, 다른 부위로 퍼지지 않는 증상입니다.",
+        "방사성 근막통 (Myofascial Pain with Referral)": "→ 특정 근육을 눌렀을 때 통증이 다른 부위로 방사되어 퍼지는 증상입니다.",
+        "관절통 (Arthralgia)": "→ 턱관절 자체에 발생하는 통증으로, 움직이거나 누를 때 통증이 유발되는 상태입니다.",
+        "퇴행성 관절 질환 (Degenerative Joint Disease)": "→ 턱관절의 연골이나 뼈가 마모되거나 손상되어 통증과 기능 제한이 동반되는 상태입니다.",
+        "감소 없는 디스크 변위 (Disc Displacement without Reduction)": "→ 턱관절 디스크가 비정상 위치에 있으며, 입을 벌려도 제자리로 돌아오지 않는 상태입니다.",
+        "감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)": "→ 디스크가 제자리로 돌아오지 않으며, 입 벌리기가 제한되는 상태입니다.",
+        "감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)": "→ 디스크가 움직일 때 딸깍소리가 나며, 일시적인 입 벌리기 장애가 간헐적으로 나타나는 상태입니다.",
+        "감소 동반 디스크 변위 (Disc Displacement with Reduction)": "→ 입을 벌릴 때 디스크가 제자리로 돌아오며 딸깍소리가 나는 상태이며, 기능 제한은 없는 경우입니다.",
+        "TMD에 기인한 두통 (Headache attributed to TMD)": "→ 턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다."
     }
 
     if not results:
@@ -1434,9 +1453,7 @@ elif st.session_state.step == 19:
         st.markdown("---")
         for diagnosis in results:
             st.markdown(f"### 🔹 {diagnosis}")
-            desc_key = diagnosis.split(" (")[0]  # 한글 진단 키 추출
-            desc = dc_tmd_explanations.get(desc_key, "설명 없음")
-            st.info(desc)
+            st.info(dc_tmd_explanations.get(diagnosis, "설명 없음"))
             st.markdown("---")
 
     st.info("※ 본 결과는 예비 진단이며, 전문의 상담을 반드시 권장합니다.")
