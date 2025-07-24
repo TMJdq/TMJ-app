@@ -769,12 +769,48 @@ elif st.session_state.step == 6:
     st.title("현재 증상 (빈도 및 시기)")
     st.markdown("---")
 
+    def go_previous():
+        complaint = st.session_state.get("chief_complaint")
+        if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
+            st.session_state.step = 4
+        elif complaint == "턱관절 소리/잠김":
+            st.session_state.step = 5
+        elif complaint == "기타 불편한 증상":
+            st.session_state.step = 2
+
+    def go_next():
+        freq = st.session_state.get("frequency_choice", "선택 안 함")
+        freq_other = st.session_state.get("frequency_other_text", "").strip()
+        freq_valid = (
+            freq not in ["선택 안 함", "기타"]
+            or (freq == "기타" and freq_other != "")
+        )
+
+        time_morning = st.session_state.get("time_morning", False)
+        time_afternoon = st.session_state.get("time_afternoon", False)
+        time_evening = st.session_state.get("time_evening", False)
+        time_other = st.session_state.get("time_other", False)
+        time_other_text = st.session_state.get("time_other_text", "").strip()
+        time_valid = (
+            time_morning or time_afternoon or time_evening or (time_other and time_other_text != "")
+        )
+
+        if freq_valid and time_valid:
+            st.session_state.step = 7
+        else:
+            if not freq_valid and not time_valid:
+                st.warning("빈도와 시간대 항목을 모두 입력하거나 선택해주세요.")
+            elif not freq_valid:
+                st.warning("빈도 항목을 입력하거나 선택해주세요.")
+            else:
+                st.warning("시간대 항목을 입력하거나 선택해주세요.")
+
     with st.container(border=True):
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
         freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
-        freq = st.radio("", freq_opts, index=5, key="frequency_choice")
+        st.radio("", freq_opts, index=5, key="frequency_choice")
 
-        if freq == "기타":
+        if st.session_state.get("frequency_choice") == "기타":
             st.text_input("기타 빈도:", key="frequency_other_text")
         else:
             st.session_state.frequency_other_text = ""
@@ -798,40 +834,9 @@ elif st.session_state.step == 6:
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("이전 단계"):
-            complaint = st.session_state.get("chief_complaint")
-            if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
-                st.session_state.step = 4
-            elif complaint == "턱관절 소리/잠김":
-                st.session_state.step = 5
-            elif complaint == "기타 불편한 증상":
-                st.session_state.step = 2
-            return
-
+        st.button("이전 단계", on_click=go_previous)
     with col2:
-        if st.button("다음 단계로 이동 👉"):
-            freq_valid = (
-                freq not in ["선택 안 함", "기타"]
-                or (freq == "기타" and st.session_state.frequency_other_text.strip() != "")
-            )
-
-            time_valid = (
-                st.session_state.time_morning or
-                st.session_state.time_afternoon or
-                st.session_state.time_evening or
-                (st.session_state.time_other and st.session_state.time_other_text.strip() != "")
-            )
-
-            if freq_valid and time_valid:
-                st.session_state.step = 7
-                st.experimental_rerun()
-            else:
-                if not freq_valid and not time_valid:
-                    st.warning("빈도와 시간대 항목을 모두 입력하거나 선택해주세요.")
-                elif not freq_valid:
-                    st.warning("빈도 항목을 입력하거나 선택해주세요.")
-                else:
-                    st.warning("시간대 항목을 입력하거나 선택해주세요.")
+        st.button("다음 단계로 이동 👉", on_click=go_next)
 
 
 # STEP 7: 습관
