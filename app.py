@@ -971,7 +971,7 @@ elif st.session_state.step == 9:
             go_next()
 
   
-# STEP 10: 턱 운동 범위 및 관찰3 (Range of Motion & Observations) (기존 코드의 STEP 14)
+# STEP 10: 턱 운동 범위 및 관찰3 (Range of Motion & Observations)
 elif st.session_state.step == 10:
     st.title("턱 운동 범위 및 관찰 (Range of Motion & Observations)")
     st.markdown("---")
@@ -1028,9 +1028,55 @@ elif st.session_state.step == 10:
         if st.button("다음 단계로 이동 👉"):
             go_next()
 
-            
-# STEP 11: 귀 관련 증상 (기존 코드의 STEP 7)
+
+# STEP 11: 근육 촉진 평가
 elif st.session_state.step == 11:
+    st.title("근육 촉진 평가")
+    st.markdown("---")
+
+    with st.container(border=True):
+        st.markdown(
+            "<span style='color:red;'>아래 항목은 실제 측정 및 검사가 필요할 수 있으며, 가능하신 부분만 기입해 주시면 됩니다. 나머지는 진료 중 확인할 수 있습니다.</span>",
+            unsafe_allow_html=True
+        )
+
+        st.markdown("### 측정 및 촉진 소견")
+
+        st.text_area(
+            label="측두근 촉진 소견",
+            key="palpation_temporalis",
+            placeholder="검사가 필요한 항목입니다."
+        )
+
+        st.text_area(
+            label="내측 익돌근 촉진 소견",
+            key="palpation_medial_pterygoid",
+            placeholder="검사가 필요한 항목입니다."
+        )
+
+        st.text_area(
+            label="외측 익돌근 촉진 소견",
+            key="palpation_lateral_pterygoid",
+            placeholder="검사가 필요한 항목입니다."
+        )
+
+        st.text_area(
+            label="통증 위치 매핑 (지도 또는 상세 설명)",
+            key="pain_mapping",
+            placeholder="검사가 필요한 항목입니다."
+        )
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("이전 단계"):
+            go_back()
+    with col2:
+        if st.button("다음 단계로 이동 👉"):
+            go_next()
+
+# STEP 12: 귀 관련 증상
+elif st.session_state.step == 12:
     st.title("귀 관련 증상")
     st.markdown("---")
     with st.container(border=True):
@@ -1083,8 +1129,8 @@ elif st.session_state.step == 11:
                 go_next()
                 
 
-# STEP 12: 경추/목/어깨 관련 증상 (기존 코드의 STEP 8)
-elif st.session_state.step == 12:
+# STEP 13: 경추/목/어깨 관련 증상
+elif st.session_state.step == 13:
     st.title("경추/목/어깨 관련 증상")
     st.markdown("---")
     
@@ -1157,8 +1203,8 @@ elif st.session_state.step == 12:
                 go_next()
 
 
-# STEP 13: 정서적 스트레스 이력
-elif st.session_state.step == 13:
+# STEP 14: 정서적 스트레스 이력
+elif st.session_state.step == 14:
     st.title("정서적 스트레스 이력")
     st.markdown("---")
     with st.container(border=True):
@@ -1204,8 +1250,8 @@ elif st.session_state.step == 13:
                 go_next()
 
 
-# STEP 14: 과거 치과적 이력 (Past Dental History)
-elif st.session_state.step == 14:
+# STEP 15: 과거 치과적 이력 (Past Dental History)
+elif st.session_state.step == 15:
     st.title("과거 치과적 이력 (Past Dental History)")
     st.markdown("---")
     with st.container(border=True):
@@ -1304,8 +1350,8 @@ elif st.session_state.step == 14:
 
 
 
-# STEP 15: 과거 의과적 이력 (Past Medical History) (기존 코드의 STEP 10)
-elif st.session_state.step == 15:
+# STEP 16: 과거 의과적 이력 (Past Medical History)
+elif st.session_state.step == 16:
     st.title("과거 의과적 이력 (Past Medical History)")
     st.markdown("---")
     with st.container(border=True):
@@ -1326,8 +1372,8 @@ elif st.session_state.step == 15:
 
 
   
-# STEP 16: 자극 검사
-elif st.session_state.step == 16:
+# STEP 17: 자극 검사
+elif st.session_state.step == 17:
     st.title("자극 검사 (Provocation Tests)")
     st.markdown("---")
     with st.container(border=True):
@@ -1360,8 +1406,8 @@ elif st.session_state.step == 16:
             go_next()
 
 
-# STEP 17: 결과
-elif st.session_state.step == 17:
+# STEP 18: 결과
+elif st.session_state.step == 18:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
 
