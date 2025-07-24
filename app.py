@@ -518,10 +518,10 @@ elif st.session_state.step == 5:
         else:
             st.session_state["crepitus_confirmed"] = "선택 안 함"
 
-        # 턱 잠김 질문 표시 조건
+        # --- 턱 잠김 질문 조건 ---
         show_lock_questions = (
-            st.session_state.tmj_sound in ["딸깍소리", "없음"] or
-            (st.session_state.tmj_sound == "사각사각소리(크레피투스)" and st.session_state.get("crepitus_confirmed") == "아니오")
+            st.session_state.tmj_sound == "사각사각소리(크레피투스)" and
+            st.session_state.get("crepitus_confirmed") == "아니오"
         )
 
         if show_lock_questions:
@@ -566,7 +566,7 @@ elif st.session_state.step == 5:
                         label_visibility="collapsed"
                     )
         else:
-            # 잠김 상태 초기화
+            # 턱 잠김 상태 초기화
             st.session_state["jaw_locked_now"] = "선택 안 함"
             st.session_state["jaw_unlock_possible"] = "선택 안 함"
             st.session_state["jaw_locked_past"] = "선택 안 함"
@@ -600,7 +600,7 @@ elif st.session_state.step == 5:
                     if st.session_state.get("jaw_locked_past") == "선택 안 함":
                         errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
                     elif st.session_state.get("jaw_locked_past") == "예" and \
-                         st.session_state.get("mao_fits_3fingers") == "선택 안 함":
+                            st.session_state.get("mao_fits_3fingers") == "선택 안 함":
                         errors.append("MAO 시 손가락 3개가 들어가는지 여부를 선택해주세요.")
 
             if errors:
