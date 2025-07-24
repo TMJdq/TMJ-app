@@ -546,9 +546,7 @@ elif st.session_state.step == 4:
         st.session_state.headache_reproduce_by_pressure_value = "선택 안 함"
         st.session_state.headache_not_elsewhere_value = "선택 안 함"
 
-    # 세션 확인용 (디버깅 목적)
-    with st.expander("🧪 세션 상태 확인"):
-        st.json(st.session_state)
+    
 
     st.markdown("---")
     col1, col2 = st.columns(2)
