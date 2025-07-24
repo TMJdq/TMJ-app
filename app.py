@@ -449,29 +449,28 @@ elif st.session_state.step == 5:
     st.markdown("---")
 
     with st.container(border=True):
-        # ✅ 세션 키 초기값 명시적으로 설정
-        if "tmj_sound" not in st.session_state:
-            st.session_state.tmj_sound = "선택 안 함"
-
+        # 세션 기본값 설정
         st.session_state.setdefault("tmj_click_context", [])
         st.session_state.setdefault("crepitus_confirmed", "선택 안 함")
         st.session_state.setdefault("jaw_locked_now", "선택 안 함")
         st.session_state.setdefault("jaw_unlock_possible", "선택 안 함")
         st.session_state.setdefault("jaw_locked_past", "선택 안 함")
         st.session_state.setdefault("mao_fits_3fingers", "선택 안 함")
+        if "tmj_sound" not in st.session_state:
+            st.session_state.tmj_sound = "선택 안 함"
 
-        # ✅ 라디오 버튼 표시
+        # 턱 소리 라디오 질문
+        st.markdown("**턱에서 나는 소리가 있나요?**")
         joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
+
         selected_sound = st.radio(
             "턱에서 나는 소리가 있나요?",
             options=joint_sound_options,
             index=joint_sound_options.index(st.session_state.tmj_sound)
         )
-
-        # ✅ 선택 시 세션 업데이트
         st.session_state.tmj_sound = selected_sound
 
-        # ✅ 딸깍소리 관련 질문
+        # 딸깍소리 추가 질문
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
@@ -483,7 +482,7 @@ elif st.session_state.step == 5:
                     updated_context.append(option)
             st.session_state.tmj_click_context = updated_context
 
-        # ✅ 사각사각소리 관련
+        # 사각사각소리 추가 질문
         if st.session_state.tmj_sound == "사각사각소리(크레피투스)":
             st.markdown("**사각사각소리가 확실히 느껴지나요?**")
             st.radio(
@@ -492,7 +491,7 @@ elif st.session_state.step == 5:
                 key="crepitus_confirmed"
             )
 
-        # ✅ 턱 잠김 조건
+        # 턱 잠김 조건 확인
         show_lock_questions = (
             st.session_state.tmj_sound == "사각사각소리(크레피투스)" and
             st.session_state.crepitus_confirmed == "아니오"
@@ -531,7 +530,7 @@ elif st.session_state.step == 5:
                         key="mao_fits_3fingers"
                     )
 
-    # ✅ 세션 확인용
+    # 세션 확인용
     with st.expander("🧪 세션 상태 확인"):
         st.json(st.session_state)
 
