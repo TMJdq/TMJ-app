@@ -1040,29 +1040,37 @@ elif st.session_state.step == 11:
             unsafe_allow_html=True
         )
 
-        st.markdown("### 측정 및 촉진 소견")
+        st.markdown("### 전문가 촉진 소견")
 
+        st.markdown("**측두근 촉진 소견**")
         st.text_area(
             label="측두근 촉진 소견",
             key="palpation_temporalis",
+            label_visibility="collapsed",
             placeholder="검사가 필요한 항목입니다."
         )
 
+        st.markdown("**내측 익돌근 촉진 소견**")
         st.text_area(
             label="내측 익돌근 촉진 소견",
             key="palpation_medial_pterygoid",
+            label_visibility="collapsed",
             placeholder="검사가 필요한 항목입니다."
         )
 
+        st.markdown("**외측 익돌근 촉진 소견**")
         st.text_area(
             label="외측 익돌근 촉진 소견",
             key="palpation_lateral_pterygoid",
+            label_visibility="collapsed",
             placeholder="검사가 필요한 항목입니다."
         )
 
+        st.markdown("**통증 위치 매핑 (지도 또는 상세 설명)**")
         st.text_area(
-            label="통증 위치 매핑 (지도 또는 상세 설명)",
+            label="통증 위치 매핑",
             key="pain_mapping",
+            label_visibility="collapsed",
             placeholder="검사가 필요한 항목입니다."
         )
 
@@ -1074,6 +1082,7 @@ elif st.session_state.step == 11:
     with col2:
         if st.button("다음 단계로 이동 👉"):
             go_next()
+
 
 # STEP 12: 귀 관련 증상
 elif st.session_state.step == 12:
