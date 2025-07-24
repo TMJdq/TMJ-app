@@ -35,13 +35,10 @@ def go_back():
 def compute_diagnoses(state):
     diagnoses = []
 
-    def is_yes(value):
-        return value == "예"
+    def is_yes(val): return val == "예"
+    def is_no(val): return val == "아니오"
 
-    def is_no(value):
-        return value == "아니오"
-
-    # 1~3. 근육통 관련 진단 (배타적)
+    # 1~3. 근육통 관련
     if is_no(state.get("muscle_pressure_2s")):
         diagnoses.append("근육통 (Myalgia)")
     elif is_yes(state.get("muscle_pressure_2s")):
@@ -51,24 +48,25 @@ def compute_diagnoses(state):
             diagnoses.append("근육통 (Myalgia)")
             diagnoses.append("국소 근육통 (Local Myalgia)")
 
-    # 4. 관절통 (Arthralgia)
+    # 4. 관절통
     if is_yes(state.get("tmj_press_pain")):
         diagnoses.append("관절통 (Arthralgia)")
 
-    # 5. TMD에 기인한 두통
-    if (
-        is_yes(state.get("headache_temples"))
-        and is_yes(state.get("headache_with_jaw"))
-        and is_yes(state.get("headache_reproduce_by_pressure"))
-        and is_yes(state.get("headache_not_elsewhere"))
-    ):
+    # 5. TMD에 기인한 두통 (모든 조건이 "예"인 경우만)
+    keys = [
+        "headache_temples",
+        "headache_with_jaw",
+        "headache_reproduce_by_pressure",
+        "headache_not_elsewhere"
+    ]
+    if all(is_yes(state.get(k)) for k in keys):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
     # 6. 퇴행성 관절 질환
     if is_yes(state.get("crepitus_confirmed")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7 & 8. 디스크 변위 (감소 없는)
+    # 7~8. 디스크 변위 (감소 없음)
     if is_yes(state.get("mao_fits_3fingers")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
     elif is_no(state.get("mao_fits_3fingers")):
@@ -78,13 +76,11 @@ def compute_diagnoses(state):
     if is_yes(state.get("jaw_locked_now")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
-    # 10. 감소 동반 디스크 변위
+    # 10. 딸깍소리 → 감소 동반 디스크 변위
     if state.get("tmj_sound") == "딸깍소리":
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
-
-
 
 
 # 총 단계 수 (0부터 시작)
@@ -556,7 +552,6 @@ elif st.session_state.step == 5:
 
 
 # STEP 6: 빈도 및 시기, 강도
-# ✅ STEP 6: 빈도 및 시기, 통증 강도
 elif st.session_state.step == 6:
     st.title("현재 증상 (빈도 및 시기)")
     st.markdown("---")
