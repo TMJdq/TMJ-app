@@ -841,7 +841,6 @@ elif st.session_state.step == 6:
         st.button("다음 단계로 이동 👉", on_click=go_next)
 
 
-
 # STEP 7: 습관
 elif st.session_state.step == 7:
     st.title("습관 (Habits)")
