@@ -731,7 +731,7 @@ elif st.session_state.step == 5:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            go_back()
+            st.session_state.step = 2
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
@@ -799,14 +799,7 @@ elif st.session_state.step == 6:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
-            complaint = st.session_state.get("chief_complaint")
-            if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
-                st.session_state.step = 4
-            elif complaint == "턱관절 소리/잠김":
-                st.session_state.step = 5
-            elif complaint == "기타 불편한 증상":
-                st.session_state.step = 2
-            st.experimental_rerun()
+            st.session_state.step = 2
     with col2:
         if st.button("다음 단계로 이동 👉"):
             freq = st.session_state.get("frequency_choice", "선택 안 함")
