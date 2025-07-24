@@ -462,11 +462,14 @@ elif st.session_state.step == 5:
         if st.session_state.tmj_sound == "딸깍소리":
             st.markdown("#### 📌 딸깍 소리 빈도 선택")
             click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
+            st.session_state.setdefault("tmj_click_context", [])
+
+            # ✅ multiselect: value 생략, key만 지정
             st.multiselect("언제 딸깍 소리가 나나요?",
                            options=click_options,
-                           key="tmj_click_context",
-                           value=st.session_state.get("tmj_click_context", []))
+                           key="tmj_click_context")
 
+            # checkbox로 추가 정보 수집 (필요 시 유지)
             updated_context = []
             for option in click_options:
                 key = f"click_{option}"
@@ -487,6 +490,7 @@ elif st.session_state.step == 5:
             )
         else:
             st.session_state["crepitus_confirmed"] = "선택 안 함"
+
 
         # 턱 잠김 관련 조건
         show_lock_questions = (
