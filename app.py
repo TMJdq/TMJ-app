@@ -9,19 +9,19 @@ if 'step' not in st.session_state:
     st.session_state.step = 0
     st.session_state.validation_errors = {}
 
-    # ✅ 진단 관련 키를 항상 세션에 포함되도록 기본값 설정
+   
     diagnosis_keys = {
-    "muscle_pressure_2s": "선택 안 함",
-    "muscle_referred_pain": "선택 안 함",
-    "tmj_press_pain": "선택 안 함",
-    "headache_temples": "선택 안 함",
-    "headache_with_jaw": "선택 안 함",
-    "headache_reproduce_by_pressure": "선택 안 함",
-    "headache_not_elsewhere": "선택 안 함",
-    "crepitus_confirmed": "선택 안 함",
-    "mao_fits_3fingers": "선택 안 함",
-    "jaw_locked_now": "선택 안 함",
-    "tmj_sound": "선택 안 함"
+        "muscle_pressure_2s_value": "선택 안 함",
+        "muscle_referred_pain_value": "선택 안 함",
+        "tmj_press_pain_value": "선택 안 함",
+        "headache_temples_value": "선택 안 함",
+        "headache_with_jaw_value": "선택 안 함",
+        "headache_reproduce_by_pressure_value": "선택 안 함",
+        "headache_not_elsewhere_value": "선택 안 함",
+        "crepitus_confirmed_value": "선택 안 함",
+        "mao_fits_3fingers_value": "선택 안 함",
+        "jaw_locked_now_value": "선택 안 함",
+        "tmj_sound_value": "선택 안 함"
     }
 
     for key, default in diagnosis_keys.items():
@@ -59,7 +59,7 @@ def compute_diagnoses(state):
     def is_yes(val): return val == "예"
     def is_no(val): return val == "아니오"
 
-    # 근육통 관련 (세션 변수명에 맞춰 _value 추가)
+    # 세션 상태 키는 모두 _value가 붙은 형태로 맞추었습니다.
     if is_no(state.get("muscle_pressure_2s_value")):
         diagnoses.append("근육통 (Myalgia)")
     elif is_yes(state.get("muscle_pressure_2s_value")):
@@ -69,31 +69,27 @@ def compute_diagnoses(state):
             diagnoses.append("근육통 (Myalgia)")
             diagnoses.append("국소 근육통 (Local Myalgia)")
 
-    # 관절통
     if is_yes(state.get("tmj_press_pain_value")):
         diagnoses.append("관절통 (Arthralgia)")
 
-    # TMD에 기인한 두통
-    keys = [
+    headache_keys = [
         "headache_temples_value",
         "headache_with_jaw_value",
         "headache_reproduce_by_pressure_value",
         "headache_not_elsewhere_value"
     ]
-    if all(is_yes(state.get(k)) for k in keys):
+    if all(is_yes(state.get(k)) for k in headache_keys):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 퇴행성 관절 질환
     if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 디스크 변위
-    if is_yes(state.get("mao_fits_3fingers")):
+    if is_yes(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-    elif is_no(state.get("mao_fits_3fingers")):
+    elif is_no(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
-    if is_yes(state.get("jaw_locked_now")):
+    if is_yes(state.get("jaw_locked_now_value")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     if state.get("tmj_sound_value") and "딸깍" in state.get("tmj_sound_value"):
@@ -654,7 +650,7 @@ elif st.session_state.step == 5:
 
     # 턱 잠김 조건 질문 보여줄지 판단 (이제 tmj_sound_value와 crepitus_confirmed_value 사용)
     show_lock_questions = (
-        st.session_state.tmj_sound_value == "사각사각소리(크레피투스)" and
+        st.session_state.tmj_sound_value == "사각사각소리(크repitus)" and
         st.session_state.crepitus_confirmed_value == "아니오"
     )
 
@@ -684,6 +680,7 @@ elif st.session_state.step == 5:
 
 
         # 조건부 질문은 _value를 참조하도록 변경
+        # Fixed: "아니 오" changed to "아니오"
         elif st.session_state.jaw_locked_now_value == "아니오":
             st.markdown("**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**")
             st.radio(
@@ -717,9 +714,9 @@ elif st.session_state.step == 5:
         st.session_state.jaw_unlock_possible_value = "선택 안 함"
         st.session_state.jaw_locked_past_value = "선택 안 함"
         st.session_state.mao_fits_3fingers_value = "선택 안 함"
-        # 딸깍소리가 아닌 경우 tmj_click_context 초기화
-        if st.session_state.tmj_sound_value != "딸깍소리":
-             st.session_state.tmj_click_context = []
+    # 딸깍소리가 아닌 경우 tmj_click_context 초기화 (이전 로직에서 누락되어 추가)
+    if st.session_state.tmj_sound_value != "딸깍소리":
+        st.session_state.tmj_click_context = []
 
 
     # 세션 확인용 (디버깅 목적)
