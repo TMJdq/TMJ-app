@@ -547,18 +547,14 @@ elif st.session_state.step == 5:
     # 사각사각소리(크레피투스) 선택 시
     elif st.session_state.tmj_sound == "사각사각소리(크레피투스)":
         crepitus_options = ["예", "아니오", "선택 안 함"]
-        current_value = st.session_state.get("crepitus_confirmed", "선택 안 함")
 
-        try:
-            current_index = crepitus_options.index(current_value)
-        except ValueError:
-            current_index = crepitus_options.index("선택 안 함")
+        if "crepitus_confirmed" not in st.session_state:
+            st.session_state.crepitus_confirmed = "선택 안 함"
 
-        st.radio(
-            "**사각사각소리 확실 여부**",
+        selected = st.radio(
+            "사각사각소리 확실 여부",
             options=crepitus_options,
-            key="crepitus_confirmed",
-            index=current_index
+            key="crepitus_confirmed"
         )
 
     # 턱 잠김 조건 질문 보여줄지 판단
