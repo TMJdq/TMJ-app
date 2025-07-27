@@ -22,7 +22,14 @@ if 'step' not in st.session_state:
     }
     for key, default in diagnosis_keys.items():
         st.session_state.setdefault(key, default)
-        
+
+
+
+##세션 상태 확인
+
+st.write(dict(st.session_state))
+
+
 # --- 페이지 설정 ---
 st.set_page_config(
     page_title="턱관절 자가 문진 시스템 | 스마트 헬스케어",
@@ -147,7 +154,7 @@ if st.session_state.step == 0:
 # 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
         st.rerun()
 
-# STEP 1: 환자 정보 입력 (기존 코드의 STEP 0)
+# STEP 1: 환자 정보 입력
 elif st.session_state.step == 1:
     st.header("📝 환자 기본 정보 입력")
     st.write("정확한 문진을 위해 필수 정보를 입력해주세요. (*표시는 필수 항목입니다.)")
@@ -378,11 +385,15 @@ elif st.session_state.step == 4:
 
         if pain_type in ["넓은 부위의 통증", "근육 통증"]:
             st.markdown("#### 💬 근육/넓은 부위 관련")
+            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
             st.radio("", yes_no_options, index=get_radio_index("muscle_movement_pain_value", yes_no_options),
                      key="muscle_movement_pain_widget_key", on_change=update_muscle_movement_pain)
+
+            st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
             st.radio("", yes_no_options, index=get_radio_index("muscle_pressure_2s_value", yes_no_options),
                      key="muscle_pressure_2s_widget_key", on_change=update_muscle_pressure_2s)
             if st.session_state.muscle_pressure_2s_value == "예":
+                st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
                 st.radio("", yes_no_options, index=get_radio_index("muscle_referred_pain_value", yes_no_options),
                          key="muscle_referred_pain_widget_key", on_change=update_muscle_referred_pain)
             else:
@@ -390,19 +401,26 @@ elif st.session_state.step == 4:
 
         elif pain_type == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
+            st.markdown("**입을 벌릴 때나 움직일 때 통증이 있나요?**")
             st.radio("", yes_no_options, index=get_radio_index("tmj_movement_pain_value", yes_no_options),
                      key="tmj_movement_pain_widget_key", on_change=update_tmj_movement_pain)
+            st.markdown("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**")
             st.radio("", yes_no_options, index=get_radio_index("tmj_press_pain_value", yes_no_options),
                      key="tmj_press_pain_widget_key", on_change=update_tmj_press_pain)
 
         elif pain_type == "두통":
             st.markdown("#### 💬 두통 관련")
+
+            st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
             st.radio("", yes_no_options, index=get_radio_index("headache_temples_value", yes_no_options),
                      key="headache_temples_widget_key", on_change=update_headache_temples)
+            st.markdown("**턱을 움직일 때 두통이 심해지나요?**")
             st.radio("", yes_no_options, index=get_radio_index("headache_with_jaw_value", yes_no_options),
                      key="headache_with_jaw_widget_key", on_change=update_headache_with_jaw)
+            st.markdown("**관자놀이 근육을 눌렀을 때 기존 두통이 재현되나요?**")
             st.radio("", yes_no_options, index=get_radio_index("headache_reproduce_by_pressure_value", yes_no_options),
                      key="headache_reproduce_by_pressure_widget_key", on_change=update_headache_reproduce_by_pressure)
+            st.markdown("**해당 두통이 다른 의학적 진단으로 설명되지 않나요?**")
             st.radio("", yes_no_options, index=get_radio_index("headache_not_elsewhere_value", yes_no_options),
                      key="headache_not_elsewhere_widget_key", on_change=update_headache_not_elsewhere)
 
