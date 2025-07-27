@@ -509,9 +509,9 @@ elif st.session_state.step == 5:
         st.session_state.mao_fits_3fingers_value = st.session_state.mao_fits_3fingers_widget_key
 
     joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
-
+    st.markdown("**턱에서 나는 소리가 있나요?**")
     st.radio(
-        "**턱에서 나는 소리가 있나요?**",
+        "턱에서 나는 소리를 선택하세요.",
         options=joint_sound_options,
         key="tmj_sound_widget_key",
         index=get_radio_index("tmj_sound_value", joint_sound_options),
@@ -519,7 +519,7 @@ elif st.session_state.step == 5:
     )
 
     if st.session_state.tmj_sound_value == "딸깍소리":
-        st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
+        st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요.**")
         click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
         updated_context = []
         for option in click_options:
