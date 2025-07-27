@@ -25,9 +25,6 @@ if 'step' not in st.session_state:
 
 
 
-##세션 상태 확인
-
-st.write(dict(st.session_state))
 
 
 # --- 페이지 설정 ---
