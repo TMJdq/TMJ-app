@@ -269,15 +269,17 @@ elif st.session_state.step == 2:
 elif st.session_state.step == 3:
     st.title("현재 증상 (통증 양상)")
     st.markdown("---")
+    
     with st.container(border=True):
         st.markdown("**턱을 움직이거나 씹기, 말하기 등의 기능 또는 악습관(이갈이, 턱 괴기 등)으로 인해 통증이 악화되나요?**")
         st.radio(
             label="악화 여부",
-            options=["예", "아니오","선택 안 함"],
+            options=["예", "아니오", "선택 안 함"],
             key="jaw_aggravation",
             index=2,
             label_visibility="collapsed"
         )
+
         st.markdown("---")
         st.markdown("**통증을 어떻게 표현하시겠습니까? (예: 둔함, 날카로움, 욱신거림 등)**")
         st.radio(
@@ -287,16 +289,24 @@ elif st.session_state.step == 3:
             index=5,
             label_visibility="collapsed"
         )
+
         if st.session_state.get("pain_quality") == "기타":
             st.text_input("기타 통증 양상을 적어주세요:", value=st.session_state.get('pain_quality_other', ''), key="pain_quality_other")
         else:
             st.session_state.pain_quality_other = ""
+
     st.markdown("---")
     col1, col2 = st.columns(2)
+
+    # ✅ 이전 버튼: Step 3 관련 세션 초기화
     with col1:
         if st.button("이전 단계"):
+            for key in ["jaw_aggravation", "pain_quality", "pain_quality_other"]:
+                st.session_state.pop(key, None)
             st.session_state.step = 2
             st.rerun()
+
+    # 다음 버튼: 유효성 검사 후 진행
     with col2:
         if st.button("다음 단계로 이동 👉"):
             if st.session_state.get("jaw_aggravation") == "선택 안 함":
@@ -305,18 +315,17 @@ elif st.session_state.step == 3:
                 st.warning("통증 양상 항목을 선택해주세요.")
             else:
                 st.session_state.step = 4
+                st.rerun()
 
- 	# 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
-            st.rerun()
 
 # STEP 4: 통증 부위
 elif st.session_state.step == 4:
     st.title("현재 증상 (통증 분류 및 검사)")
     st.markdown("---")
+
     pain_type_options = ["선택 안 함", "넓은 부위의 통증", "근육 통증", "턱관절 통증", "두통"]
     yes_no_options = ["예", "아니오", "선택 안 함"]
-    # --- Session State Initialization for Persistent Values ---
-    # These variables will hold the actual data across pages
+
     st.session_state.setdefault("pain_types_value", "선택 안 함")
     st.session_state.setdefault("muscle_movement_pain_value", "선택 안 함")
     st.session_state.setdefault("muscle_pressure_2s_value", "선택 안 함")
@@ -327,161 +336,85 @@ elif st.session_state.step == 4:
     st.session_state.setdefault("headache_with_jaw_value", "선택 안 함")
     st.session_state.setdefault("headache_reproduce_by_pressure_value", "선택 안 함")
     st.session_state.setdefault("headache_not_elsewhere_value", "선택 안 함")
-    # Helper functions to get index based on persistent session state
+
     def get_selectbox_index(key_value, options):
         val = st.session_state.get(key_value, "선택 안 함")
-        try:
-            return options.index(val)
-        except ValueError:
-            return 0 # Default to "선택 안 함" index
+        return options.index(val) if val in options else 0
+
     def get_radio_index(key_value, options):
         val = st.session_state.get(key_value, "선택 안 함")
-        try:
-            return options.index(val)
-        except ValueError:
-            return 2 # Default to "선택 안 함" index
-    # --- Callbacks for updating persistent session state from widget keys ---
-    def update_pain_types():
-        st.session_state.pain_types_value = st.session_state.pain_types_widget_key
-    def update_muscle_movement_pain():
-        st.session_state.muscle_movement_pain_value = st.session_state.muscle_movement_pain_widget_key
-    def update_muscle_pressure_2s():
-        st.session_state.muscle_pressure_2s_value = st.session_state.muscle_pressure_2s_widget_key
-    def update_muscle_referred_pain():
-        st.session_state.muscle_referred_pain_value = st.session_state.muscle_referred_pain_widget_key
-    def update_tmj_movement_pain():
-        st.session_state.tmj_movement_pain_value = st.session_state.tmj_movement_pain_widget_key
-    def update_tmj_press_pain():
-        st.session_state.tmj_press_pain_value = st.session_state.tmj_press_pain_widget_key
-    def update_headache_temples():
-        st.session_state.headache_temples_value = st.session_state.headache_temples_widget_key
-    def update_headache_with_jaw():
-        st.session_state.headache_with_jaw_value = st.session_state.headache_with_jaw_widget_key
-    def update_headache_reproduce_by_pressure():
-        st.session_state.headache_reproduce_by_pressure_value = st.session_state.headache_reproduce_by_pressure_widget_key
-    def update_headache_not_elsewhere():
-        st.session_state.headache_not_elsewhere_value = st.session_state.headache_not_elsewhere_widget_key
+        return options.index(val) if val in options else 2
+
+    def update_pain_types(): st.session_state.pain_types_value = st.session_state.pain_types_widget_key
+    def update_muscle_movement_pain(): st.session_state.muscle_movement_pain_value = st.session_state.muscle_movement_pain_widget_key
+    def update_muscle_pressure_2s(): st.session_state.muscle_pressure_2s_value = st.session_state.muscle_pressure_2s_widget_key
+    def update_muscle_referred_pain(): st.session_state.muscle_referred_pain_value = st.session_state.muscle_referred_pain_widget_key
+    def update_tmj_movement_pain(): st.session_state.tmj_movement_pain_value = st.session_state.tmj_movement_pain_widget_key
+    def update_tmj_press_pain(): st.session_state.tmj_press_pain_value = st.session_state.tmj_press_pain_widget_key
+    def update_headache_temples(): st.session_state.headache_temples_value = st.session_state.headache_temples_widget_key
+    def update_headache_with_jaw(): st.session_state.headache_with_jaw_value = st.session_state.headache_with_jaw_widget_key
+    def update_headache_reproduce_by_pressure(): st.session_state.headache_reproduce_by_pressure_value = st.session_state.headache_reproduce_by_pressure_widget_key
+    def update_headache_not_elsewhere(): st.session_state.headache_not_elsewhere_value = st.session_state.headache_not_elsewhere_widget_key
+
     with st.container(border=True):
         st.markdown("**아래 중 해당되는 통증 유형을 선택해주세요.**")
         st.selectbox(
-            label="",
-            options=pain_type_options,
-            index=get_selectbox_index("pain_types_value", pain_type_options), # Initialize from persistent value
-            key="pain_types_widget_key", # Unique widget key
-            on_change=update_pain_types # Update persistent value on change
+            label="", options=pain_type_options,
+            index=get_selectbox_index("pain_types_value", pain_type_options),
+            key="pain_types_widget_key", on_change=update_pain_types
         )
+
         st.markdown("---")
-        # Use the persistent value for conditional rendering
         pain_type = st.session_state.pain_types_value
+
         if pain_type in ["넓은 부위의 통증", "근육 통증"]:
             st.markdown("#### 💬 근육/넓은 부위 관련")
-            st.markdown("**입을 벌릴 때나 턱을 움직일 때 통증이 있나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("muscle_movement_pain_value", yes_no_options),
-                key="muscle_movement_pain_widget_key",
-                on_change=update_muscle_movement_pain
-            )
-            st.markdown("**근육을 2초간 눌렀을 때 통증이 느껴지나요?**")
-            # Store the widget's temporary value in a local variable for immediate use
-            muscle_2s_choice_temp = st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("muscle_pressure_2s_value", yes_no_options),
-                key="muscle_pressure_2s_widget_key",
-                on_change=update_muscle_pressure_2s
-            )
-            # Use the persistent session state value for conditional display
+            st.radio("", yes_no_options, index=get_radio_index("muscle_movement_pain_value", yes_no_options),
+                     key="muscle_movement_pain_widget_key", on_change=update_muscle_movement_pain)
+            st.radio("", yes_no_options, index=get_radio_index("muscle_pressure_2s_value", yes_no_options),
+                     key="muscle_pressure_2s_widget_key", on_change=update_muscle_pressure_2s)
             if st.session_state.muscle_pressure_2s_value == "예":
-                st.markdown("**근육을 5초간 눌렀을 때, 통증이 다른 부위로 퍼지나요?**")
-                st.radio(
-                    label="",
-                    options=yes_no_options,
-                    index=get_radio_index("muscle_referred_pain_value", yes_no_options),
-                    key="muscle_referred_pain_widget_key",
-                    on_change=update_muscle_referred_pain
-                )
+                st.radio("", yes_no_options, index=get_radio_index("muscle_referred_pain_value", yes_no_options),
+                         key="muscle_referred_pain_widget_key", on_change=update_muscle_referred_pain)
             else:
-                # If 2-second pain is not '예', reset the 5-second pain value
                 st.session_state.muscle_referred_pain_value = "선택 안 함"
+
         elif pain_type == "턱관절 통증":
             st.markdown("#### 💬 턱관절 관련")
-            st.markdown("**입을 벌릴 때나 움직일 때 통증이 있나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("tmj_movement_pain_value", yes_no_options),
-                key="tmj_movement_pain_widget_key",
-                on_change=update_tmj_movement_pain
-            )
-            st.markdown("**턱관절 부위를 눌렀을 때 기존 통증이 재현되나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("tmj_press_pain_value", yes_no_options),
-                key="tmj_press_pain_widget_key",
-                on_change=update_tmj_press_pain
-            )
+            st.radio("", yes_no_options, index=get_radio_index("tmj_movement_pain_value", yes_no_options),
+                     key="tmj_movement_pain_widget_key", on_change=update_tmj_movement_pain)
+            st.radio("", yes_no_options, index=get_radio_index("tmj_press_pain_value", yes_no_options),
+                     key="tmj_press_pain_widget_key", on_change=update_tmj_press_pain)
+
         elif pain_type == "두통":
             st.markdown("#### 💬 두통 관련")
-            st.markdown("**두통이 관자놀이 부위에서 발생하나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("headache_temples_value", yes_no_options),
-                key="headache_temples_widget_key",
-                on_change=update_headache_temples
-            )
-            st.markdown("**턱을 움직일 때 두통이 심해지나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("headache_with_jaw_value", yes_no_options),
-                key="headache_with_jaw_widget_key",
-                on_change=update_headache_with_jaw
-            )
-            st.markdown("**관자놀이 근육을 눌렀을 때 기존 두통이 재현되나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("headache_reproduce_by_pressure_value", yes_no_options),
-                key="headache_reproduce_by_pressure_widget_key",
-                on_change=update_headache_reproduce_by_pressure
-            )
-            st.markdown("**해당 두통이 다른 의학적 진단으로 설명되지 않나요?**")
-            st.radio(
-                label="",
-                options=yes_no_options,
-                index=get_radio_index("headache_not_elsewhere_value", yes_no_options),
-                key="headache_not_elsewhere_widget_key",
-                on_change=update_headache_not_elsewhere
-            )
-    # --- Resetting irrelevant session state values based on current pain_type ---
-    # These resets now target the _value variables for consistency
-    if pain_type not in ["넓은 부위의 통증", "근육 통증"]:
-        st.session_state.muscle_movement_pain_value = "선택 안 함"
-        st.session_state.muscle_pressure_2s_value = "선택 안 함"
-        st.session_state.muscle_referred_pain_value = "선택 안 함"
-    if pain_type != "턱관절 통증":
-        st.session_state.tmj_movement_pain_value = "선택 안 함"
-        st.session_state.tmj_press_pain_value = "선택 안 함"
-    if pain_type != "두통":
-        st.session_state.headache_temples_value = "선택 안 함"
-        st.session_state.headache_with_jaw_value = "선택 안 함"
-        st.session_state.headache_reproduce_by_pressure_value = "선택 안 함"
-        st.session_state.headache_not_elsewhere_value = "선택 안 함"
-    
+            st.radio("", yes_no_options, index=get_radio_index("headache_temples_value", yes_no_options),
+                     key="headache_temples_widget_key", on_change=update_headache_temples)
+            st.radio("", yes_no_options, index=get_radio_index("headache_with_jaw_value", yes_no_options),
+                     key="headache_with_jaw_widget_key", on_change=update_headache_with_jaw)
+            st.radio("", yes_no_options, index=get_radio_index("headache_reproduce_by_pressure_value", yes_no_options),
+                     key="headache_reproduce_by_pressure_widget_key", on_change=update_headache_reproduce_by_pressure)
+            st.radio("", yes_no_options, index=get_radio_index("headache_not_elsewhere_value", yes_no_options),
+                     key="headache_not_elsewhere_widget_key", on_change=update_headache_not_elsewhere)
+
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
+            for key in [
+                "pain_types_value", "muscle_movement_pain_value", "muscle_pressure_2s_value", "muscle_referred_pain_value",
+                "tmj_movement_pain_value", "tmj_press_pain_value",
+                "headache_temples_value", "headache_with_jaw_value",
+                "headache_reproduce_by_pressure_value", "headache_not_elsewhere_value"
+            ]:
+                st.session_state.pop(key, None)
             st.session_state.step = 3
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
             errors = []
-            # All validations now refer to the persistent _value variables
             if st.session_state.pain_types_value == "선택 안 함":
                 errors.append("통증 유형을 선택해주세요.")
             if st.session_state.pain_types_value in ["넓은 부위의 통증", "근육 통증"]:
@@ -509,43 +442,47 @@ elif st.session_state.step == 4:
                 for err in errors:
                     st.warning(err)
             else:
-                st.session_state.step = 6 # Next step logic remains the same
-                
+                st.session_state.step = 5
+                st.rerun()
 
-	# 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
-            st.rerun()
 
 # STEP 5: 턱관절 소리 및 잠김
 elif st.session_state.step == 5:
     st.title("현재 증상 (턱관절 소리 및 잠김 증상)")
     st.markdown("---")
-    # 세션 기본값 설정 (최초 1회만)
+
     st.session_state.setdefault("tmj_sound_value", "선택 안 함")
     st.session_state.setdefault("crepitus_confirmed_value", "선택 안 함")
-    st.session_state.setdefault("tmj_click_context", [])  # 체크박스이므로 리스트로 관리
+    st.session_state.setdefault("tmj_click_context", [])
     st.session_state.setdefault("jaw_locked_now_value", "선택 안 함")
     st.session_state.setdefault("jaw_unlock_possible_value", "선택 안 함")
     st.session_state.setdefault("jaw_locked_past_value", "선택 안 함")
     st.session_state.setdefault("mao_fits_3fingers_value", "선택 안 함")
+
     def get_radio_index(key_value, options):
         val = st.session_state.get(key_value, "선택 안 함")
-        try:
-            return options.index(val)
-        except ValueError:
-            return options.index("선택 안 함")
+        return options.index(val) if val in options else options.index("선택 안 함")
+
     def update_tmj_sound():
         st.session_state.tmj_sound_value = st.session_state.tmj_sound_widget_key
+
     def update_crepitus_confirmed():
         st.session_state.crepitus_confirmed_value = st.session_state.crepitus_confirmed_widget_key
+
     def update_jaw_locked_now():
         st.session_state.jaw_locked_now_value = st.session_state.jaw_locked_now_widget_key
+
     def update_jaw_unlock_possible():
         st.session_state.jaw_unlock_possible_value = st.session_state.jaw_unlock_possible_widget_key
+
     def update_jaw_locked_past():
         st.session_state.jaw_locked_past_value = st.session_state.jaw_locked_past_widget_key
+
     def update_mao_fits_3fingers():
         st.session_state.mao_fits_3fingers_value = st.session_state.mao_fits_3fingers_widget_key
+
     joint_sound_options = ["딸깍소리", "사각사각소리(크레피투스)", "없음", "선택 안 함"]
+
     st.radio(
         "**턱에서 나는 소리가 있나요?**",
         options=joint_sound_options,
@@ -553,6 +490,7 @@ elif st.session_state.step == 5:
         index=get_radio_index("tmj_sound_value", joint_sound_options),
         on_change=update_tmj_sound
     )
+
     if st.session_state.tmj_sound_value == "딸깍소리":
         st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요**")
         click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
@@ -563,6 +501,7 @@ elif st.session_state.step == 5:
             if st.checkbox(f"- {option}", value=is_checked, key=key):
                 updated_context.append(option)
         st.session_state.tmj_click_context = updated_context
+
     elif st.session_state.tmj_sound_value == "사각사각소리(크레피투스)":
         crepitus_options = ["예", "아니오", "선택 안 함"]
         st.radio(
@@ -572,13 +511,14 @@ elif st.session_state.step == 5:
             index=get_radio_index("crepitus_confirmed_value", crepitus_options),
             on_change=update_crepitus_confirmed
         )
+
     show_lock_questions = (
         st.session_state.tmj_sound_value == "사각사각소리(크레피투스)" and
         st.session_state.crepitus_confirmed_value == "아니오"
     )
+
     if show_lock_questions:
         st.markdown("---")
-       
         st.radio(
             "**현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요?**",
             options=["예", "아니오", "선택 안 함"],
@@ -586,8 +526,8 @@ elif st.session_state.step == 5:
             index=get_radio_index("jaw_locked_now_value", ["예", "아니오", "선택 안 함"]),
             on_change=update_jaw_locked_now
         )
+
         if st.session_state.jaw_locked_now_value == "예":
-            
             st.radio(
                 "**해당 증상은 저절로 또는 조작으로 풀리나요?**",
                 options=["예", "아니오", "선택 안 함"],
@@ -596,7 +536,6 @@ elif st.session_state.step == 5:
                 on_change=update_jaw_unlock_possible
             )
         elif st.session_state.jaw_locked_now_value == "아니오":
-          
             st.radio(
                 "**과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요?**",
                 options=["예", "아니오", "선택 안 함"],
@@ -605,7 +544,6 @@ elif st.session_state.step == 5:
                 on_change=update_jaw_locked_past
             )
             if st.session_state.jaw_locked_past_value == "예":
-               
                 st.radio(
                     "**입을 최대한 벌렸을 때 (MAO), 손가락 3개가 들어가나요?**",
                     options=["예", "아니오", "선택 안 함"],
@@ -615,7 +553,7 @@ elif st.session_state.step == 5:
                 )
             else:
                 st.session_state.mao_fits_3fingers_value = "선택 안 함"
-        else:  
+        else:
             st.session_state.jaw_unlock_possible_value = "선택 안 함"
             st.session_state.jaw_locked_past_value = "선택 안 함"
             st.session_state.mao_fits_3fingers_value = "선택 안 함"
@@ -624,15 +562,25 @@ elif st.session_state.step == 5:
         st.session_state.jaw_unlock_possible_value = "선택 안 함"
         st.session_state.jaw_locked_past_value = "선택 안 함"
         st.session_state.mao_fits_3fingers_value = "선택 안 함"
+
     if st.session_state.tmj_sound_value != "딸깍소리":
         st.session_state.tmj_click_context = []
-    
+
     st.markdown("---")
     col1, col2 = st.columns(2)
+
+    # ✅ 이전 버튼: Step 5 관련 세션 초기화
     with col1:
         if st.button("이전 단계"):
-            st.session_state.step = 2
+            for key in [
+                "tmj_sound_value", "crepitus_confirmed_value", "tmj_click_context",
+                "jaw_locked_now_value", "jaw_unlock_possible_value",
+                "jaw_locked_past_value", "mao_fits_3fingers_value"
+            ]:
+                st.session_state.pop(key, None)
+            st.session_state.step = 4
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
             errors = []
@@ -657,56 +605,79 @@ elif st.session_state.step == 5:
                     st.warning(err)
             else:
                 st.session_state.step = 6
-                
-	# 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
-            st.rerun()
+                st.rerun()
+
 
 # STEP 6: 빈도 및 시기, 강도
 elif st.session_state.step == 6:
     st.title("현재 증상 (빈도 및 시기)")
     st.markdown("---")
+
     with st.container(border=True):
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
         freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
         st.radio("", freq_opts, index=5, key="frequency_choice")
+
         if st.session_state.get("frequency_choice") == "기타":
             st.text_input("기타 빈도:", key="frequency_other_text")
         else:
             st.session_state.frequency_other_text = ""
+
         st.markdown("---")
         st.markdown("**주로 어느 시간대에 발생하나요?**")
         st.checkbox("아침", value=st.session_state.get("time_morning", False), key="time_morning")
         st.checkbox("오후", value=st.session_state.get("time_afternoon", False), key="time_afternoon")
         st.checkbox("저녁", value=st.session_state.get("time_evening", False), key="time_evening")
         st.checkbox("기타 시간대", value=st.session_state.get("time_other", False), key="time_other")
+
         if st.session_state.get("time_other"):
             st.text_input("기타 시간대:", key="time_other_text")
         else:
             st.session_state.time_other_text = ""
+
         st.markdown("---")
         st.markdown("**(통증이 있을 시) 현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
         st.slider("통증 정도 선택", 0, 10, value=st.session_state.get("pain_level", 0), key="pain_level")
+
     st.markdown("---")
     col1, col2 = st.columns(2)
+
+    # ✅ Step 6 → Step 2로 이동하며 Step 3~6 초기화
     with col1:
         if st.button("이전 단계(주호소 질문으로)"):
+            for key in [
+                # Step 3
+                "jaw_aggravation", "pain_quality", "pain_quality_other",
+                # Step 4
+                "pain_types_value", "muscle_movement_pain_value", "muscle_pressure_2s_value", "muscle_referred_pain_value",
+                "tmj_movement_pain_value", "tmj_press_pain_value",
+                "headache_temples_value", "headache_with_jaw_value",
+                "headache_reproduce_by_pressure_value", "headache_not_elsewhere_value",
+                # Step 5
+                "tmj_sound_value", "crepitus_confirmed_value", "tmj_click_context",
+                "jaw_locked_now_value", "jaw_unlock_possible_value",
+                "jaw_locked_past_value", "mao_fits_3fingers_value",
+                # Step 6
+                "frequency_choice", "frequency_other_text",
+                "time_morning", "time_afternoon", "time_evening", "time_other", "time_other_text",
+                "pain_level"
+            ]:
+                st.session_state.pop(key, None)
             st.session_state.step = 2
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
             freq = st.session_state.get("frequency_choice", "선택 안 함")
             freq_other = st.session_state.get("frequency_other_text", "").strip()
             freq_valid = (
-                freq not in ["선택 안 함", "기타"]
-                or (freq == "기타" and freq_other != "")
+                freq not in ["선택 안 함", "기타"] or (freq == "기타" and freq_other != "")
             )
-            time_morning = st.session_state.get("time_morning", False)
-            time_afternoon = st.session_state.get("time_afternoon", False)
-            time_evening = st.session_state.get("time_evening", False)
-            time_other = st.session_state.get("time_other", False)
-            time_other_text = st.session_state.get("time_other_text", "").strip()
             time_valid = (
-                time_morning or time_afternoon or time_evening or (time_other and time_other_text != "")
+                st.session_state.get("time_morning", False)
+                or st.session_state.get("time_afternoon", False)
+                or st.session_state.get("time_evening", False)
+                or (st.session_state.get("time_other", False) and st.session_state.get("time_other_text", "").strip() != "")
             )
             if freq_valid and time_valid:
                 st.session_state.step = 7
@@ -719,8 +690,6 @@ elif st.session_state.step == 6:
                 else:
                     st.warning("시간대 항목을 입력하거나 선택해주세요.")
 
-	# 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
-            st.rerun()
 
 # STEP 7: 습관
 elif st.session_state.step == 7:
