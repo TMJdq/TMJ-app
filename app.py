@@ -469,7 +469,7 @@ elif st.session_state.step == 4:
                 for err in errors:
                     st.warning(err)
             else:
-                st.session_state.step = 5
+                st.session_state.step = 6
                 st.rerun()
 
 
