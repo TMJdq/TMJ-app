@@ -858,21 +858,21 @@ elif st.session_state.step == 9:
         st.markdown("---")
         st.markdown("**앞으로 내밀기(Protrusion) ______ mm (의료진이 측정 후 기록)**")
         st.text_input(label="", value=st.session_state.get('protrusion', ''), key="protrusion", label_visibility="collapsed")
-        st.radio("Protrusion 시 통증 여부", options=["예", "아니오", "선택 안 함"],
+        st.radio("**Protrusion 시 통증 여부**", options=["예", "아니오", "선택 안 함"],
                   index=["예", "아니오", "선택 안 함"].index(st.session_state.get('protrusion_pain', '선택 안 함')),
         	      key="protrusion_pain")
 
         st.markdown("---")
         st.markdown("**측방운동(Laterotrusion) 오른쪽: ______ mm (의료진이 측정 후 기록)**")
         st.text_input(label="", value=st.session_state.get('latero_right', ''), key="latero_right", label_visibility="collapsed")
-        st.radio("Laterotrusion 오른쪽 통증 여부", options=["예", "아니오", "선택 안 함"],
+        st.radio("**Laterotrusion 오른쪽 통증 여부**", options=["예", "아니오", "선택 안 함"],
          	      index=["예", "아니오", "선택 안 함"].index(st.session_state.get('latero_right_pain', '선택 안 함')),
                   key="latero_right_pain")
 
         st.markdown("---")
         st.markdown("**측방운동(Laterotrusion) 왼쪽: ______ mm (의료진이 측정 후 기록)**")
         st.text_input(label="", value=st.session_state.get('latero_left', ''), key="latero_left", label_visibility="collapsed")
-        st.radio("Laterotrusion 왼쪽 통증 여부", options=["예", "아니오", "선택 안 함"],
+        st.radio("**Laterotrusion 왼쪽 통증 여부**", options=["예", "아니오", "선택 안 함"],
                   index=["예", "아니오", "선택 안 함"].index(st.session_state.get('latero_left_pain', '선택 안 함')),
                   key="latero_left_pain")
 
