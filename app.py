@@ -226,6 +226,7 @@ elif st.session_state.step == 2:
             index=4,
             label_visibility="collapsed"
         )
+
         if st.session_state.get("chief_complaint") == "기타 불편한 증상":
             st.text_input(
                 "기타 사유를 적어주세요:",
@@ -234,6 +235,7 @@ elif st.session_state.step == 2:
             )
         else:
             st.session_state.chief_complaint_other = ""
+
         st.markdown("---")
         st.markdown("**문제가 처음 발생한 시기**")
         st.date_input(
@@ -242,28 +244,35 @@ elif st.session_state.step == 2:
             key="onset",
             label_visibility="collapsed"
         )
+
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             st.session_state.step = 1
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
             complaint = st.session_state.get("chief_complaint")
+            other_text = st.session_state.get("chief_complaint_other", "").strip()
+
             if complaint == "선택 안 함":
                 st.warning("주 호소 항목을 선택해주세요.")
+            elif complaint == "기타 불편한 증상" and not other_text:
+                st.warning("기타 증상을 입력해주세요.")
             else:
                 # 주 호소에 따라 분기
                 if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
-                    st.session_state.step = 3  # 통증 양상
+                    st.session_state.step = 3
                 elif complaint == "턱관절 소리/잠김":
-                    st.session_state.step = 5  # 턱관절 관련
+                    st.session_state.step = 5
                 elif complaint == "기타 불편한 증상":
-                    st.session_state.step = 6  # 빈도 및 시기 등
+                    st.session_state.step = 6
 
-	    # 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
                 st.rerun()
+
 
 # STEP 3: 통증 양상
 elif st.session_state.step == 3:
