@@ -593,7 +593,7 @@ elif st.session_state.step == 5:
 
         if st.session_state.jaw_locked_now_value == "예":
             st.radio(
-                "**해당 증상은 조작해야 풀리나요?**",
+                "**해당 증상은 조작으로 풀리나요?**",
                 options=["예", "아니오", "선택 안 함"],
                 key="jaw_unlock_possible_widget_key",
                 index=get_radio_index("jaw_unlock_possible_value", ["예", "아니오", "선택 안 함"]),
