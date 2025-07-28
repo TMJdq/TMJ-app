@@ -593,7 +593,7 @@ elif st.session_state.step == 5:
 
         if st.session_state.jaw_locked_now_value == "예":
             st.radio(
-                "**해당 증상은 저절로 또는 조작으로 풀리나요?**",
+                "**해당 증상은 조작해야 풀리나요?**",
                 options=["예", "아니오", "선택 안 함"],
                 key="jaw_unlock_possible_widget_key",
                 index=get_radio_index("jaw_unlock_possible_value", ["예", "아니오", "선택 안 함"]),
@@ -658,7 +658,7 @@ elif st.session_state.step == 5:
                 if st.session_state.jaw_locked_now_value == "선택 안 함":
                     errors.append("현재 턱 잠김 여부를 선택해주세요.")
                 if st.session_state.jaw_locked_now_value == "예" and st.session_state.jaw_unlock_possible_value == "선택 안 함":
-                    errors.append("현재 턱 잠김이 풀리는지 여부를 선택해주세요.")
+                    errors.append("현재 턱 잠김이 조작으로 풀리는지 여부를 선택해주세요.")
                 if st.session_state.jaw_locked_now_value == "아니오":
                     if st.session_state.jaw_locked_past_value == "선택 안 함":
                         errors.append("과거 턱 잠김 경험 여부를 선택해주세요.")
@@ -1335,37 +1335,74 @@ elif st.session_state.step == 16:
 elif st.session_state.step == 17:
     st.title("자극 검사 (Provocation Tests)")
     st.markdown("---")
+
+
+    st.markdown(
+        "<span style='color:red;'>아래 항목은 실제 측정 및 검사가 필요할 수 있으며, 가능하신 부분만 기입해 주시면 됩니다.</span>",
+        unsafe_allow_html=True
+    )
+
     with st.container(border=True):
         st.markdown("**오른쪽으로 어금니를 강하게 물 때:**")
-        st.radio(label="", options=["통증", "통증 없음", "선택 안 함"], index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get('bite_right', '선택 안 함')) if 'bite_right' in st.session_state else 2, key="bite_right", label_visibility="collapsed")
-    
+        st.radio(
+            label="",
+            options=["통증", "통증 없음", "선택 안 함"],
+            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_right", "선택 안 함")),
+            key="bite_right",
+            label_visibility="collapsed"
+        )
+
         st.markdown("---")
         st.markdown("**왼쪽으로 어금니를 강하게 물 때:**")
-        st.radio(label="", options=["통증", "통증 없음", "선택 안 함"], index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get('bite_left', '선택 안 함')) if 'bite_left' in st.session_state else 2, key="bite_left", label_visibility="collapsed")
-    
+        st.radio(
+            label="",
+            options=["통증", "통증 없음", "선택 안 함"],
+            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_left", "선택 안 함")),
+            key="bite_left",
+            label_visibility="collapsed"
+        )
+
         st.markdown("---")
         st.markdown("**압력 가하기 (Loading Test):**")
-        st.radio(label="", options=["통증", "통증 없음", "선택 안 함"], index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get('loading_test', '선택 안 함')) if 'loading_test' in st.session_state else 2, key="loading_test", label_visibility="collapsed")
-    
+        st.radio(
+            label="",
+            options=["통증", "통증 없음", "선택 안 함"],
+            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("loading_test", "선택 안 함")),
+            key="loading_test",
+            label_visibility="collapsed"
+        )
+
         st.markdown("---")
         st.markdown("**저항 검사 (Resistance Test, 턱 움직임 막기):**")
-        st.radio(label="", options=["통증", "통증 없음", "선택 안 함"], index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get('resistance_test', '선택 안 함')) if 'resistance_test' in st.session_state else 2, key="resistance_test", label_visibility="collapsed")
-    
+        st.radio(
+            label="",
+            options=["통증", "통증 없음", "선택 안 함"],
+            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("resistance_test", "선택 안 함")),
+            key="resistance_test",
+            label_visibility="collapsed"
+        )
+
         st.markdown("---")
         st.markdown("**치아 마모 (Attrition)**")
-        st.radio(label="", options=["경미", "중간", "심함", "선택 안 함"], index=["경미", "중간", "심함", "선택 안 함"].index(st.session_state.get('attrition', '선택 안 함')) if 'attrition' in st.session_state else 3, key="attrition", label_visibility="collapsed")
-    
+        st.radio(
+            label="",
+            options=["경미", "중간", "심함", "선택 안 함"],
+            index=["경미", "중간", "심함", "선택 안 함"].index(st.session_state.get("attrition", "선택 안 함")),
+            key="attrition",
+            label_visibility="collapsed"
+        )
+
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             st.session_state.step = 16
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
             st.session_state.step = 18
- 
-	# 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
             st.rerun()
 
 # STEP 18: 기능 평가
