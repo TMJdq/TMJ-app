@@ -76,7 +76,7 @@ def compute_diagnoses(state):
     if is_yes(state.get("tmj_press_pain_value")):
         diagnoses.append("관절통 (Arthralgia)")
 
-    # 5. TMD에 기인한 두통 (Headache attributed to TMD)
+    # 5. TMD에 기인한 두통
     if (
         state.get("headache_with_jaw_value") == "예" and
         all(
@@ -94,20 +94,23 @@ def compute_diagnoses(state):
     ):
         diagnoses.append("TMD에 기인한 두통 (Headache attributed to TMD)")
 
-    # 6. 퇴행성 관절 질환 (Degenerative Joint Disease)
+    # 6. 퇴행성 관절 질환
     if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7. 감소 없는 디스크 변위 (Disc Displacement without Reduction)
+    # 7. 감소 없는 디스크 변위
     if is_yes(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
 
     # 8. 감소 없는 디스크 변위 - 개구 제한 동반
-    elif is_no(state.get("mao_fits_3fingers_value")):
+    if is_no(state.get("mao_fits_3fingers_value")) or is_no(state.get("jaw_needs_assist_open_value")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
     # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if is_yes(state.get("jaw_locked_now_value")):
+    if (
+        is_yes(state.get("jaw_locked_now_value")) and
+        is_yes(state.get("jaw_needs_assist_open_value"))
+    ):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 10. 감소 동반 디스크 변위
@@ -601,7 +604,7 @@ elif st.session_state.step == 5:
 
         if st.session_state.jaw_locked_now_value == "예":
             st.radio(
-                "**해당 증상은 조작으로 풀리나요?**",
+                "**해당 증상은 조작해야 풀리나요?**",
                 options=["예", "아니오", "선택 안 함"],
                 key="jaw_unlock_possible_widget_key",
                 index=get_radio_index("jaw_unlock_possible_value", ["예", "아니오", "선택 안 함"]),
