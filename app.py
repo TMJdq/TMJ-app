@@ -177,18 +177,22 @@ elif st.session_state.step == 1:
     with st.container(border=True):
         col_name, col_birthdate = st.columns(2)
         with col_name:
-            # key를 통해 세션 상태에 직접 접근하여 값 설정
             st.text_input("이름*", value=st.session_state.get('name', ''), key="name", placeholder="이름을 입력하세요")
             if 'name' in st.session_state.validation_errors:
                 st.error(st.session_state.validation_errors['name'])
         with col_birthdate:
-            # date_input은 datetime.date 객체를 반환하며, 초기값 설정
-            # st.session_state.birthdate가 존재하지 않을 경우 오늘 날짜로 초기화
-            st.date_input("생년월일*", value=st.session_state.get('birthdate', datetime.date(2000, 1, 1)), key="birthdate")
-            # date_input은 기본적으로 항상 유효한 값을 가짐
-        st.radio("성별*", ["남성", "여성", "기타", "선택 안 함"], index=["남성", "여성", "기타", "선택 안 함"].index(st.session_state.get('gender', '선택 안 함')), horizontal=True, key="gender")
+            st.date_input(
+                "생년월일*",
+                value=st.session_state.get('birthdate', datetime.date(2000, 1, 1)),
+                key="birthdate",
+                min_value=datetime.date(1900, 1, 1)
+            )
+        st.radio("성별*", ["남성", "여성", "기타", "선택 안 함"],
+                 index=["남성", "여성", "기타", "선택 안 함"].index(st.session_state.get('gender', '선택 안 함')),
+                 horizontal=True, key="gender")
         if 'gender' in st.session_state.validation_errors:
             st.error(st.session_state.validation_errors['gender'])
+
         col_email, col_phone = st.columns(2)
         with col_email:
             st.text_input("이메일*", value=st.session_state.get('email', ''), key="email", placeholder="예: user@example.com")
@@ -196,12 +200,12 @@ elif st.session_state.step == 1:
                 st.error(st.session_state.validation_errors['email'])
         with col_phone:
             st.text_input("연락처 (선택 사항)", value=st.session_state.get('phone', ''), key="phone", placeholder="예: 01012345678 (숫자만 입력)")
-            # 연락처는 선택 사항이므로 유효성 검사에서 제외
-        st.markdown("---") # 선택 사항 구분선
+
+        st.markdown("---")
         st.text_input("주소 (선택 사항)", value=st.session_state.get('address', ''), key="address", placeholder="도로명 주소 또는 지번 주소")
         st.text_input("직업 (선택 사항)", value=st.session_state.get('occupation', ''), key="occupation", placeholder="직업을 입력하세요")
         st.text_area("내원 목적 (선택 사항)", value=st.session_state.get('visit_reason', ''), key="visit_reason", placeholder="예: 턱에서 소리가 나고 통증이 있어서 진료를 받고 싶습니다.")
-    
+
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
@@ -210,7 +214,7 @@ elif st.session_state.step == 1:
             st.rerun()
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            st.session_state.validation_errors = {} 
+            st.session_state.validation_errors = {}
             mandatory_fields_filled = True
             if not st.session_state.get('name'):
                 st.session_state.validation_errors['name'] = "이름은 필수 입력 항목입니다."
@@ -221,15 +225,13 @@ elif st.session_state.step == 1:
             if not st.session_state.get('email'):
                 st.session_state.validation_errors['email'] = "이메일은 필수 입력 항목입니다."
                 mandatory_fields_filled = False
-            
-             # 유효성 검사에 통과했을 때만 다음 단계로 이동
+
             if mandatory_fields_filled:
                 st.session_state.step = 2
-            # 다음 단계로 즉시 이동하기 위해 st.rerun() 호출
                 st.rerun()
             else:
-            # 오류 메시지를 보여주기 위해 스크립트 다시 실행
                 st.rerun()
+
 # STEP 2: 주호소
 elif st.session_state.step == 2:
     st.title("주 호소 (Chief Complaint)")
@@ -261,9 +263,13 @@ elif st.session_state.step == 2:
 
         st.markdown("---")
         st.markdown("**문제가 처음 발생한 시기**")
-        st.date_input(
+        onset_options = [
+            "일주일 이내", "1개월 이내", "6개월 이내", "1년 이내", "1년 이상 전"
+        ]
+        st.selectbox(
             label="문제 발생 시기",
-            value=st.session_state.get('onset', datetime.date.today()),
+            options=onset_options,
+            index=onset_options.index(st.session_state.get("onset", "일주일 이내")),
             key="onset",
             label_visibility="collapsed"
         )
@@ -286,7 +292,6 @@ elif st.session_state.step == 2:
             elif complaint == "기타 불편한 증상" and not other_text:
                 st.warning("기타 증상을 입력해주세요.")
             else:
-                # 주 호소에 따라 분기
                 if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
                     st.session_state.step = 3
                 elif complaint == "턱관절 소리/잠김":
@@ -295,7 +300,6 @@ elif st.session_state.step == 2:
                     st.session_state.step = 6
 
                 st.rerun()
-
 
 # STEP 3: 통증 양상
 elif st.session_state.step == 3:
