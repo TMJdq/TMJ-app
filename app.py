@@ -50,7 +50,7 @@ def compute_diagnoses(state):
     def is_yes(val): return val == "예"
     def is_no(val): return val == "아니오"
 
-    # 1. 국소 근육통 (Local Myalgia) 먼저 판단
+    # 1. 국소 근육통 (Local Myalgia)
     if (
         is_yes(state.get("muscle_pressure_2s_value")) and
         is_yes(state.get("muscle_referred_pain_value")) and
@@ -66,7 +66,7 @@ def compute_diagnoses(state):
     ):
         diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
 
-    # 3. 근육통 (Myalgia) — 국소/방사성 근막통이 진단되지 않은 경우에만
+    # 3. 근육통 (Myalgia) — 국소/방사성이 없을 때만
     if (
         "국소 근육통 (Local Myalgia)" not in diagnoses and
         "방사성 근막통 (Myofascial Pain with Referral)" not in diagnoses
@@ -100,21 +100,30 @@ def compute_diagnoses(state):
     if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7~8. 감소 없는 디스크 변위
+    # 7. 감소 없는 디스크 변위 (손가락 3개 들어가는 경우)
     if is_yes(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-    elif is_no(state.get("mao_fits_3fingers_value")):
+
+    # 8. 감소 없는 디스크 변위 - 개구 제한 동반
+    if (
+        is_no(state.get("mao_fits_3fingers_value")) or
+        is_no(state.get("jaw_unlock_possible_value"))
+    ):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
-    # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if is_yes(state.get("jaw_locked_now_value")):
+    # 9. 감소 동반 간헐적 잠금 디스크 변위 — 조작해야 열릴 경우만 진단
+    if (
+        is_yes(state.get("jaw_locked_now_value")) and
+        is_yes(state.get("jaw_unlock_possible_value"))
+    ):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
-    # 10. 감소 동반 디스크 변위
+    # 10. 감소 동반 디스크 변위 (딸깍 소리 있을 경우)
     if state.get("tmj_sound_value") and "딸깍" in state.get("tmj_sound_value"):
         diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
+
 
 
 # 총 단계 수 (0부터 시작)
