@@ -714,16 +714,14 @@ elif st.session_state.step == 6:
 
         st.markdown("---")
         st.markdown("**두통이 있나요?**")
-        headache_yesno = st.radio("", ["예", "아니오", "선택 안 함"], index=["예", "아니오", "선택 안 함"].index(st.session_state.has_headache_now), key="has_headache_now")
+        st.radio("", ["예", "아니오", "선택 안 함"], index=["예", "아니오", "선택 안 함"].index(st.session_state.has_headache_now), key="has_headache_now")
 
-        if headache_yesno == "예":
+        if st.session_state.has_headache_now == "예":
             st.markdown("---")
             st.markdown("**두통 부위를 모두 선택해주세요.**")
             headache_area_opts = ["이마", "측두부(관자놀이)", "뒤통수", "정수리", "기타"]
-            st.session_state.headache_areas = st.multiselect(
-                "두통 부위", headache_area_opts,
-                default=[v for v in st.session_state.get("headache_areas", []) if v in headache_area_opts]
-            )
+            for area in headache_area_opts:
+                st.session_state.headache_areas = [a for a in headache_area_opts if st.checkbox(area, value=(area in st.session_state.headache_areas), key=f"headache_area_{area}")]
 
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state.headache_severity = st.slider("두통 강도", 0, 10, value=st.session_state.headache_severity)
@@ -734,17 +732,11 @@ elif st.session_state.step == 6:
 
             st.markdown("**두통을 유발하거나 악화시키는 요인이 있나요? (복수 선택 가능)**")
             trigger_opts = ["스트레스", "수면 부족", "음식 섭취", "소음", "밝은 빛", "기타"]
-            st.session_state.headache_triggers = st.multiselect(
-                "악화 요인", trigger_opts,
-                default=[v for v in st.session_state.get("headache_triggers", []) if v in trigger_opts]
-            )
+            st.session_state.headache_triggers = [opt for opt in trigger_opts if st.checkbox(opt, value=(opt in st.session_state.headache_triggers), key=f"trigger_{opt}")]
 
             st.markdown("**두통을 완화시키는 요인이 있나요? (복수 선택 가능)**")
             relief_opts = ["휴식", "약물", "안마", "수면", "기타"]
-            st.session_state.headache_reliefs = st.multiselect(
-                "경감 요인", relief_opts,
-                default=[v for v in st.session_state.get("headache_reliefs", []) if v in relief_opts]
-            )
+            st.session_state.headache_reliefs = [opt for opt in relief_opts if st.checkbox(opt, value=(opt in st.session_state.headache_reliefs), key=f"relief_{opt}")]
 
     st.markdown("---")
     with st.container(border=True):
@@ -800,7 +792,6 @@ elif st.session_state.step == 6:
                 (st.session_state.get("time_other", False) and st.session_state.get("time_other_text", "").strip() != "")
             )
 
-            # 두통 질문이 '예'일 경우 필수 항목 체크
             if st.session_state.has_headache_now == "예":
                 if not st.session_state.headache_areas:
                     errors.append("두통 부위를 최소 1개 이상 선택해주세요.")
@@ -824,6 +815,7 @@ elif st.session_state.step == 6:
             else:
                 st.session_state.step = 7
                 st.rerun()
+
                 
 # STEP 7: 습관
 elif st.session_state.step == 7:
