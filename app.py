@@ -701,6 +701,9 @@ elif st.session_state.step == 6:
     st.session_state.setdefault("headache_reliefs", [])
     st.session_state.setdefault("headache_severity", 0)
     st.session_state.setdefault("headache_frequency", "선택 안 함")
+    st.session_state.setdefault("headache_area_other_text", "")
+    st.session_state.setdefault("headache_trigger_other_text", "")
+    st.session_state.setdefault("headache_relief_other_text", "")
 
     with st.container(border=True):
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
@@ -725,6 +728,10 @@ elif st.session_state.step == 6:
                 if st.checkbox(area, value=(area in st.session_state.headache_areas), key=f"headache_area_{area}"):
                     selected_areas.append(area)
             st.session_state.headache_areas = selected_areas
+            if "기타" in selected_areas:
+                st.text_input("기타 부위:", key="headache_area_other_text")
+            else:
+                st.session_state.headache_area_other_text = ""
 
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state.headache_severity = st.slider("두통 강도", 0, 10, value=st.session_state.headache_severity)
@@ -740,6 +747,10 @@ elif st.session_state.step == 6:
                 if st.checkbox(trig, value=(trig in st.session_state.headache_triggers), key=f"trigger_{trig}"):
                     selected_triggers.append(trig)
             st.session_state.headache_triggers = selected_triggers
+            if "기타" in selected_triggers:
+                st.text_input("기타 악화요인:", key="headache_trigger_other_text")
+            else:
+                st.session_state.headache_trigger_other_text = ""
 
             st.markdown("**두통을 완화시키는 요인이 있나요? (복수 선택 가능)**")
             relief_opts = ["휴식", "약물", "안마", "수면", "기타"]
@@ -748,6 +759,10 @@ elif st.session_state.step == 6:
                 if st.checkbox(rel, value=(rel in st.session_state.headache_reliefs), key=f"relief_{rel}"):
                     selected_reliefs.append(rel)
             st.session_state.headache_reliefs = selected_reliefs
+            if "기타" in selected_reliefs:
+                st.text_input("기타 경감요인:", key="headache_relief_other_text")
+            else:
+                st.session_state.headache_relief_other_text = ""
 
     st.markdown("---")
     with st.container(border=True):
@@ -783,7 +798,8 @@ elif st.session_state.step == 6:
                 "frequency_choice", "frequency_other_text",
                 "time_morning", "time_afternoon", "time_evening", "time_other", "time_other_text",
                 "pain_level",
-                "has_headache_now", "headache_areas", "headache_triggers", "headache_reliefs", "headache_severity", "headache_frequency"
+                "has_headache_now", "headache_areas", "headache_triggers", "headache_reliefs", "headache_severity", "headache_frequency",
+                "headache_area_other_text", "headache_trigger_other_text", "headache_relief_other_text"
             ]:
                 st.session_state.pop(key, None)
             st.session_state.step = 2
