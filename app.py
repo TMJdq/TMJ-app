@@ -50,13 +50,7 @@ def compute_diagnoses(state):
     def is_yes(val): return val == "예"
     def is_no(val): return val == "아니오"
 
-    # 1. 근육통 (Myalgia)
-    if is_no(state.get("muscle_pressure_2s_value")):
-        diagnoses.append("근육통 (Myalgia)")
-    elif is_yes(state.get("muscle_pressure_2s_value")) and is_no(state.get("muscle_referred_pain_value")):
-        diagnoses.append("근육통 (Myalgia)")
-
-    # 2. 국소 근육통 (Local Myalgia)
+    # 1. 국소 근육통 (Local Myalgia) 먼저 판단
     if (
         is_yes(state.get("muscle_pressure_2s_value")) and
         is_yes(state.get("muscle_referred_pain_value")) and
@@ -64,13 +58,23 @@ def compute_diagnoses(state):
     ):
         diagnoses.append("국소 근육통 (Local Myalgia)")
 
-    # 3. 방사성 근막통 (Myofascial Pain with Referral)
+    # 2. 방사성 근막통 (Myofascial Pain with Referral)
     if (
         is_yes(state.get("muscle_pressure_2s_value")) and
         is_yes(state.get("muscle_referred_pain_value")) and
         is_yes(state.get("muscle_referred_remote_pain_value"))
     ):
         diagnoses.append("방사성 근막통 (Myofascial Pain with Referral)")
+
+    # 3. 근육통 (Myalgia) — 국소/방사성 근막통이 진단되지 않은 경우에만
+    if (
+        "국소 근육통 (Local Myalgia)" not in diagnoses and
+        "방사성 근막통 (Myofascial Pain with Referral)" not in diagnoses
+    ):
+        if is_no(state.get("muscle_pressure_2s_value")):
+            diagnoses.append("근육통 (Myalgia)")
+        elif is_yes(state.get("muscle_pressure_2s_value")) and is_no(state.get("muscle_referred_pain_value")):
+            diagnoses.append("근육통 (Myalgia)")
 
     # 4. 관절통 (Arthralgia)
     if is_yes(state.get("tmj_press_pain_value")):
@@ -79,14 +83,12 @@ def compute_diagnoses(state):
     # 5. TMD에 기인한 두통
     if (
         state.get("headache_with_jaw_value") == "예" and
-        all(
-            is_yes(state.get(k)) for k in [
-                "headache_temples_value",
-                "headache_reproduce_by_pressure_value",
-                "headache_not_elsewhere_value",
-                "headache_with_jaw_value"
-            ]
-        )
+        all(is_yes(state.get(k)) for k in [
+            "headache_temples_value",
+            "headache_reproduce_by_pressure_value",
+            "headache_not_elsewhere_value",
+            "headache_with_jaw_value"
+        ])
     ) or (
         state.get("headache_with_jaw_value") == "아니오" and
         is_yes(state.get("headache_temples_value")) and
@@ -98,19 +100,14 @@ def compute_diagnoses(state):
     if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7. 감소 없는 디스크 변위
+    # 7~8. 감소 없는 디스크 변위
     if is_yes(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
-
-    # 8. 감소 없는 디스크 변위 - 개구 제한 동반
-    if is_no(state.get("mao_fits_3fingers_value")) or is_no(state.get("jaw_needs_assist_open_value")):
+    elif is_no(state.get("mao_fits_3fingers_value")):
         diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
 
     # 9. 감소 동반 간헐적 잠금 디스크 변위
-    if (
-        is_yes(state.get("jaw_locked_now_value")) and
-        is_yes(state.get("jaw_needs_assist_open_value"))
-    ):
+    if is_yes(state.get("jaw_locked_now_value")):
         diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
 
     # 10. 감소 동반 디스크 변위
