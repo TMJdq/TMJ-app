@@ -262,7 +262,7 @@ elif st.session_state.step == 2:
             st.session_state.chief_complaint_other = ""
 
         st.markdown("---")
-        st.markdown("**문제가 처음 발생한 시기**")
+        st.markdown("**문제가 처음 발생한 시기가 어떻게 되나요?**")
         onset_options = [
             "일주일 이내", "1개월 이내", "6개월 이내", "1년 이내", "1년 이상 전", "선택 안 함"
         ]
@@ -1421,8 +1421,8 @@ elif st.session_state.step == 18:
         st.markdown("**턱관절 증상으로 인해 일상생활(음식 섭취, 말하기, 하품 등)에 불편함을 느끼시나요?**")
         st.radio(
             label="일상생활 영향",
-            options=["전혀 불편하지 않다", "약간 불편하다", "자주 불편하다", "매우 불편하다", "선택 안 함"],
-            index=["전혀 불편하지 않다", "약간 불편하다", "자주 불편하다", "매우 불편하다", "선택 안 함"].index(
+            options=["전혀 불편하지 않음", "약간 불편함", "자주 불편함", "매우 불편함", "선택 안 함"],
+            index=["전혀 불편하지 않음", "약간 불편함", "자주 불편함", "매우 불편함", "선택 안 함"].index(
                 st.session_state.get("impact_daily", "선택 안 함")
             ),
             key="impact_daily",
