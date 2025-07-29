@@ -264,12 +264,12 @@ elif st.session_state.step == 2:
         st.markdown("---")
         st.markdown("**문제가 처음 발생한 시기**")
         onset_options = [
-            "일주일 이내", "1개월 이내", "6개월 이내", "1년 이내", "1년 이상 전"
+            "일주일 이내", "1개월 이내", "6개월 이내", "1년 이내", "1년 이상 전", "선택 안 함"
         ]
-        st.selectbox(
-            label="문제 발생 시기",
+        st.radio(
+            label="",
             options=onset_options,
-            index=onset_options.index(st.session_state.get("onset", "일주일 이내")),
+            index=onset_options.index(st.session_state.get("onset", "선택 안 함")),
             key="onset",
             label_visibility="collapsed"
         )
@@ -286,11 +286,14 @@ elif st.session_state.step == 2:
         if st.button("다음 단계로 이동 👉"):
             complaint = st.session_state.get("chief_complaint")
             other_text = st.session_state.get("chief_complaint_other", "").strip()
+            onset_selected = st.session_state.get("onset")
 
             if complaint == "선택 안 함":
                 st.warning("주 호소 항목을 선택해주세요.")
             elif complaint == "기타 불편한 증상" and not other_text:
                 st.warning("기타 증상을 입력해주세요.")
+            elif onset_selected == "선택 안 함":
+                st.warning("문제 발생 시기를 선택해주세요.")
             else:
                 if complaint in ["턱 주변의 통증(턱 근육, 관자놀이, 귀 앞쪽)", "턱 움직임 관련 두통"]:
                     st.session_state.step = 3
@@ -300,6 +303,7 @@ elif st.session_state.step == 2:
                     st.session_state.step = 6
 
                 st.rerun()
+
 
 # STEP 3: 통증 양상
 elif st.session_state.step == 3:
