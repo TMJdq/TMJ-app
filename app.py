@@ -720,8 +720,11 @@ elif st.session_state.step == 6:
             st.markdown("---")
             st.markdown("**두통 부위를 모두 선택해주세요.**")
             headache_area_opts = ["이마", "측두부(관자놀이)", "뒤통수", "정수리", "기타"]
+            selected_areas = []
             for area in headache_area_opts:
-                st.session_state.headache_areas = [a for a in headache_area_opts if st.checkbox(area, value=(area in st.session_state.headache_areas), key=f"headache_area_{area}")]
+                if st.checkbox(area, value=(area in st.session_state.headache_areas), key=f"headache_area_{area}"):
+                    selected_areas.append(area)
+            st.session_state.headache_areas = selected_areas
 
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state.headache_severity = st.slider("두통 강도", 0, 10, value=st.session_state.headache_severity)
@@ -732,11 +735,19 @@ elif st.session_state.step == 6:
 
             st.markdown("**두통을 유발하거나 악화시키는 요인이 있나요? (복수 선택 가능)**")
             trigger_opts = ["스트레스", "수면 부족", "음식 섭취", "소음", "밝은 빛", "기타"]
-            st.session_state.headache_triggers = [opt for opt in trigger_opts if st.checkbox(opt, value=(opt in st.session_state.headache_triggers), key=f"trigger_{opt}")]
+            selected_triggers = []
+            for trig in trigger_opts:
+                if st.checkbox(trig, value=(trig in st.session_state.headache_triggers), key=f"trigger_{trig}"):
+                    selected_triggers.append(trig)
+            st.session_state.headache_triggers = selected_triggers
 
             st.markdown("**두통을 완화시키는 요인이 있나요? (복수 선택 가능)**")
             relief_opts = ["휴식", "약물", "안마", "수면", "기타"]
-            st.session_state.headache_reliefs = [opt for opt in relief_opts if st.checkbox(opt, value=(opt in st.session_state.headache_reliefs), key=f"relief_{opt}")]
+            selected_reliefs = []
+            for rel in relief_opts:
+                if st.checkbox(rel, value=(rel in st.session_state.headache_reliefs), key=f"relief_{rel}"):
+                    selected_reliefs.append(rel)
+            st.session_state.headache_reliefs = selected_reliefs
 
     st.markdown("---")
     with st.container(border=True):
@@ -815,8 +826,7 @@ elif st.session_state.step == 6:
             else:
                 st.session_state.step = 7
                 st.rerun()
-
-                
+               
 # STEP 7: 습관
 elif st.session_state.step == 7:
     st.title("습관 (Habits)")
