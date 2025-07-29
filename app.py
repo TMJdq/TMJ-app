@@ -721,27 +721,50 @@ elif st.session_state.step == 6:
         st.slider("통증 정도 선택", 0, 10, value=st.session_state.get("pain_level", 0), key="pain_level")
 
     st.markdown("---")
+
+    # ✅ 두통 질문 추가
+    with st.container(border=True):
+        st.markdown("**현재 두통이 있나요?**")
+        headache_choice = st.radio("두통 여부", ["예", "아니오", "선택 안 함"], index=["예", "아니오", "선택 안 함"].index(st.session_state.get("headache_now", "선택 안 함")), key="headache_now")
+
+        if headache_choice == "예":
+            st.markdown("**🧠 두통 부위 (복수 선택 가능)**")
+            headache_area_opts = ["이마", "관자놀이", "뒤통수", "정수리", "측두부"]
+            st.session_state.headache_areas = st.multiselect("두통 부위", headache_area_opts, default=st.session_state.get("headache_areas", []), key="headache_areas")
+
+            st.markdown("**🧠 두통의 빈도는 어느 정도인가요?**")
+            headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
+            st.radio("두통 빈도", headache_freq_opts, index=headache_freq_opts.index(st.session_state.get("headache_freq", "선택 안 함")), key="headache_freq")
+
+            st.markdown("**🧠 현재 두통 강도는 어느 정도인가요? (0~10)**")
+            st.slider("두통 강도", 0, 10, value=st.session_state.get("headache_level", 0), key="headache_level")
+
+            st.markdown("**🧠 두통을 악화시키는 요인 (복수 선택 가능)**")
+            trigger_opts = ["스트레스", "수면 부족", "턱 사용", "기타"]
+            st.session_state.headache_triggers = st.multiselect("악화 요인", trigger_opts, default=st.session_state.get("headache_triggers", []), key="headache_triggers")
+
+            st.markdown("**🧠 두통을 완화시키는 요인 (복수 선택 가능)**")
+            relief_opts = ["휴식", "수면", "마사지", "기타"]
+            st.session_state.headache_reliefs = st.multiselect("완화 요인", relief_opts, default=st.session_state.get("headache_reliefs", []), key="headache_reliefs")
+
+    st.markdown("---")
     col1, col2 = st.columns(2)
 
-    # ✅ Step 6 → Step 2로 이동하며 Step 3~6 초기화
     with col1:
         if st.button("이전 단계(주호소 질문으로)"):
             for key in [
-                # Step 3
                 "jaw_aggravation", "pain_quality", "pain_quality_other",
-                # Step 4
                 "pain_types_value", "muscle_movement_pain_value", "muscle_pressure_2s_value", "muscle_referred_pain_value",
                 "tmj_movement_pain_value", "tmj_press_pain_value",
                 "headache_temples_value", "headache_with_jaw_value",
                 "headache_reproduce_by_pressure_value", "headache_not_elsewhere_value",
-                # Step 5
                 "tmj_sound_value", "crepitus_confirmed_value", "tmj_click_context",
                 "jaw_locked_now_value", "jaw_unlock_possible_value",
                 "jaw_locked_past_value", "mao_fits_3fingers_value",
-                # Step 6
                 "frequency_choice", "frequency_other_text",
                 "time_morning", "time_afternoon", "time_evening", "time_other", "time_other_text",
-                "pain_level"
+                "pain_level",
+                "headache_now", "headache_areas", "headache_freq", "headache_level", "headache_triggers", "headache_reliefs"
             ]:
                 st.session_state.pop(key, None)
             st.session_state.step = 2
@@ -760,7 +783,23 @@ elif st.session_state.step == 6:
                 or st.session_state.get("time_evening", False)
                 or (st.session_state.get("time_other", False) and st.session_state.get("time_other_text", "").strip() != "")
             )
-            if freq_valid and time_valid:
+
+            headache_ok = True
+            if st.session_state.get("headache_now") == "예":
+                if not st.session_state.get("headache_areas"):
+                    st.warning("두통 부위를 최소 1개 이상 선택해주세요.")
+                    headache_ok = False
+                if st.session_state.get("headache_freq", "선택 안 함") == "선택 안 함":
+                    st.warning("두통 빈도를 선택해주세요.")
+                    headache_ok = False
+                if not st.session_state.get("headache_triggers"):
+                    st.warning("두통의 악화 요인을 최소 1개 이상 선택해주세요.")
+                    headache_ok = False
+                if not st.session_state.get("headache_reliefs"):
+                    st.warning("두통의 완화 요인을 최소 1개 이상 선택해주세요.")
+                    headache_ok = False
+
+            if freq_valid and time_valid and headache_ok:
                 st.session_state.step = 7
                 st.rerun()
             else:
@@ -768,9 +807,8 @@ elif st.session_state.step == 6:
                     st.warning("빈도와 시간대 항목을 모두 입력하거나 선택해주세요.")
                 elif not freq_valid:
                     st.warning("빈도 항목을 입력하거나 선택해주세요.")
-                else:
+                elif not time_valid:
                     st.warning("시간대 항목을 입력하거나 선택해주세요.")
-
 
 # STEP 7: 습관
 elif st.session_state.step == 7:
