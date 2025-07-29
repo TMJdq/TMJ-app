@@ -720,6 +720,18 @@ elif st.session_state.step == 6:
         st.slider("통증 정도 선택", 0, 10, value=st.session_state.get("pain_level", 0), key="pain_level")
 
         st.markdown("---")
+        st.markdown("**주로 어느 시간대에 발생하나요?**")
+        st.checkbox("아침", value=st.session_state.get("time_morning", False), key="time_morning")
+        st.checkbox("오후", value=st.session_state.get("time_afternoon", False), key="time_afternoon")
+        st.checkbox("저녁", value=st.session_state.get("time_evening", False), key="time_evening")
+        st.checkbox("기타 시간대", value=st.session_state.get("time_other", False), key="time_other")
+
+        if st.session_state.get("time_other"):
+            st.text_input("기타 시간대:", key="time_other_text")
+        else:
+            st.session_state.time_other_text = ""
+
+        st.markdown("---")
         st.markdown("**두통이 있나요?**")
         st.radio("", ["예", "아니오", "선택 안 함"], index=["예", "아니오", "선택 안 함"].index(st.session_state.has_headache_now), key="has_headache_now")
 
@@ -740,7 +752,7 @@ elif st.session_state.step == 6:
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state.headache_severity = st.slider("두통 강도", 0, 10, value=st.session_state.headache_severity)
 
-            st.markdown("**두통은 얼마나 자주 발생하나요?**")
+            st.markdown("**두통 빈도는 얼마나 자주 발생하나요?**")
             headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
             st.radio("", headache_freq_opts, index=headache_freq_opts.index(st.session_state.get("headache_frequency", "선택 안 함")), key="headache_frequency")
 
@@ -767,19 +779,6 @@ elif st.session_state.step == 6:
                 st.text_input("기타 경감요인:", key="headache_relief_other_text")
             else:
                 st.session_state.headache_relief_other_text = ""
-
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("**주로 어느 시간대에 발생하나요?**")
-        st.checkbox("아침", value=st.session_state.get("time_morning", False), key="time_morning")
-        st.checkbox("오후", value=st.session_state.get("time_afternoon", False), key="time_afternoon")
-        st.checkbox("저녁", value=st.session_state.get("time_evening", False), key="time_evening")
-        st.checkbox("기타 시간대", value=st.session_state.get("time_other", False), key="time_other")
-
-        if st.session_state.get("time_other"):
-            st.text_input("기타 시간대:", key="time_other_text")
-        else:
-            st.session_state.time_other_text = ""
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -842,6 +841,7 @@ elif st.session_state.step == 6:
             else:
                 st.session_state.step = 7
                 st.rerun()
+
                
 # STEP 7: 습관
 elif st.session_state.step == 7:
