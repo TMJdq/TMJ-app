@@ -1124,20 +1124,22 @@ elif st.session_state.step == 13:
         st.checkbox("목 통증", value=st.session_state.get('neck_pain', False), key="neck_pain", disabled=disabled_others_neck)
         st.checkbox("어깨 통증", value=st.session_state.get('shoulder_pain', False), key="shoulder_pain", disabled=disabled_others_neck)
         st.checkbox("뻣뻣함(강직감)", value=st.session_state.get('stiffness', False), key="stiffness", disabled=disabled_others_neck)
+        
         st.session_state.neck_shoulder_symptoms = {
             "목 통증": st.session_state.get('neck_pain', False),
             "어깨 통증": st.session_state.get('shoulder_pain', False),
             "뻣뻣함(강직감)": st.session_state.get('stiffness', False),
         }
+
     st.markdown("---")
     with st.container(border=True):
         st.markdown("**다음 중 해당되는 증상이 있다면 모두 선택해주세요. (복수 선택 가능)**")
         st.session_state.additional_symptoms = {
-            "등 상부 통증": st.checkbox("등 상부 통증", key="upper_back_pain"),
-            "두개저 통증 (머리 뒤통수 밑)": st.checkbox("두개저 통증", key="occipital_pain"),
-            "측두부 통증 (관자놀이)": st.checkbox("측두부 통증", key="temple_pain"),
-            "턱 아래 통증 (설골 주변)": st.checkbox("턱 아래 통증", key="under_jaw_pain"),
+            "눈 통증": st.checkbox("눈 통증", key="eye_pain"),
+            "코 통증": st.checkbox("코 통증", key="nose_pain"),
+            "목구멍 통증": st.checkbox("목구멍 통증", key="throat_pain"),
         }
+
     st.markdown("---")
     with st.container(border=True):
         st.markdown("**목 외상 관련 이력이 있으신가요?**")
@@ -1155,12 +1157,14 @@ elif st.session_state.step == 13:
             if 'trauma_detail' in st.session_state:
                 st.session_state.trauma_detail = ""
         st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
+
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
             st.session_state.step = 12
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
             trauma_selected = st.session_state.get('neck_trauma_radio') in ["예", "아니오"]
@@ -1177,9 +1181,7 @@ elif st.session_state.step == 13:
                 st.warning("목 외상 여부를 선택해주세요.")
             else:
                 st.session_state.step = 14
- 
-	# 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
-            st.rerun()
+                st.rerun()
 
 # STEP 14: 정서적 스트레스 이력
 elif st.session_state.step == 14:
