@@ -716,6 +716,10 @@ elif st.session_state.step == 6:
             st.session_state.frequency_other_text = ""
 
         st.markdown("---")
+        st.markdown("**(통증이 있을 시) 현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
+        st.slider("통증 정도 선택", 0, 10, value=st.session_state.get("pain_level", 0), key="pain_level")
+
+        st.markdown("---")
         st.markdown("**두통이 있나요?**")
         st.radio("", ["예", "아니오", "선택 안 함"], index=["예", "아니오", "선택 안 함"].index(st.session_state.has_headache_now), key="has_headache_now")
 
@@ -776,10 +780,6 @@ elif st.session_state.step == 6:
             st.text_input("기타 시간대:", key="time_other_text")
         else:
             st.session_state.time_other_text = ""
-
-        st.markdown("---")
-        st.markdown("**(통증이 있을 시) 현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
-        st.slider("통증 정도 선택", 0, 10, value=st.session_state.get("pain_level", 0), key="pain_level")
 
     st.markdown("---")
     col1, col2 = st.columns(2)
