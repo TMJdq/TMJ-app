@@ -69,6 +69,24 @@ def sync_multiple_keys(mapping: dict):
     """ 여러 widget_key → state_key 복사 """
     for widget_key, state_key in mapping.items():
         st.session_state[state_key] = st.session_state.get(widget_key, "")
+    
+def update_textarea(key):
+    st.session_state[key] = st.session_state.get(key, "")
+
+def update_radio_state(key):
+    st.session_state[key] = st.session_state.get(key, "")
+
+def update_neck_none():
+    if st.session_state.get("neck_none", False):
+        st.session_state["neck_pain"] = False
+        st.session_state["shoulder_pain"] = False
+        st.session_state["stiffness"] = False
+
+def update_neck_symptom(symptom_key):
+    if st.session_state.get(symptom_key, False):
+        st.session_state["neck_none"] = False
+
+
 
 
 import streamlit as st
@@ -1626,53 +1644,51 @@ elif st.session_state.step == 13:
 
         st.checkbox(
             "없음",
-            value=st.session_state.get("neck_none", False),
+            value=st.session_state.get('neck_none', False),
             key="neck_none",
-            on_change=clear_neck_symptoms_if_none
+            on_change=update_neck_none
         )
-
-        disabled = st.session_state.get("neck_none", False)
 
         st.checkbox(
             "목 통증",
-            value=st.session_state.get("neck_pain", False),
+            value=st.session_state.get('neck_pain', False),
             key="neck_pain",
-            disabled=disabled,
-            on_change=sync_checkbox_state,
-            args=("neck_pain", "neck_pain")
+            on_change=update_neck_symptom,
+            args=("neck_pain",),
+            disabled=st.session_state.get("neck_none", False)
         )
 
         st.checkbox(
             "어깨 통증",
-            value=st.session_state.get("shoulder_pain", False),
+            value=st.session_state.get('shoulder_pain', False),
             key="shoulder_pain",
-            disabled=disabled,
-            on_change=sync_checkbox_state,
-            args=("shoulder_pain", "shoulder_pain")
+            on_change=update_neck_symptom,
+            args=("shoulder_pain",),
+            disabled=st.session_state.get("neck_none", False)
         )
 
         st.checkbox(
             "뻣뻣함(강직감)",
-            value=st.session_state.get("stiffness", False),
+            value=st.session_state.get('stiffness', False),
             key="stiffness",
-            disabled=disabled,
-            on_change=sync_checkbox_state,
-            args=("stiffness", "stiffness")
+            on_change=update_neck_symptom,
+            args=("stiffness",),
+            disabled=st.session_state.get("neck_none", False)
         )
 
-        st.session_state["neck_shoulder_symptoms"] = {
-            "목 통증": st.session_state.get("neck_pain", False),
-            "어깨 통증": st.session_state.get("shoulder_pain", False),
-            "뻣뻣함(강직감)": st.session_state.get("stiffness", False),
+        st.session_state.neck_shoulder_symptoms = {
+            "목 통증": st.session_state.get('neck_pain', False),
+            "어깨 통증": st.session_state.get('shoulder_pain', False),
+            "뻣뻣함(강직감)": st.session_state.get('stiffness', False),
         }
 
     st.markdown("---")
     with st.container(border=True):
         st.markdown("**다음 중 해당되는 증상이 있다면 모두 선택해주세요. (복수 선택 가능)**")
-        st.session_state["additional_symptoms"] = {
-            "눈 통증": st.checkbox("눈 통증", value=st.session_state.get("eye_pain", False), key="eye_pain"),
-            "코 통증": st.checkbox("코 통증", value=st.session_state.get("nose_pain", False), key="nose_pain"),
-            "목구멍 통증": st.checkbox("목구멍 통증", value=st.session_state.get("throat_pain", False), key="throat_pain"),
+        st.session_state.additional_symptoms = {
+            "눈 통증": st.checkbox("눈 통증", key="eye_pain"),
+            "코 통증": st.checkbox("코 통증", key="nose_pain"),
+            "목구멍 통증": st.checkbox("목구멍 통증", key="throat_pain"),
         }
 
     st.markdown("---")
@@ -1681,27 +1697,21 @@ elif st.session_state.step == 13:
         st.radio(
             label="",
             options=["예", "아니오", "선택 안 함"],
-            index=["예", "아니오", "선택 안 함"].index(st.session_state.get("neck_trauma_radio", "선택 안 함")),
+            index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')),
             key="neck_trauma_radio",
-            on_change=sync_radio,
-            args=("neck_trauma_radio", "neck_trauma"),
             label_visibility="collapsed"
         )
 
-        if st.session_state.get("neck_trauma_radio") == "예":
+        if st.session_state.get('neck_trauma_radio') == "예":
             st.markdown("있다면 자세히 적어주세요:")
-            st.text_input(
-                label="",
-                value=st.session_state.get("trauma_detail", ""),
-                key="trauma_detail",
-                label_visibility="collapsed"
-            )
+            st.text_input(label="", value=st.session_state.get('trauma_detail', ''), key="trauma_detail", label_visibility="collapsed")
         else:
             st.session_state["trauma_detail"] = ""
 
+        st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
+
     st.markdown("---")
     col1, col2 = st.columns(2)
-
     with col1:
         if st.button("이전 단계"):
             st.session_state.step = 12
@@ -1709,13 +1719,17 @@ elif st.session_state.step == 13:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            trauma_selected = st.session_state.get("neck_trauma_radio") in ["예", "아니오"]
-            symptoms_selected = st.session_state.get("neck_none", False) or \
-                                st.session_state.get("neck_pain", False) or \
-                                st.session_state.get("shoulder_pain", False) or \
-                                st.session_state.get("stiffness", False)
+            trauma_selected = st.session_state.get('neck_trauma_radio') in ["예", "아니오"]
+            symptoms_selected = st.session_state.get('neck_none', False) or \
+                                st.session_state.get('neck_pain', False) or \
+                                st.session_state.get('shoulder_pain', False) or \
+                                st.session_state.get('stiffness', False)
 
-            if st.session_state.get("neck_none") and (st.session_state.get("neck_pain") or st.session_state.get("shoulder_pain") or st.session_state.get("stiffness")):
+            if st.session_state.get('neck_none', False) and (
+                st.session_state.get('neck_pain', False) or
+                st.session_state.get('shoulder_pain', False) or
+                st.session_state.get('stiffness', False)
+            ):
                 st.warning("'없음'과 다른 증상을 동시에 선택할 수 없습니다. 다시 확인해주세요.")
             elif not symptoms_selected:
                 st.warning("증상에서 최소 하나를 선택하거나 '없음'을 체크해주세요.")
