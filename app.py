@@ -1681,15 +1681,14 @@ def create_diagnosis_pdf(diagnosis_data):
     pdf_buffer.seek(0)
     return pdf_buffer
 
-# Streamlit 앱의 메인 로직입니다.
-# 세션 상태가 초기화되지 않았으면, 초기화합니다.
+
 if 'step' not in st.session_state:
     st.session_state.step = 0
     st.session_state.validation_errors = {}
     for key, default in diagnosis_keys.items():
         st.session_state[key] = default
 
-st.title("턱관절 자가문진 웹앱 (예시)")
+st.title("결과 PDF 다운로드")
 st.write(f"현재 단계: {st.session_state.step + 1}/{total_steps}")
 
 # 이 부분에 실제 문진 질문 로직이 들어갑니다.
