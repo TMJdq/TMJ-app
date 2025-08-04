@@ -30,10 +30,12 @@ for key, default in diagnosis_keys.items():
     if key not in st.session_state:
         st.session_state[key] = default
 
-def create_diagnosis_pdf(diagnosis_data):
-    from fpdf import FPDF
-    from pathlib import Path
+from fpdf import FPDF
+from pathlib import Path
+from io import BytesIO
+import streamlit as st  # 필요 시
 
+def create_diagnosis_pdf(diagnosis_data):
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
 
@@ -52,25 +54,11 @@ def create_diagnosis_pdf(diagnosis_data):
         pdf.cell(0, 10, f'{key}: {value}', 0, 1)
         pdf.ln(2)
 
-    return pdf.output(dest='S').encode('latin1')
-
-
-    # 제목
-    pdf.set_font('NanumGothic', '', 16)
-    pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
-    pdf.ln(10) # 줄바꿈
-
-    # 진단 결과 내용 추가
-    pdf.set_font('NanumGothic', '', 12)
-    for key, value in diagnosis_data.items():
-        # 키를 보기 좋은 한글로 변환하는 로직을 추가할 수 있습니다.
-        # 예: key_display = key.replace('_', ' ').title()
-        
-        pdf.cell(0, 10, f'{key}: {value}', 0, 1)
-        pdf.ln(2) # 간격 조절
-
-    # PDF를 바이트 형태로 반환
-    return pdf.output(dest='S').encode('latin1')
+    # PDF를 BytesIO 객체에 저장하여 반환
+    pdf_buffer = BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
 
 # --- 페이지 설정 ---
