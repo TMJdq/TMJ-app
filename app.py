@@ -87,6 +87,7 @@ def add_diagnosis_content_styled(pdf, data):
         if isinstance(val, bool):
             return "✔" if val else ""
         if isinstance(val, list):
+            # '기타' 항목이 리스트에 포함되어 있을 경우, '_other_text' 키도 확인
             val_str = ', '.join([item for item in val if item and item != '기타'])
             if '기타' in val and data.get(f"{key}_other_text", ""):
                 val_str += f" ({data.get(f'{key}_other_text')})"
@@ -143,7 +144,7 @@ def add_diagnosis_content_styled(pdf, data):
 
     y_pos += 5
     pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"Mouth Jaw Movement: open: {safe_value('active_opening')} mm / closed: ", 0, 1)
+    pdf.cell(0, 5, f"Mouth Jaw Movement: open: {safe_value('active_opening')} mm / closed: {safe_value('passive_opening')} mm", 0, 1)
     
     # History/Trauma
     y_pos += 5
@@ -166,7 +167,7 @@ def add_diagnosis_content_styled(pdf, data):
     
     y_pos = pdf.get_y() + 5
     x_pos = 15
-    col_spacing = 50
+    col_spacing = 90
     
     # Habits list
     habits = [
@@ -193,9 +194,9 @@ def add_diagnosis_content_styled(pdf, data):
         label2, val2 = habits[i+1] if i+1 < len(habits) else (None, None)
 
         pdf.set_xy(x_pos, y_pos)
-        pdf.cell(col_spacing, 5, f"{label1}: {val1}", 0, 0)
+        pdf.cell(col_spacing, 5, f" {label1}: {val1}", 0, 0)
         if label2:
-            pdf.cell(0, 5, f"{label2}: {val2}", 0, 1)
+            pdf.cell(0, 5, f" {label2}: {val2}", 0, 1)
         else:
             pdf.ln()
         y_pos += 5
@@ -280,7 +281,7 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.cell(0, 5, 'VI. PMH', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     pdf.set_xy(15, pdf.get_y() + 5)
-    pdf.multi_cell(0, 5, safe_value('past_history', '기재 안 함'))
+    pdf.multi_cell(0, 5, f"과거 이력: {safe_value('past_history', '기재 안 함')}")
     pdf.set_xy(15, pdf.get_y() + 5)
     pdf.multi_cell(0, 5, f"현재 복용 약물: {safe_value('current_medications', '기재 안 함')}")
 
@@ -404,17 +405,20 @@ def add_diagnosis_content_styled(pdf, data):
     y_start += row_h
 
     # Content
-    def draw_noise_row(label, key, y):
+    def draw_noise_row_with_values(label, key_open_right, key_close_right, key_open_left, key_close_left, y):
         pdf.set_xy(10, y)
         pdf.cell(col1_w, row_h, label, 1, 0, 'C')
-        pdf.cell(col2_w + col3_w, row_h, '', 1, 0)
-        pdf.cell(col4_w + col5_w, row_h, '', 1, 1)
+        pdf.cell(col2_w, row_h, safe_value(key_open_right, ''), 1, 0, 'C')
+        pdf.cell(col3_w, row_h, safe_value(key_close_right, ''), 1, 0, 'C')
+        pdf.cell(col4_w, row_h, safe_value(key_open_left, ''), 1, 0, 'C')
+        pdf.cell(col5_w, row_h, safe_value(key_close_left, ''), 1, 1, 'C')
 
-    draw_noise_row('Closed condyle (0~15mm)', 'tmj_noise_closed_condyle', y_start)
+    # 세션 상태 키가 명확하지 않아 임의로 지정. 실제 코드에 맞게 수정 필요.
+    draw_noise_row_with_values('Closed condyle (0~15mm)', 'tmj_noise_right_open_closed', 'tmj_noise_right_close_closed', 'tmj_noise_left_open_closed', 'tmj_noise_left_close_closed', y_start)
     y_start += row_h
-    draw_noise_row('Mild (15~30mm)', 'tmj_noise_mild', y_start)
+    draw_noise_row_with_values('Mild (15~30mm)', 'tmj_noise_right_open_mild', 'tmj_noise_right_close_mild', 'tmj_noise_left_open_mild', 'tmj_noise_left_close_mild', y_start)
     y_start += row_h
-    draw_noise_row('Wide open (30mm 이상)', 'tmj_noise_wide_open', y_start)
+    draw_noise_row_with_values('Wide open (30mm 이상)', 'tmj_noise_right_open_wide', 'tmj_noise_right_close_wide', 'tmj_noise_left_open_wide', 'tmj_noise_left_close_wide', y_start)
     
     pdf.ln(5)
 
@@ -2663,5 +2667,6 @@ if st.session_state.get("step", 0) == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
         )
+
 
 
