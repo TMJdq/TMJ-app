@@ -87,8 +87,6 @@ def update_neck_symptom(symptom_key):
         st.session_state["neck_none"] = False
 
 
-
-
 import streamlit as st
 
 with st.expander("🔍 세션 상태 보기 (디버깅용)", expanded=False):
@@ -1989,17 +1987,18 @@ elif st.session_state.step == 17:
 elif st.session_state.step == 18:
     st.title("기능 평가 (Functional Impact)")
     st.markdown("---")
+
     with st.container(border=True):
         st.markdown("**턱관절 증상으로 인해 일상생활(음식 섭취, 말하기, 하품 등)에 불편함을 느끼시나요?**")
         st.radio(
             label="일상생활 영향",
             options=["전혀 불편하지 않음", "약간 불편함", "자주 불편함", "매우 불편함", "선택 안 함"],
-            key="impact_daily",
             index=["전혀 불편하지 않음", "약간 불편함", "자주 불편함", "매우 불편함", "선택 안 함"].index(
                 st.session_state.get("impact_daily", "선택 안 함")
             ),
-            on_change=update_functional_impact,
-            args=("impact_daily",),
+            key="impact_daily",
+            on_change=sync_widget_key,
+            args=("impact_daily", "impact_daily"),
             label_visibility="collapsed"
         )
 
@@ -2014,7 +2013,6 @@ elif st.session_state.step == 18:
                 "매우 큰 영향으로 일/학업 중단 고려한 적 있음",
                 "선택 안 함"
             ],
-            key="impact_work",
             index=[
                 "전혀 영향 없음",
                 "약간 집중에 어려움 있음",
@@ -2022,8 +2020,9 @@ elif st.session_state.step == 18:
                 "매우 큰 영향으로 일/학업 중단 고려한 적 있음",
                 "선택 안 함"
             ].index(st.session_state.get("impact_work", "선택 안 함")),
-            on_change=update_functional_impact,
-            args=("impact_work",),
+            key="impact_work",
+            on_change=sync_widget_key,
+            args=("impact_work", "impact_work"),
             label_visibility="collapsed"
         )
 
@@ -2038,7 +2037,6 @@ elif st.session_state.step == 18:
                 "심각하게 삶의 질 저하",
                 "선택 안 함"
             ],
-            key="impact_quality_of_life",
             index=[
                 "전혀 영향을 미치지 않음",
                 "약간 영향을 미침",
@@ -2046,8 +2044,9 @@ elif st.session_state.step == 18:
                 "심각하게 삶의 질 저하",
                 "선택 안 함"
             ].index(st.session_state.get("impact_quality_of_life", "선택 안 함")),
-            on_change=update_functional_impact,
-            args=("impact_quality_of_life",),
+            key="impact_quality_of_life",
+            on_change=sync_widget_key,
+            args=("impact_quality_of_life", "impact_quality_of_life"),
             label_visibility="collapsed"
         )
 
@@ -2056,12 +2055,12 @@ elif st.session_state.step == 18:
         st.radio(
             label="수면 질",
             options=["매우 좋음", "보통", "나쁨", "매우 나쁨", "선택 안 함"],
-            key="sleep_quality",
             index=["매우 좋음", "보통", "나쁨", "매우 나쁨", "선택 안 함"].index(
                 st.session_state.get("sleep_quality", "선택 안 함")
             ),
-            on_change=update_functional_impact,
-            args=("sleep_quality",),
+            key="sleep_quality",
+            on_change=sync_widget_key,
+            args=("sleep_quality", "sleep_quality"),
             label_visibility="collapsed"
         )
 
@@ -2069,17 +2068,18 @@ elif st.session_state.step == 18:
         st.radio(
             label="수면과 턱관절 질환 연관성",
             options=["그렇다", "아니다", "잘 모르겠다", "선택 안 함"],
-            key="sleep_tmd_relation",
             index=["그렇다", "아니다", "잘 모르겠다", "선택 안 함"].index(
                 st.session_state.get("sleep_tmd_relation", "선택 안 함")
             ),
-            on_change=update_functional_impact,
-            args=("sleep_tmd_relation",),
+            key="sleep_tmd_relation",
+            on_change=sync_widget_key,
+            args=("sleep_tmd_relation", "sleep_tmd_relation"),
             label_visibility="collapsed"
         )
 
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             st.session_state.step = 17
