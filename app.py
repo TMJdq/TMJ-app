@@ -1800,12 +1800,6 @@ elif st.session_state.step == 14:
 
 
 # STEP 15: 과거 치과적 이력 (Past Dental History)
-# 콜백 함수
-def update_radio_state(key: str):
-    st.session_state[key] = st.session_state.get(key, "")
-
-def update_text_state(key: str):
-    st.session_state[key] = st.session_state.get(key, "").strip()
 
 elif st.session_state.step == 15:
     st.title("과거 치과적 이력 (Past Dental History)")
