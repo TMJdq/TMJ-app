@@ -442,8 +442,8 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.set_font(FONT_NAME, '', 10)
     pdf.set_xy(15, pdf.get_y() + 5)
     diagnosis_list = data.get('final_diagnosis', [])
-    pdf.multi_cell(0, 5, safe_value(diagnosis_list))
-
+    diagnosis_text = ', '.join(diagnosis_list) if diagnosis_list else '진단 근거 없음'
+    pdf.multi_cell(0, 5, diagnosis_text)
 
     
 
