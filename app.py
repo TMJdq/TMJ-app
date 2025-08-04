@@ -91,11 +91,6 @@ def update_neck_symptom(symptom_key: str):
 
 
 
-import streamlit as st
-
-with st.expander("🔍 세션 상태 보기 (디버깅용)", expanded=False):
-    st.json(st.session_state)
-
 
 # --- 페이지 설정 ---
 st.set_page_config(
