@@ -100,11 +100,6 @@ def add_diagnosis_content_styled(pdf, data):
         pdf.set_font(FONT_NAME, '', font_size)
         pdf.cell(w, h, f"{label}: {value}", 0, 1)
 
-    # --- 페이지 상단 정보 ---
-    pdf.set_font(FONT_NAME, '', 8)
-    pdf.set_xy(10, 10)
-    pdf.cell(0, 5, '41000003704100000370210000481586OM4475656')
-
     # --- 제목 ---
     pdf.set_font(FONT_NAME, '', 14)
     pdf.set_xy(10, 15)
@@ -2712,6 +2707,7 @@ if st.session_state.get("step", 0) == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
         )
+
 
 
 
