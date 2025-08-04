@@ -41,25 +41,126 @@ def create_diagnosis_pdf(diagnosis_data):
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
 
+    # ✅ 폰트 경로 확인
     font_path = Path("fonts/NanumGothic.ttf")
     if not font_path.exists():
         st.error(f"폰트 파일을 찾을 수 없습니다: {font_path.absolute()}")
         return None
 
+    # ✅ 폰트 등록 및 타이틀
     pdf.add_font('NanumGothic', '', str(font_path), uni=True)
     pdf.set_font('NanumGothic', '', 16)
     pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
     pdf.ln(10)
-    pdf.set_font('NanumGothic', '', 12)
 
-    for key, value in diagnosis_data.items():
-        pdf.cell(0, 10, f"{key}: {value}", ln=True)
-        pdf.ln(2)
+    # ✅ 내용 작성 함수 호출
+    add_diagnosis_content(pdf, diagnosis_data)
 
-    # ✅ 핵심: PDF를 바이트로 변환하여 BytesIO로 래핑
+    # ✅ PDF 반환
     pdf_bytes = pdf.output(dest='S')
     return BytesIO(pdf_bytes)
 
+def add_diagnosis_content(pdf, data):
+    def safe_value(key):
+        val = data.get(key, "")
+        return "" if val == "선택 안 함" or val == "" else val
+
+    def section(title):
+        pdf.set_font('NanumGothic', '', 13)
+        pdf.cell(0, 8, f"■ {title}", ln=True)
+        pdf.ln(1)
+        pdf.set_font('NanumGothic', '', 11)
+
+    pdf.set_font('NanumGothic', '', 11)
+
+    # I. Chief Complaint
+    section("I. Chief Complaint")
+    pdf.cell(0, 8, f"  주증상: {safe_value('chief_complaint')}  (시작일: {safe_value('onset_date')})", ln=True)
+    pdf.ln(2)
+
+    # II. Present Illness
+    section("II. Present Illness")
+    pdf.cell(0, 8, f"  통증 있음: {safe_value('pain')}", ln=True)
+    pdf.cell(0, 8, f"  클릭/소리: {safe_value('sound')}", ln=True)
+    pdf.cell(0, 8, f"  구강 개폐 운동: {safe_value('mouth_opening')}", ln=True)
+    pdf.cell(0, 8, f"  과거력/외상: {safe_value('tmj_trauma')}", ln=True)
+    pdf.cell(0, 8, f"  통증 양상: {safe_value('pain_quality')}", ln=True)
+    pdf.cell(0, 8, f"  VAS (통증 강도): {safe_value('pain_vas')}", ln=True)
+    pdf.ln(2)
+
+    # III. Habits
+    section("III. 습관 (Habits)")
+    habits = ["bruxism", "clenching", "side_sleep", "gum_chewing", "hard_food", 
+              "nail_biting", "lip_biting", "cheek_biting", "tongue_thrusting", 
+              "chin_leaning", "forward_head", "alcohol", "smoking", "caffeine"]
+    for habit in habits:
+        v = safe_value(habit)
+        if v:
+            pdf.cell(0, 8, f"  - {habit.replace('_', ' ').title()}: {v}", ln=True)
+    pdf.ln(2)
+
+    # IV. Associated Symptoms
+    section("IV. 관련 증상 (Associated Symptoms)")
+    neck = data.get("neck_shoulder_symptoms", {})
+    if any(neck.values()):
+        symptom_str = ', '.join([k for k, v in neck.items() if v])
+        pdf.cell(0, 8, f"  경추/목/어깨 증상: {symptom_str}", ln=True)
+
+    trauma = safe_value("neck_trauma")
+    if trauma == "예":
+        pdf.cell(0, 8, f"  목 외상 이력: 있음 / {safe_value('trauma_detail')}", ln=True)
+    elif trauma == "아니오":
+        pdf.cell(0, 8, f"  목 외상 이력: 없음", ln=True)
+
+    add_symptoms = data.get("additional_symptoms", {})
+    if any(add_symptoms.values()):
+        additional_str = ', '.join([k for k, v in add_symptoms.items() if v])
+        pdf.cell(0, 8, f"  기타 증상: {additional_str}", ln=True)
+    pdf.ln(2)
+
+    # V. Emotional Stress
+    section("V. 정서적 스트레스 이력")
+    stress = safe_value("stress_radio")
+    if stress:
+        pdf.cell(0, 8, f"  스트레스 여부: {stress}", ln=True)
+    detail = safe_value("stress_detail")
+    if detail:
+        pdf.multi_cell(0, 6, f"  상세 내용: {detail}")
+    pdf.ln(2)
+
+    # VII. Past Dental History
+    section("VII. 과거 치과적 이력")
+    pdf.cell(0, 8, f"  교정치료: {safe_value('ortho_exp')}  / 상세: {safe_value('ortho_detail')}", ln=True)
+    if safe_value("ortho_exp_other"):
+        pdf.cell(0, 8, f"  기타: {safe_value('ortho_exp_other')}", ln=True)
+
+    pdf.cell(0, 8, f"  보철치료: {safe_value('prosth_exp')}  / 상세: {safe_value('prosth_detail')}", ln=True)
+    if safe_value("prosth_exp_other"):
+        pdf.cell(0, 8, f"  기타: {safe_value('prosth_exp_other')}", ln=True)
+
+    if safe_value("other_dental"):
+        pdf.multi_cell(0, 6, f"  기타 치과 이력: {safe_value('other_dental')}")
+
+    pdf.cell(0, 8, f"  턱관절 치료 경험: {safe_value('tmd_treatment_history')}", ln=True)
+    if data.get("tmd_treatment_history") == "예":
+        pdf.cell(0, 8, f"    치료 내용: {safe_value('tmd_treatment_detail')}", ln=True)
+        pdf.cell(0, 8, f"    반응: {safe_value('tmd_treatment_response')}", ln=True)
+        pdf.cell(0, 8, f"    복용 약물: {safe_value('tmd_current_medications')}", ln=True)
+    pdf.ln(2)
+
+    # VIII. Functional Impact
+    section("VIII. 기능 평가 (Functional Impact)")
+    pdf.cell(0, 8, f"  일상생활 영향: {safe_value('impact_daily')}", ln=True)
+    pdf.cell(0, 8, f"  업무/학업 영향: {safe_value('impact_work')}", ln=True)
+    pdf.cell(0, 8, f"  삶의 질 영향: {safe_value('impact_quality_of_life')}", ln=True)
+    pdf.cell(0, 8, f"  수면의 질: {safe_value('sleep_quality')}", ln=True)
+    pdf.cell(0, 8, f"  수면과 턱관절 증상 연관성: {safe_value('sleep_tmd_relation')}", ln=True)
+    pdf.ln(4)
+
+
+
+
+    
 
 def sync_widget_key(widget_key: str, state_key: str):
     """특정 위젯 키 값을 세션 상태 키에 복사"""
