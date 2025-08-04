@@ -1,13 +1,17 @@
+# 필요한 라이브러리들을 모두 상단에 한 번만 import 합니다.
 import streamlit as st
 from fpdf import FPDF
-import datetime
-import os
-from PIL import Image
-from pathlib import
+from pathlib import Path
+from io import BytesIO
+import datetime # 이 예제에서는 사용되지 않지만, 원래 코드에 있으므로 남겨둡니다.
+import os      # 이 예제에서는 사용되지 않지만, 원래 코드에 있으므로 남겨둡니다.
+from PIL import Image # 이 예제에서는 사용되지 않지만, 원래 코드에 있으므로 남겨둡니다.
 
+# 전체 단계 수 및 최종 단계를 정의합니다.
 total_steps = 20
 final_step = total_steps - 1
 
+# 진단 데이터의 키와 기본값을 정의합니다.
 diagnosis_keys = {
     "muscle_pressure_2s_value": "선택 안 함",
     "muscle_referred_pain_value": "선택 안 함",
@@ -23,44 +27,73 @@ diagnosis_keys = {
     "tmj_sound_value": "선택 안 함"
 }
 
-if 'step' not in st.session_state:
-    st.session_state.step = 0
-    st.session_state.validation_errors = {}
-
-for key, default in diagnosis_keys.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
-
-from fpdf import FPDF
-from pathlib import Path
-from io import BytesIO
-import streamlit as st  # 필요 시
-
+# fpdf를 사용하여 진단 데이터를 PDF로 변환하는 함수입니다.
 def create_diagnosis_pdf(diagnosis_data):
+    """
+    제공된 진단 데이터를 바탕으로 PDF 파일을 생성합니다.
+    """
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
     
-    # 폰트 경로를 프로젝트 내의 상대 경로로 수정
-    # app.py와 같은 레벨에 있는 fonts 폴더 안의 폰트를 가리킵니다.
+    # 폰트 경로를 프로젝트 내의 상대 경로로 지정합니다.
+    # 이 코드를 실행하기 전에 'fonts' 폴더에 'NanumGothic.ttf' 파일을 넣어주세요.
     font_path = Path("fonts/NanumGothic.ttf")
     if not font_path.exists():
         st.error(f"폰트 파일을 찾을 수 없습니다: {font_path.absolute()}")
         return None
-
+    
+    # PDF에 폰트를 추가하고 설정합니다.
     pdf.add_font('NanumGothic', '', str(font_path), uni=True)
     pdf.set_font('NanumGothic', '', 16)
     pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
     pdf.ln(10)
-
+    
     pdf.set_font('NanumGothic', '', 12)
     for key, value in diagnosis_data.items():
+        # 사용자에게 보여지는 키 이름을 좀 더 친숙하게 바꾸려면 이 부분을 수정하세요.
         pdf.cell(0, 10, f'{key}: {value}', 0, 1)
         pdf.ln(2)
-
+    
+    # PDF를 메모리에 저장하고 반환합니다.
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
     return pdf_buffer
+
+# Streamlit 앱의 메인 로직입니다.
+# 세션 상태가 초기화되지 않았으면, 초기화합니다.
+if 'step' not in st.session_state:
+    st.session_state.step = 0
+    st.session_state.validation_errors = {}
+    for key, default in diagnosis_keys.items():
+        st.session_state[key] = default
+
+st.title("턱관절 자가문진 웹앱 (예시)")
+st.write(f"현재 단계: {st.session_state.step + 1}/{total_steps}")
+
+# 이 부분에 실제 문진 질문 로직이 들어갑니다.
+# 여기서는 예시로 'muscle_pressure_2s_value' 키에 값을 할당하는 버튼을 추가했습니다.
+if st.button("진단 데이터에 값 할당하기"):
+    st.session_state['muscle_pressure_2s_value'] = "약간의 통증 있음"
+    st.success("진단 데이터에 값이 할당되었습니다!")
+    st.session_state.step = final_step
+    
+# 최종 단계에 도달하면 PDF 다운로드 버튼을 표시합니다.
+if st.session_state.step == final_step:
+    st.write("진단이 완료되었습니다. 결과 보고서를 다운로드하세요.")
+    
+    # PDF를 생성하기 위해 세션 상태의 진단 데이터를 함수에 전달합니다.
+    diagnosis_data = {key: st.session_state[key] for key in diagnosis_keys.keys()}
+    pdf_buffer = create_diagnosis_pdf(diagnosis_data)
+    
+    if pdf_buffer:
+        # Streamlit의 download_button 위젯을 사용하여 PDF 파일을 다운로드합니다.
+        st.download_button(
+            label="진단 결과 PDF 다운로드",
+            data=pdf_buffer,
+            file_name="diagnosis_report.pdf",
+            mime="application/pdf"
+        )
 
 
 # --- 페이지 설정 ---
@@ -1582,59 +1615,103 @@ elif st.session_state.step == 19:
             del st.session_state[key]
         st.rerun()
 
+# 필요한 라이브러리들을 모두 상단에 한 번만 import 합니다.
+import streamlit as st
+from fpdf import FPDF
 from pathlib import Path
+from io import BytesIO
+import datetime # 이 예제에서는 사용되지 않지만, 원래 코드에 있으므로 남겨둡니다.
+import os      # 이 예제에서는 사용되지 않지만, 원래 코드에 있으므로 남겨둡니다.
+from PIL import Image # 이 예제에서는 사용되지 않지만, 원래 코드에 있으므로 남겨둡니다.
 
+# 전체 단계 수 및 최종 단계를 정의합니다.
+total_steps = 20
+final_step = total_steps - 1
+
+# 진단 데이터의 키와 기본값을 정의합니다.
+diagnosis_keys = {
+    "muscle_pressure_2s_value": "선택 안 함",
+    "muscle_referred_pain_value": "선택 안 함",
+    "muscle_referred_remote_pain_value": "선택 안 함", 
+    "tmj_press_pain_value": "선택 안 함",
+    "headache_temples_value": "선택 안 함",
+    "headache_with_jaw_value": "선택 안 함",
+    "headache_reproduce_by_pressure_value": "선택 안 함",
+    "headache_not_elsewhere_value": "선택 안 함",
+    "crepitus_confirmed_value": "선택 안 함",
+    "mao_fits_3fingers_value": "선택 안 함",
+    "jaw_locked_now_value": "선택 안 함",
+    "tmj_sound_value": "선택 안 함"
+}
+
+# fpdf를 사용하여 진단 데이터를 PDF로 변환하는 함수입니다.
 def create_diagnosis_pdf(diagnosis_data):
+    """
+    제공된 진단 데이터를 바탕으로 PDF 파일을 생성합니다.
+    """
     # PDF 객체 생성
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
-
-    font_path = Path.home() / "OneDrive" / "바탕 화면" / "NanumGothic.ttf"
+    
+    # 폰트 경로를 프로젝트 내의 상대 경로로 지정합니다.
+    # 이 코드를 실행하기 전에 'fonts' 폴더에 'NanumGothic.ttf' 파일을 넣어주세요.
+    font_path = Path("fonts/NanumGothic.ttf")
     
     if not font_path.exists():
-        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path}")
+        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path.absolute()}")
         return None
-
+    
+    # PDF에 폰트를 추가하고 설정합니다.
     pdf.add_font('NanumGothic', '', str(font_path), uni=True)
     pdf.set_font('NanumGothic', '', 16)
+    
+    # 제목
     pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
     pdf.ln(10)
-
+    
+    # 진단 결과 내용 추가
     pdf.set_font('NanumGothic', '', 12)
     for key, value in diagnosis_data.items():
         pdf.cell(0, 10, f'{key}: {value}', 0, 1)
         pdf.ln(2)
+    
+    # PDF를 메모리에 저장하고 반환합니다.
+    pdf_buffer = BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
-    return pdf.output(dest='S').encode('latin1')    
+# Streamlit 앱의 메인 로직입니다.
+# 세션 상태가 초기화되지 않았으면, 초기화합니다.
+if 'step' not in st.session_state:
+    st.session_state.step = 0
+    st.session_state.validation_errors = {}
+    for key, default in diagnosis_keys.items():
+        st.session_state[key] = default
 
-    # 제목
-    pdf.set_font('NanumGothic', '', 16)
-    pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
-    pdf.ln(10) # 줄바꿈
+st.title("턱관절 자가문진 웹앱 (예시)")
+st.write(f"현재 단계: {st.session_state.step + 1}/{total_steps}")
 
-    # 진단 결과 내용 추가
-    pdf.set_font('NanumGothic', '', 12)
-    for key, value in diagnosis_data.items():
-        # 키를 보기 좋은 한글로 변환하는 로직을 추가할 수 있습니다.
-        # 예: key_display = key.replace('_', ' ').title()
-        
-        pdf.cell(0, 10, f'{key}: {value}', 0, 1)
-        pdf.ln(2) # 간격 조절
-
-    # PDF를 바이트 형태로 반환
-    return pdf.output(dest='S').encode('latin1')
-
-if st.session_state.get("step", 0) == final_step:
-    diagnosis_results = {
-        key: st.session_state.get(key, diagnosis_keys[key])
-        for key in diagnosis_keys
-    }
-    pdf_output_bytes = create_diagnosis_pdf(diagnosis_results)
-
-    if pdf_output_bytes:
+# 이 부분에 실제 문진 질문 로직이 들어갑니다.
+# 여기서는 예시로 'muscle_pressure_2s_value' 키에 값을 할당하는 버튼을 추가했습니다.
+if st.button("진단 데이터에 값 할당하기"):
+    st.session_state['muscle_pressure_2s_value'] = "약간의 통증 있음"
+    st.success("진단 데이터에 값이 할당되었습니다!")
+    st.session_state.step = final_step
+    
+# 최종 단계에 도달하면 PDF 다운로드 버튼을 표시합니다.
+if st.session_state.step == final_step:
+    st.write("진단이 완료되었습니다. 결과 보고서를 다운로드하세요.")
+    
+    # PDF를 생성하기 위해 세션 상태의 진단 데이터를 함수에 전달합니다.
+    diagnosis_data = {key: st.session_state[key] for key in diagnosis_keys.keys()}
+    pdf_buffer = create_diagnosis_pdf(diagnosis_data)
+    
+    if pdf_buffer:
+        # Streamlit의 download_button 위젯을 사용하여 PDF 파일을 다운로드합니다.
         st.download_button(
             label="진단 결과 PDF 다운로드",
-            data=pdf_output_bytes,
+            data=pdf_buffer,
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
-            mime='application/octet-stream'
+            mime='application/pdf'
         )
