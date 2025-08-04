@@ -41,6 +41,7 @@ import datetime
 from pathlib import Path
 from io import BytesIO
 
+
 # --- PDF 생성 함수 (이미지 양식에 맞춰 완전히 재작성) ---
 
 # PDF 생성을 위한 전역 설정
@@ -67,7 +68,13 @@ def create_diagnosis_pdf(diagnosis_data):
     add_diagnosis_content_styled(pdf, diagnosis_data)
     
     # PDF 반환
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    # fpdf.output(dest='S')는 이미 바이트 스트림을 반환하므로 encode()는 제거합니다.
+    try:
+        pdf_bytes = pdf.output(dest='S')
+    except Exception as e:
+        st.error(f"PDF 생성 중 오류가 발생했습니다: {e}")
+        return None
+
     return BytesIO(pdf_bytes)
 
 def add_diagnosis_content_styled(pdf, data):
