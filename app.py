@@ -87,18 +87,14 @@ def add_diagnosis_content_styled(pdf, data):
         if isinstance(val, bool):
             return "✔" if val else ""
         if isinstance(val, list):
+            # '기타' 항목이 리스트에 포함되어 있을 경우, '_other' 키도 확인
             val_str = ', '.join([item for item in val if item and item != '기타'])
-            if '기타' in val and data.get(f"{key}_other_text", ""):
-                val_str += f" ({data.get(f'{key}_other_text')})"
+            if '기타' in val and data.get(f"{key}_other", ""):
+                val_str += f" ({data.get(f'{key}_other')})"
             return val_str if val_str else ""
         if val == "선택 안 함" or val is None or val == "":
             return ""
         return str(val)
-
-    def draw_text_with_label(x, y, label, value, w=0, h=5, font_size=10):
-        pdf.set_xy(x, y)
-        pdf.set_font(FONT_NAME, '', font_size)
-        pdf.cell(w, h, f"{label}: {value}", 0, 1)
 
     # --- 제목 ---
     pdf.set_font(FONT_NAME, '', 14)
@@ -106,7 +102,7 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.cell(0, 10, 'Temporomandibular Disorder Chart', 0, 1, 'C')
     pdf.ln(5)
     
-    # --- I. 환자 기본 정보 ---
+    # --- I. Patient Information ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = 25
     pdf.set_xy(10, y_pos)
@@ -209,7 +205,7 @@ def add_diagnosis_content_styled(pdf, data):
     x_pos = 15
     col_spacing = 90
     
-    # Habits list - Combined to save space
+    # Habits list
     habits = [
         ("Clenching", "habit_clenching_day"),
         ("Bruxism", "habit_bruxism_night"),
@@ -324,7 +320,8 @@ def add_diagnosis_content_styled(pdf, data):
     y_pos += 6
     pdf.set_xy(15, y_pos)
     pdf.multi_cell(0, 5, f"과거 이력: {safe_value('past_history', '기재 안함')}")
-    pdf.set_xy(15, pdf.get_y() + 5)
+    y_pos = pdf.get_y()
+    pdf.set_xy(15, y_pos)
     pdf.multi_cell(0, 5, f"현재 복용 약물: {safe_value('current_medications', '기재 안함')}")
 
     pdf.ln(2)
@@ -553,7 +550,6 @@ def add_diagnosis_content_styled(pdf, data):
     diagnosis_list = data.get('final_diagnosis', [])
     diagnosis_text = ', '.join(diagnosis_list) if diagnosis_list else '진단 근거 없음'
     pdf.multi_cell(0, 5, diagnosis_text)
-
 
     
 
@@ -2743,6 +2739,7 @@ if st.session_state.get("step", 0) == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
         )
+
 
 
 
