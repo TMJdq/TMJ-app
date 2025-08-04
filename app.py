@@ -62,29 +62,33 @@ def create_diagnosis_pdf(diagnosis_data):
 
 
 def sync_widget_key(widget_key: str, state_key: str):
-    """ 위젯 입력값을 별도 키로 복사합니다. """
+    """특정 위젯 키 값을 세션 상태 키에 복사"""
     st.session_state[state_key] = st.session_state.get(widget_key, "")
 
 def sync_multiple_keys(mapping: dict):
-    """ 여러 widget_key → state_key 복사 """
+    """여러 widget_key → state_key 매핑 복사"""
     for widget_key, state_key in mapping.items():
         st.session_state[state_key] = st.session_state.get(widget_key, "")
-    
-def update_textarea(key):
-    st.session_state[key] = st.session_state.get(key, "")
 
-def update_radio_state(key):
+def update_textarea(key: str):
+    """텍스트 입력형 위젯 업데이트"""
+    st.session_state[key] = st.session_state.get(key, "").strip()
+
+def update_radio_state(key: str):
+    """라디오 버튼 선택값 업데이트"""
     st.session_state[key] = st.session_state.get(key, "")
 
 def update_neck_none():
+    """'없음' 체크 시 다른 증상 해제"""
     if st.session_state.get("neck_none", False):
-        st.session_state["neck_pain"] = False
-        st.session_state["shoulder_pain"] = False
-        st.session_state["stiffness"] = False
+        for key in ["neck_pain", "shoulder_pain", "stiffness"]:
+            st.session_state[key] = False
 
-def update_neck_symptom(symptom_key):
+def update_neck_symptom(symptom_key: str):
+    """다른 증상 선택 시 '없음' 체크 해제"""
     if st.session_state.get(symptom_key, False):
         st.session_state["neck_none"] = False
+
 
 
 import streamlit as st
@@ -1796,6 +1800,13 @@ elif st.session_state.step == 14:
 
 
 # STEP 15: 과거 치과적 이력 (Past Dental History)
+# 콜백 함수
+def update_radio_state(key: str):
+    st.session_state[key] = st.session_state.get(key, "")
+
+def update_text_state(key: str):
+    st.session_state[key] = st.session_state.get(key, "").strip()
+
 elif st.session_state.step == 15:
     st.title("과거 치과적 이력 (Past Dental History)")
     st.markdown("---")
@@ -1804,45 +1815,116 @@ elif st.session_state.step == 15:
         # 교정치료 경험
         st.markdown("**교정치료(치아 교정) 경험**")
         ortho_options = ["예", "아니오", "기타", "선택 안 함"]
-        ortho_value = st.session_state.get("ortho_exp", "선택 안 함")
-        st.radio("", ortho_options, index=ortho_options.index(ortho_value), key="ortho_exp", label_visibility="collapsed")
+        st.radio(
+            "", ortho_options,
+            index=ortho_options.index(st.session_state.get("ortho_exp", "선택 안 함")),
+            key="ortho_exp",
+            on_change=update_radio_state,
+            args=("ortho_exp",),
+            label_visibility="collapsed"
+        )
 
-        if st.session_state.ortho_exp == "기타":
-            st.text_input("기타: 교정치료 관련 내용 입력", key="ortho_exp_other", value=st.session_state.get("ortho_exp_other", ""))
+        if st.session_state.get("ortho_exp") == "기타":
+            st.text_input(
+                "기타: 교정치료 관련 내용 입력",
+                key="ortho_exp_other",
+                value=st.session_state.get("ortho_exp_other", ""),
+                on_change=update_text_state,
+                args=("ortho_exp_other",)
+            )
         else:
             st.session_state["ortho_exp_other"] = ""
 
-        st.text_input("예라면 언제, 얼마나 받았는지 적어주세요:", key="ortho_detail", value=st.session_state.get("ortho_detail", ""))
+        st.text_input(
+            "예라면 언제, 얼마나 받았는지 적어주세요:",
+            key="ortho_detail",
+            value=st.session_state.get("ortho_detail", ""),
+            on_change=update_text_state,
+            args=("ortho_detail",)
+        )
 
         st.markdown("---")
+
         # 보철치료 경험
         st.markdown("**보철치료(의치, 브리지, 임플란트 등) 경험**")
         prosth_options = ["예", "아니오", "기타", "선택 안 함"]
-        prosth_value = st.session_state.get("prosth_exp", "선택 안 함")
-        st.radio("", prosth_options, index=prosth_options.index(prosth_value), key="prosth_exp", label_visibility="collapsed")
+        st.radio(
+            "", prosth_options,
+            index=prosth_options.index(st.session_state.get("prosth_exp", "선택 안 함")),
+            key="prosth_exp",
+            on_change=update_radio_state,
+            args=("prosth_exp",),
+            label_visibility="collapsed"
+        )
 
-        if st.session_state.prosth_exp == "기타":
-            st.text_input("기타: 보철치료 관련 내용 입력", key="prosth_exp_other", value=st.session_state.get("prosth_exp_other", ""))
+        if st.session_state.get("prosth_exp") == "기타":
+            st.text_input(
+                "기타: 보철치료 관련 내용 입력",
+                key="prosth_exp_other",
+                value=st.session_state.get("prosth_exp_other", ""),
+                on_change=update_text_state,
+                args=("prosth_exp_other",)
+            )
         else:
             st.session_state["prosth_exp_other"] = ""
 
-        st.text_input("예라면 어떤 치료였는지 적어주세요:", key="prosth_detail", value=st.session_state.get("prosth_detail", ""))
+        st.text_input(
+            "예라면 어떤 치료였는지 적어주세요:",
+            key="prosth_detail",
+            value=st.session_state.get("prosth_detail", ""),
+            on_change=update_text_state,
+            args=("prosth_detail",)
+        )
 
         st.markdown("---")
+
         # 기타 치과 치료
         st.markdown("**기타 치과 치료 이력 (주요 치과 시술, 수술 등)**")
-        st.text_area("", key="other_dental", value=st.session_state.get("other_dental", ""), label_visibility="collapsed")
+        st.text_area(
+            "",
+            key="other_dental",
+            value=st.session_state.get("other_dental", ""),
+            on_change=update_text_state,
+            args=("other_dental",),
+            label_visibility="collapsed"
+        )
 
         st.markdown("---")
+
         # 턱관절 치료 이력
         st.markdown("**이전에 턱관절 질환 치료를 받은 적 있나요?**")
-        tmd_value = st.session_state.get("tmd_treatment_history", "선택 안 함")
-        st.radio("", ["예", "아니오", "선택 안 함"], index=["예", "아니오", "선택 안 함"].index(tmd_value), key="tmd_treatment_history", label_visibility="collapsed")
+        st.radio(
+            "",
+            ["예", "아니오", "선택 안 함"],
+            index=["예", "아니오", "선택 안 함"].index(st.session_state.get("tmd_treatment_history", "선택 안 함")),
+            key="tmd_treatment_history",
+            on_change=update_radio_state,
+            args=("tmd_treatment_history",),
+            label_visibility="collapsed"
+        )
 
-        if st.session_state.tmd_treatment_history == "예":
-            st.text_input("어떤 치료를 받으셨나요?", key="tmd_treatment_detail", value=st.session_state.get("tmd_treatment_detail", ""), placeholder=" ")
-            st.text_input("해당 치료에 대한 반응(효과나 문제점 등):", key="tmd_treatment_response", value=st.session_state.get("tmd_treatment_response", ""), placeholder=" ")
-            st.text_input("현재 복용 중인 턱관절 관련 약물이 있다면 입력해주세요:", key="tmd_current_medications", value=st.session_state.get("tmd_current_medications", ""), placeholder=" ")
+        if st.session_state.get("tmd_treatment_history") == "예":
+            st.text_input(
+                "어떤 치료를 받으셨나요?",
+                key="tmd_treatment_detail",
+                value=st.session_state.get("tmd_treatment_detail", ""),
+                on_change=update_text_state,
+                args=("tmd_treatment_detail",)
+            )
+            st.text_input(
+                "해당 치료에 대한 반응(효과나 문제점 등):",
+                key="tmd_treatment_response",
+                value=st.session_state.get("tmd_treatment_response", ""),
+                on_change=update_text_state,
+                args=("tmd_treatment_response",)
+            )
+            st.text_input(
+                "현재 복용 중인 턱관절 관련 약물이 있다면 입력해주세요:",
+                key="tmd_current_medications",
+                value=st.session_state.get("tmd_current_medications", ""),
+                on_change=update_text_state,
+                args=("tmd_current_medications",)
+            )
         else:
             st.session_state["tmd_treatment_detail"] = ""
             st.session_state["tmd_treatment_response"] = ""
@@ -1854,13 +1936,24 @@ elif st.session_state.step == 15:
         if st.button("이전 단계"):
             st.session_state.step = 14
             st.rerun()
+
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            if st.session_state.ortho_exp == '선택 안 함' or st.session_state.prosth_exp == '선택 안 함':
-                st.warning("교정치료 및 보철치료 항목을 모두 선택해주세요.")
+            errors = []
+            if st.session_state.get("ortho_exp") == "선택 안 함":
+                errors.append("교정치료 경험 여부를 선택해주세요.")
+            if st.session_state.get("prosth_exp") == "선택 안 함":
+                errors.append("보철치료 경험 여부를 선택해주세요.")
+            if st.session_state.get("tmd_treatment_history") == "선택 안 함":
+                errors.append("턱관절 치료 경험 여부를 선택해주세요.")
+
+            if errors:
+                for e in errors:
+                    st.warning(e)
             else:
                 st.session_state.step = 16
                 st.rerun()
+
 
 # STEP 16: 과거 의과적 이력 (Past Medical History)
 elif st.session_state.step == 16:
