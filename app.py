@@ -32,12 +32,14 @@ def create_diagnosis_pdf(diagnosis_data):
     """
     제공된 진단 데이터를 바탕으로 PDF 파일을 생성합니다.
     """
+    # PDF 객체 생성
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
     
     # 폰트 경로를 프로젝트 내의 상대 경로로 지정합니다.
     # 이 코드를 실행하기 전에 'fonts' 폴더에 'NanumGothic.ttf' 파일을 넣어주세요.
     font_path = Path("fonts/NanumGothic.ttf")
+    
     if not font_path.exists():
         st.error(f"폰트 파일을 찾을 수 없습니다: {font_path.absolute()}")
         return None
@@ -45,12 +47,14 @@ def create_diagnosis_pdf(diagnosis_data):
     # PDF에 폰트를 추가하고 설정합니다.
     pdf.add_font('NanumGothic', '', str(font_path), uni=True)
     pdf.set_font('NanumGothic', '', 16)
+    
+    # 제목
     pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
     pdf.ln(10)
     
+    # 진단 결과 내용 추가
     pdf.set_font('NanumGothic', '', 12)
     for key, value in diagnosis_data.items():
-        # 사용자에게 보여지는 키 이름을 좀 더 친숙하게 바꾸려면 이 부분을 수정하세요.
         pdf.cell(0, 10, f'{key}: {value}', 0, 1)
         pdf.ln(2)
     
@@ -72,8 +76,8 @@ st.title("턱관절 자가문진 웹앱 (예시)")
 st.write(f"현재 단계: {st.session_state.step + 1}/{total_steps}")
 
 # 이 부분에 실제 문진 질문 로직이 들어갑니다.
-# 여기서는 예시로 'muscle_pressure_2s_value' 키에 값을 할당하는 버튼을 추가했습니다.
-if st.button("진단 데이터에 값 할당하기"):
+# 'key'를 추가하여 위젯의 고유성을 확보합니다.
+if st.button("진단 데이터에 값 할당하기", key="assign_data_btn"):
     st.session_state['muscle_pressure_2s_value'] = "약간의 통증 있음"
     st.success("진단 데이터에 값이 할당되었습니다!")
     st.session_state.step = final_step
@@ -91,8 +95,8 @@ if st.session_state.step == final_step:
         st.download_button(
             label="진단 결과 PDF 다운로드",
             data=pdf_buffer,
-            file_name="diagnosis_report.pdf",
-            mime="application/pdf"
+            file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
+            mime='application/pdf'
         )
 
 
