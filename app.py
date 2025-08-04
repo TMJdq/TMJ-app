@@ -1636,12 +1636,12 @@ if st.session_state.step == final_step:
     st.subheader("진단이 완료되었습니다.")
     st.markdown("아래 버튼을 눌러 결과 보고서를 PDF로 저장하세요.")
 
-    # 진단 데이터만 추출
+    # ✅ 여기 위치: PDF 생성 전에 진단 값 추출
     diagnosis_data = {
         key: st.session_state.get(key, "선택 안 함") for key in diagnosis_keys.keys()
     }
 
-    # PDF 생성
+    # ✅ PDF 생성
     pdf_buffer = create_diagnosis_pdf(diagnosis_data)
 
     if pdf_buffer:
@@ -1651,3 +1651,4 @@ if st.session_state.step == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'
         )
+
