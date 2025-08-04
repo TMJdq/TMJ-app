@@ -54,7 +54,6 @@ def create_diagnosis_pdf(diagnosis_data):
         pdf.cell(0, 10, f'{key}: {value}', 0, 1)
         pdf.ln(2)
 
-    # PDF를 BytesIO 객체에 저장하여 반환
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
