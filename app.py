@@ -3,6 +3,7 @@ from fpdf import FPDF
 import datetime
 import os
 from PIL import Image
+from pathlib import
 
 total_steps = 20
 final_step = total_steps - 1
@@ -38,10 +39,12 @@ import streamlit as st  # 필요 시
 def create_diagnosis_pdf(diagnosis_data):
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
-
-    font_path = Path("/mnt/data/NanumGothic.ttf")
+    
+    # 폰트 경로를 프로젝트 내의 상대 경로로 수정
+    # app.py와 같은 레벨에 있는 fonts 폴더 안의 폰트를 가리킵니다.
+    font_path = Path("fonts/NanumGothic.ttf")
     if not font_path.exists():
-        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path}")
+        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path.absolute()}")
         return None
 
     pdf.add_font('NanumGothic', '', str(font_path), uni=True)
