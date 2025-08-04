@@ -3,27 +3,60 @@ from fpdf import FPDF
 import datetime
 import os
 from PIL import Image
+from pathlib import Path
+from io import BytesIO
+
+total_steps = 20
+final_step = total_steps - 1
+   
+diagnosis_keys = {
+    "muscle_pressure_2s_value": "선택 안 함",
+    "muscle_referred_pain_value": "선택 안 함",
+    "muscle_referred_remote_pain_value": "선택 안 함", 
+    "tmj_press_pain_value": "선택 안 함",
+    "headache_temples_value": "선택 안 함",
+    "headache_with_jaw_value": "선택 안 함",
+    "headache_reproduce_by_pressure_value": "선택 안 함",
+    "headache_not_elsewhere_value": "선택 안 함",
+    "crepitus_confirmed_value": "선택 안 함",
+    "mao_fits_3fingers_value": "선택 안 함",
+    "jaw_locked_now_value": "선택 안 함",
+    "tmj_sound_value": "선택 안 함"
+}
+
 if 'step' not in st.session_state:
     st.session_state.step = 0
     st.session_state.validation_errors = {}
-   
-    diagnosis_keys = {
-        "muscle_pressure_2s_value": "선택 안 함",
-        "muscle_referred_pain_value": "선택 안 함",
-        "muscle_referred_remote_pain_value": "선택 안 함", 
-        "tmj_press_pain_value": "선택 안 함",
-        "headache_temples_value": "선택 안 함",
-        "headache_with_jaw_value": "선택 안 함",
-        "headache_reproduce_by_pressure_value": "선택 안 함",
-        "headache_not_elsewhere_value": "선택 안 함",
-        "crepitus_confirmed_value": "선택 안 함",
-        "mao_fits_3fingers_value": "선택 안 함",
-        "jaw_locked_now_value": "선택 안 함",
-        "tmj_sound_value": "선택 안 함"
-    }
 
-    for key, default in diagnosis_keys.items():
-        st.session_state.setdefault(key, default)
+for key, default in diagnosis_keys.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+from pathlib import Path
+from fpdf import FPDF
+
+def create_diagnosis_pdf(diagnosis_data):
+    pdf = FPDF('P', 'mm', 'A4')
+    pdf.add_page()
+
+    font_path = Path("fonts/NanumGothic.ttf")
+    if not font_path.exists():
+        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path.absolute()}")
+        return None
+
+    pdf.add_font('NanumGothic', '', str(font_path), uni=True)
+    pdf.set_font('NanumGothic', '', 16)
+    pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
+    pdf.ln(10)
+    pdf.set_font('NanumGothic', '', 12)
+
+    for key, value in diagnosis_data.items():
+        pdf.cell(0, 10, f"{key}: {value}", ln=True)
+        pdf.ln(2)
+
+    # ✅ 핵심: PDF를 바이트로 변환하여 BytesIO로 래핑
+    pdf_bytes = pdf.output(dest='S')
+    return BytesIO(pdf_bytes)
 
 
 
@@ -1539,7 +1572,7 @@ elif st.session_state.step == 18:
                 "전혀 영향을 미치지 않음",
                 "약간 영향을 미침",
                 "영향을 많이 받음",
-                "심각하게 삶의 질이 저하됨",
+                "심각하게 삶의 질 저하",
                 "선택 안 함"
             ],
             index=[
@@ -1636,3 +1669,25 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+
+
+
+
+
+if st.session_state.get("step", 0) == final_step:
+    diagnosis_results = {
+        key: st.session_state.get(key, diagnosis_keys[key])
+        for key in diagnosis_keys
+    }
+
+    # ✅ PDF 바이트 스트림 반환
+    pdf_output_bytes = create_diagnosis_pdf(diagnosis_results)
+
+    if pdf_output_bytes:
+        st.download_button(
+            label="📥 진단 결과 PDF 다운로드",
+            data=pdf_output_bytes,
+            file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
+            mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
+        )
+
