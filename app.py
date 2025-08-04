@@ -75,13 +75,16 @@ if 'step' not in st.session_state:
 st.title("턱관절 자가문진 웹앱 (예시)")
 st.write(f"현재 단계: {st.session_state.step + 1}/{total_steps}")
 
-# 이 부분에 실제 문진 질문 로직이 들어갑니다.
-# 'key'를 추가하여 위젯의 고유성을 확보합니다.
-if st.button("진단 데이터에 값 할당하기", key="assign_data_btn"):
-    st.session_state['muscle_pressure_2s_value'] = "약간의 통증 있음"
-    st.success("진단 데이터에 값이 할당되었습니다!")
-    st.session_state.step = final_step
-    
+# 진단 단계가 최종 단계 이전일 때만 질문과 버튼을 표시합니다.
+if st.session_state.step < final_step:
+    # 이 부분에 실제 문진 질문 로직이 들어갑니다.
+    # 'key'를 추가하여 위젯의 고유성을 확보합니다.
+    if st.button("진단 데이터에 값 할당하기", key="assign_data_btn"):
+        st.session_state['muscle_pressure_2s_value'] = "약간의 통증 있음"
+        st.success("진단 데이터에 값이 할당되었습니다!")
+        st.session_state.step = final_step
+        st.rerun()  # 상태 변경 후 앱을 다시 실행하여 화면을 업데이트합니다.
+
 # 최종 단계에 도달하면 PDF 다운로드 버튼을 표시합니다.
 if st.session_state.step == final_step:
     st.write("진단이 완료되었습니다. 결과 보고서를 다운로드하세요.")
@@ -98,6 +101,7 @@ if st.session_state.step == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'
         )
+
 
 
 # --- 페이지 설정 ---
