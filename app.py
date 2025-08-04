@@ -89,6 +89,9 @@ def update_neck_symptom(symptom_key: str):
     if st.session_state.get(symptom_key, False):
         st.session_state["neck_none"] = False
 
+def update_text_state(key: str):
+    """텍스트 입력값을 세션에 저장"""
+    st.session_state[key] = st.session_state.get(key, "").strip()
 
 
 
