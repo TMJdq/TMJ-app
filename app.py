@@ -31,14 +31,29 @@ for key, default in diagnosis_keys.items():
         st.session_state[key] = default
 
 def create_diagnosis_pdf(diagnosis_data):
+    from fpdf import FPDF
+    from pathlib import Path
+
     pdf = FPDF('P', 'mm', 'A4')
     pdf.add_page()
-    
-    try:
-        pdf.add_font('NanumGothic', '', 'NanumGothic.ttf')
-    except Exception as e:
-        st.error(f"폰트 파일을 찾을 수 없습니다: {e}")
+
+    font_path = Path("/mnt/data/NanumGothic.ttf")
+    if not font_path.exists():
+        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path}")
         return None
+
+    pdf.add_font('NanumGothic', '', str(font_path), uni=True)
+    pdf.set_font('NanumGothic', '', 16)
+    pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
+    pdf.ln(10)
+
+    pdf.set_font('NanumGothic', '', 12)
+    for key, value in diagnosis_data.items():
+        pdf.cell(0, 10, f'{key}: {value}', 0, 1)
+        pdf.ln(2)
+
+    return pdf.output(dest='S').encode('latin1')
+
 
     # 제목
     pdf.set_font('NanumGothic', '', 16)
