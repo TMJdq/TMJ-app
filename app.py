@@ -105,12 +105,47 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.set_xy(10, 15)
     pdf.cell(0, 10, 'Temporomandibular Disorder Chart', 0, 1, 'C')
     pdf.ln(5)
-
-    # --- I. Chief Complaint ---
+    
+    # --- I. 환자 기본 정보 ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = 25
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, f"I. Chief Complaint (Onset: {safe_value('onset')})", 0, 1)
+    pdf.cell(0, 5, 'I. Patient Information', 0, 1)
+    
+    pdf.set_font(FONT_NAME, '', 10)
+    y_pos += 6
+    
+    pdf.set_xy(15, y_pos)
+    pdf.cell(85, 5, f"이름: {safe_value('name')}", 0, 0)
+    pdf.cell(0, 5, f"생년월일: {safe_value('birthdate')}", 0, 1)
+    
+    y_pos += 5
+    pdf.set_xy(15, y_pos)
+    pdf.cell(85, 5, f"성별: {safe_value('gender')}", 0, 0)
+    pdf.cell(0, 5, f"연락처: {safe_value('phone')}", 0, 1)
+
+    y_pos += 5
+    pdf.set_xy(15, y_pos)
+    pdf.cell(0, 5, f"이메일: {safe_value('email')}", 0, 1)
+
+    y_pos += 5
+    pdf.set_xy(15, y_pos)
+    pdf.cell(0, 5, f"주소: {safe_value('address')}", 0, 1)
+    
+    y_pos += 5
+    pdf.set_xy(15, y_pos)
+    pdf.cell(0, 5, f"직업: {safe_value('occupation')}", 0, 1)
+
+    y_pos += 5
+    pdf.set_xy(15, y_pos)
+    pdf.multi_cell(0, 5, f"내원 목적: {safe_value('visit_reason')}")
+    pdf.ln(2)
+
+    # --- II. Chief Complaint ---
+    pdf.set_font(FONT_NAME, '', 12)
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
+    pdf.cell(0, 5, f"II. Chief Complaint (Onset: {safe_value('onset')})", 0, 1)
     
     pdf.set_font(FONT_NAME, '', 10)
     y_pos += 6
@@ -121,11 +156,11 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.cell(0, 5, f"주증상: {chief_complaint_text}", 0, 1)
     pdf.ln(2)
 
-    # --- II. Present Illness ---
+    # --- III. Present Illness ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'II. Present Illness', 0, 1)
+    pdf.cell(0, 5, 'III. Present Illness', 0, 1)
 
     pdf.set_font(FONT_NAME, '', 10)
     y_pos += 6
@@ -163,11 +198,11 @@ def add_diagnosis_content_styled(pdf, data):
     
     pdf.ln(2)
     
-    # --- III. Habits ---
+    # --- IV. Habits ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'III. Habits', 0, 1)
+    pdf.cell(0, 5, 'IV. Habits', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
     y_pos += 6
@@ -211,11 +246,11 @@ def add_diagnosis_content_styled(pdf, data):
     
     pdf.ln(2)
     
-    # --- IV. Associated Symptoms ---
+    # --- V. Associated Symptoms ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'IV. Associated Symptoms', 0, 1)
+    pdf.cell(0, 5, 'V. Associated Symptoms', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
     y_pos += 6
@@ -266,11 +301,11 @@ def add_diagnosis_content_styled(pdf, data):
     
     pdf.ln(2)
 
-    # --- V. History of Emotional Stress ---
+    # --- VI. History of Emotional Stress ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'V. History of Emotional Stress', 0, 1)
+    pdf.cell(0, 5, 'VI. History of Emotional Stress', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
     y_pos += 6
@@ -279,11 +314,11 @@ def add_diagnosis_content_styled(pdf, data):
     
     pdf.ln(2)
 
-    # --- VI. PMH (Past Medical History) ---
+    # --- VII. PMH (Past Medical History) ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'VI. PMH', 0, 1)
+    pdf.cell(0, 5, 'VII. PMH', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
     y_pos += 6
@@ -294,11 +329,11 @@ def add_diagnosis_content_styled(pdf, data):
 
     pdf.ln(2)
     
-    # --- VII. PDH (Past Dental History) ---
+    # --- VIII. PDH (Past Dental History) ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'VII. PDH', 0, 1)
+    pdf.cell(0, 5, 'VIII. PDH', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
     y_pos += 6
@@ -344,10 +379,10 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.set_xy(10, 10)
     y_pos = 10
 
-    # --- VIII. Range of Motion ---
+    # --- IX. Range of Motion ---
     pdf.set_font(FONT_NAME, '', 12)
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'VIII. Range of Motion', 0, 1)
+    pdf.cell(0, 5, 'IX. Range of Motion', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
     y_pos += 6
@@ -392,11 +427,11 @@ def add_diagnosis_content_styled(pdf, data):
 
     pdf.ln(5)
 
-    # --- TMJ Noise Dysfunction ---
+    # --- X. TMJ Noise Dysfunction ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'TMJ Noise Dysfunction', 0, 1)
+    pdf.cell(0, 5, 'X. TMJ Noise Dysfunction', 0, 1)
     
     y_start = pdf.get_y() + 6
     col1_w, col2_w, col3_w, col4_w, col5_w = 40, 25, 25, 25, 25
@@ -457,11 +492,11 @@ def add_diagnosis_content_styled(pdf, data):
     
     pdf.ln(5)
 
-    # --- Provocation Test ---
+    # --- XI. Provocation Test ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'Provocation Test', 0, 1)
+    pdf.cell(0, 5, 'XI. Provocation Test', 0, 1)
     
     y_start = pdf.get_y() + 6
     col1_w, col2_w, col3_w = 60, 40, 50
@@ -493,11 +528,11 @@ def add_diagnosis_content_styled(pdf, data):
 
     pdf.ln(5)
 
-    # --- Attrition ---
+    # --- XII. Attrition ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'Attrition', 0, 1)
+    pdf.cell(0, 5, 'XII. Attrition', 0, 1)
     
     pdf.set_font(FONT_NAME, '', 10)
     y_pos += 6
@@ -506,11 +541,11 @@ def add_diagnosis_content_styled(pdf, data):
 
     pdf.ln(2)
 
-    # --- Diagnosis ---
+    # --- XIII. Diagnosis ---
     pdf.set_font(FONT_NAME, '', 12)
     y_pos = pdf.get_y()
     pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'Diagnosis', 0, 1)
+    pdf.cell(0, 5, 'XIII. Diagnosis', 0, 1)
     
     pdf.set_font(FONT_NAME, '', 10)
     y_pos += 6
@@ -518,6 +553,7 @@ def add_diagnosis_content_styled(pdf, data):
     diagnosis_list = data.get('final_diagnosis', [])
     diagnosis_text = ', '.join(diagnosis_list) if diagnosis_list else '진단 근거 없음'
     pdf.multi_cell(0, 5, diagnosis_text)
+
 
     
 
@@ -2707,6 +2743,7 @@ if st.session_state.get("step", 0) == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
         )
+
 
 
 
