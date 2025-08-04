@@ -87,7 +87,6 @@ def add_diagnosis_content_styled(pdf, data):
         if isinstance(val, bool):
             return "✔" if val else ""
         if isinstance(val, list):
-            # '기타' 항목이 리스트에 포함되어 있을 경우, '_other_text' 키도 확인
             val_str = ', '.join([item for item in val if item and item != '기타'])
             if '기타' in val and data.get(f"{key}_other_text", ""):
                 val_str += f" ({data.get(f'{key}_other_text')})"
@@ -95,6 +94,11 @@ def add_diagnosis_content_styled(pdf, data):
         if val == "선택 안 함" or val is None or val == "":
             return ""
         return str(val)
+
+    def draw_text_with_label(x, y, label, value, w=0, h=5, font_size=10):
+        pdf.set_xy(x, y)
+        pdf.set_font(FONT_NAME, '', font_size)
+        pdf.cell(w, h, f"{label}: {value}", 0, 1)
 
     # --- 페이지 상단 정보 ---
     pdf.set_font(FONT_NAME, '', 8)
@@ -109,11 +113,13 @@ def add_diagnosis_content_styled(pdf, data):
 
     # --- I. Chief Complaint ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, 25)
+    y_pos = 25
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, f"I. Chief Complaint (Onset: {safe_value('onset')})", 0, 1)
     
     pdf.set_font(FONT_NAME, '', 10)
-    pdf.set_xy(15, 31)
+    y_pos += 6
+    pdf.set_xy(15, y_pos)
     chief_complaint_text = safe_value('chief_complaint')
     if safe_value('chief_complaint_other'):
         chief_complaint_text += f" ({safe_value('chief_complaint_other')})"
@@ -122,19 +128,21 @@ def add_diagnosis_content_styled(pdf, data):
 
     # --- II. Present Illness ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, 42)
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'II. Present Illness', 0, 1)
 
     pdf.set_font(FONT_NAME, '', 10)
-    y_pos = 48
-    pdf.set_xy(15, y_pos)
+    y_pos += 6
     
-    # Pain, Sound, Mouth Jaw Movement
+    # Pain
+    pdf.set_xy(15, y_pos)
     pain_text = safe_value('pain_quality')
     if safe_value('pain_quality_other'):
         pain_text += f" ({safe_value('pain_quality_other')})"
     pdf.cell(0, 5, f"Pain: {pain_text}", 0, 1)
 
+    # Sound
     y_pos += 5
     pdf.set_xy(15, y_pos)
     tmj_sound_val = safe_value('tmj_sound_value')
@@ -142,11 +150,12 @@ def add_diagnosis_content_styled(pdf, data):
         tmj_sound_val += f" ({safe_value('tmj_click_context')})"
     pdf.cell(0, 5, f"Sound: {tmj_sound_val}", 0, 1)
 
+    # Mouth Jaw Movement
     y_pos += 5
     pdf.set_xy(15, y_pos)
     pdf.cell(0, 5, f"Mouth Jaw Movement: open: {safe_value('active_opening')} mm / closed: {safe_value('passive_opening')} mm", 0, 1)
     
-    # History/Trauma
+    # History/Quality
     y_pos += 5
     pdf.set_xy(15, y_pos)
     history_quality = safe_value('past_history')
@@ -161,42 +170,46 @@ def add_diagnosis_content_styled(pdf, data):
     
     # --- III. Habits ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'III. Habits', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
-    y_pos = pdf.get_y() + 5
+    y_pos += 6
     x_pos = 15
     col_spacing = 90
     
-    # Habits list
+    # Habits list - Combined to save space
     habits = [
-        ("Clenching", safe_value("habit_clenching_day")),
-        ("Bruxism", safe_value("habit_bruxism_night")),
-        ("Side Sleep", safe_value("side_sleep")),
-        ("Snoring", safe_value("snoring")),
-        ("Gum chewing", safe_value("gum_chewing")),
-        ("Hard food favorite", safe_value("hard_food")),
-        ("Unilateral chewing", safe_value("unilateral_chewing")),
-        ("Nail / Lip / Cheek biting", safe_value("nail_biting")),
-        ("Tongue thrusting", safe_value("tongue_thrusting")),
-        ("Finger sucking", safe_value("finger_sucking")),
-        ("Chin leaning", safe_value("chin_leaning")),
-        ("Forward head posture", safe_value("forward_head")),
-        ("Alcohol", safe_value("alcohol")),
-        ("Smoking", safe_value("smoking")),
-        ("Caffeine", safe_value("caffeine")),
-        ("기타", safe_value("habit_other_detail"))
+        ("Clenching", "habit_clenching_day"),
+        ("Bruxism", "habit_bruxism_night"),
+        ("Side Sleep", "side_sleep"),
+        ("Snoring", "snoring"),
+        ("Gum chewing", "gum_chewing"),
+        ("Hard food favorite", "hard_food"),
+        ("Unilateral chewing", "unilateral_chewing"),
+        ("Nail / Lip/ Cheek biting", "nail_biting"),
+        ("Tongue thrusting", "tongue_thrusting"),
+        ("Finger sucking", "finger_sucking"),
+        ("Chin leaning", "chin_leaning"),
+        ("Forward head posture", "forward_head"),
+        ("Alcohol", "alcohol"),
+        ("Smoking", "smoking"),
+        ("Caffeine", "caffeine"),
+        ("기타", "habit_other_detail")
     ]
     
     for i in range(0, len(habits), 2):
-        label1, val1 = habits[i]
-        label2, val2 = habits[i+1] if i+1 < len(habits) else (None, None)
+        label1, key1 = habits[i]
+        label2, key2 = habits[i+1] if i+1 < len(habits) else (None, None)
 
+        val1 = safe_value(key1)
         pdf.set_xy(x_pos, y_pos)
-        pdf.cell(col_spacing, 5, f" {label1}: {val1}", 0, 0)
+        pdf.cell(col_spacing, 5, f"{label1}: {val1}", 0, 0)
+        
         if label2:
-            pdf.cell(0, 5, f" {label2}: {val2}", 0, 1)
+            val2 = safe_value(key2)
+            pdf.cell(0, 5, f"{label2}: {val2}", 0, 1)
         else:
             pdf.ln()
         y_pos += 5
@@ -205,15 +218,16 @@ def add_diagnosis_content_styled(pdf, data):
     
     # --- IV. Associated Symptoms ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'IV. Associated Symptoms', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
-    y_pos = pdf.get_y() + 5
-    pdf.set_xy(15, y_pos)
+    y_pos += 6
     
     # Headache
     headache_text = safe_value('has_headache_now')
+    pdf.set_xy(15, y_pos)
     pdf.cell(0, 5, f"Headache: {headache_text}", 0, 1)
     if headache_text == '예':
         y_pos += 5
@@ -232,24 +246,25 @@ def add_diagnosis_content_styled(pdf, data):
         pdf.set_xy(20, y_pos)
         pdf.cell(0, 5, f" - 경감요인: {safe_value('headache_reliefs')}", 0, 1)
     
+    # Ear Symptoms
     y_pos += 5
     pdf.set_xy(15, y_pos)
-    
-    # Ear Symptoms
     ear_symptoms = safe_value('selected_ear_symptoms')
     ear_other_text = safe_value('ear_symptom_other')
     ear_symptom_str = ear_symptoms
     if ear_other_text:
         ear_symptom_str += f" ({ear_other_text})"
     pdf.cell(0, 5, f"Ear Symptoms: {ear_symptom_str}", 0, 1)
-
+    
+    # Eye, Nose, Throat
     y_pos += 5
     pdf.set_xy(15, y_pos)
-    eye_pain_val = safe_value('eye_pain')
-    nose_pain_val = safe_value('nose_pain')
-    throat_pain_val = safe_value('throat_pain')
+    eye_pain_val = "통증" if data.get('eye_pain', False) else ""
+    nose_pain_val = "통증" if data.get('nose_pain', False) else ""
+    throat_pain_val = "통증" if data.get('throat_pain', False) else ""
     pdf.cell(0, 5, f"Eye: {eye_pain_val}, Nose: {nose_pain_val}, Throat: {throat_pain_val}", 0, 1)
-
+    
+    # 기타
     y_pos += 5
     pdf.set_xy(15, y_pos)
     pdf.cell(0, 5, f"기타: {safe_value('additional_symptoms_text')}", 0, 1)
@@ -258,18 +273,12 @@ def add_diagnosis_content_styled(pdf, data):
 
     # --- V. History of Emotional Stress ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'V. History of Emotional Stress', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
-    y_pos = pdf.get_y() + 5
-    pdf.set_xy(15, y_pos)
-    stress_text = safe_value('stress_radio')
-    if safe_value('stress_other_input'):
-        stress_text += f" ({safe_value('stress_other_input')})"
-    pdf.cell(0, 5, stress_text, 0, 1)
-    
-    y_pos += 5
+    y_pos += 6
     pdf.set_xy(15, y_pos)
     pdf.multi_cell(0, 5, f"상세 내용: {safe_value('stress_detail')}")
     
@@ -277,23 +286,27 @@ def add_diagnosis_content_styled(pdf, data):
 
     # --- VI. PMH (Past Medical History) ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'VI. PMH', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
+    
+    y_pos += 6
+    pdf.set_xy(15, y_pos)
+    pdf.multi_cell(0, 5, f"과거 이력: {safe_value('past_history', '기재 안함')}")
     pdf.set_xy(15, pdf.get_y() + 5)
-    pdf.multi_cell(0, 5, f"과거 이력: {safe_value('past_history', '기재 안 함')}")
-    pdf.set_xy(15, pdf.get_y() + 5)
-    pdf.multi_cell(0, 5, f"현재 복용 약물: {safe_value('current_medications', '기재 안 함')}")
+    pdf.multi_cell(0, 5, f"현재 복용 약물: {safe_value('current_medications', '기재 안함')}")
 
     pdf.ln(2)
     
     # --- VII. PDH (Past Dental History) ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'VII. PDH', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
-    y_pos = pdf.get_y() + 5
+    y_pos += 6
     
     # Ortho Tx.
     pdf.set_xy(15, y_pos)
@@ -331,15 +344,18 @@ def add_diagnosis_content_styled(pdf, data):
         pdf.set_xy(20, y_pos)
         pdf.cell(0, 5, f" - 복용 약물: {safe_value('tmd_current_medications')}", 0, 1)
 
-    pdf.ln(2)
+    # --- 페이지 넘김 ---
+    pdf.add_page()
+    pdf.set_xy(10, 10)
+    y_pos = 10
 
     # --- VIII. Range of Motion ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'VIII. Range of Motion', 0, 1)
     pdf.set_font(FONT_NAME, '', 10)
     
-    y_pos = pdf.get_y() + 5
+    y_pos += 6
     
     # Active Opening
     pdf.set_xy(15, y_pos)
@@ -383,16 +399,18 @@ def add_diagnosis_content_styled(pdf, data):
 
     # --- TMJ Noise Dysfunction ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'TMJ Noise Dysfunction', 0, 1)
     
-    y_start = pdf.get_y() + 5
+    y_start = pdf.get_y() + 6
     col1_w, col2_w, col3_w, col4_w, col5_w = 40, 25, 25, 25, 25
     row_h = 7
     
     pdf.set_font(FONT_NAME, '', 10)
     pdf.set_xy(10 + col1_w, y_start)
     pdf.cell(col2_w + col3_w, row_h, 'Right', 1, 0, 'C')
+    pdf.set_xy(10 + col1_w + col2_w + col3_w, y_start)
     pdf.cell(col4_w + col5_w, row_h, 'Left', 1, 1, 'C')
     y_start += row_h
     
@@ -404,30 +422,53 @@ def add_diagnosis_content_styled(pdf, data):
     pdf.cell(col5_w, row_h, 'Close', 1, 1, 'C')
     y_start += row_h
 
-    # Content
-    def draw_noise_row_with_values(label, key_open_right, key_close_right, key_open_left, key_close_left, y):
-        pdf.set_xy(10, y)
-        pdf.cell(col1_w, row_h, label, 1, 0, 'C')
-        pdf.cell(col2_w, row_h, safe_value(key_open_right, ''), 1, 0, 'C')
-        pdf.cell(col3_w, row_h, safe_value(key_close_right, ''), 1, 0, 'C')
-        pdf.cell(col4_w, row_h, safe_value(key_open_left, ''), 1, 0, 'C')
-        pdf.cell(col5_w, row_h, safe_value(key_close_left, ''), 1, 1, 'C')
+    def get_noise_cell_value(open_close, right_left):
+        tmj_sound_val = data.get('tmj_sound_value', '')
+        if '사각사각' in tmj_sound_val:
+            return safe_value('crepitus_confirmed_value')
+        
+        click_context = data.get('tmj_click_context', [])
+        
+        if '딸깍' in tmj_sound_val:
+            if open_close == 'Open' and ('입 벌릴 때' in click_context):
+                return '딸깍'
+            if open_close == 'Close' and ('입 다물 때' in click_context):
+                return '딸깍'
+        return ''
 
-    # 세션 상태 키가 명확하지 않아 임의로 지정. 실제 코드에 맞게 수정 필요.
-    draw_noise_row_with_values('Closed condyle (0~15mm)', 'tmj_noise_right_open_closed', 'tmj_noise_right_close_closed', 'tmj_noise_left_open_closed', 'tmj_noise_left_close_closed', y_start)
-    y_start += row_h
-    draw_noise_row_with_values('Mild (15~30mm)', 'tmj_noise_right_open_mild', 'tmj_noise_right_close_mild', 'tmj_noise_left_open_mild', 'tmj_noise_left_close_mild', y_start)
-    y_start += row_h
-    draw_noise_row_with_values('Wide open (30mm 이상)', 'tmj_noise_right_open_wide', 'tmj_noise_right_close_wide', 'tmj_noise_left_open_wide', 'tmj_noise_left_close_wide', y_start)
+    y_pos = y_start
+    pdf.set_xy(10, y_pos)
+    pdf.cell(col1_w, row_h, 'Closed condyle (0~15mm)', 1, 0, 'C')
+    pdf.cell(col2_w, row_h, get_noise_cell_value('Open', 'Right'), 1, 0, 'C')
+    pdf.cell(col3_w, row_h, get_noise_cell_value('Close', 'Right'), 1, 0, 'C')
+    pdf.cell(col4_w, row_h, get_noise_cell_value('Open', 'Left'), 1, 0, 'C')
+    pdf.cell(col5_w, row_h, get_noise_cell_value('Close', 'Left'), 1, 1, 'C')
+    
+    y_pos += row_h
+    pdf.set_xy(10, y_pos)
+    pdf.cell(col1_w, row_h, 'Mild (15~30mm)', 1, 0, 'C')
+    pdf.cell(col2_w, row_h, '', 1, 0, 'C')
+    pdf.cell(col3_w, row_h, '', 1, 0, 'C')
+    pdf.cell(col4_w, row_h, '', 1, 0, 'C')
+    pdf.cell(col5_w, row_h, '', 1, 1, 'C')
+    
+    y_pos += row_h
+    pdf.set_xy(10, y_pos)
+    pdf.cell(col1_w, row_h, 'Wide open (30mm 이상)', 1, 0, 'C')
+    pdf.cell(col2_w, row_h, '', 1, 0, 'C')
+    pdf.cell(col3_w, row_h, '', 1, 0, 'C')
+    pdf.cell(col4_w, row_h, '', 1, 0, 'C')
+    pdf.cell(col5_w, row_h, '', 1, 1, 'C')
     
     pdf.ln(5)
 
     # --- Provocation Test ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'Provocation Test', 0, 1)
     
-    y_start = pdf.get_y() + 5
+    y_start = pdf.get_y() + 6
     col1_w, col2_w, col3_w = 60, 40, 50
     row_h = 7
     
@@ -459,22 +500,26 @@ def add_diagnosis_content_styled(pdf, data):
 
     # --- Attrition ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'Attrition', 0, 1)
     
     pdf.set_font(FONT_NAME, '', 10)
-    pdf.set_xy(15, pdf.get_y() + 5)
+    y_pos += 6
+    pdf.set_xy(15, y_pos)
     pdf.cell(0, 5, safe_value('attrition'), 0, 1)
 
     pdf.ln(2)
 
     # --- Diagnosis ---
     pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, pdf.get_y())
+    y_pos = pdf.get_y()
+    pdf.set_xy(10, y_pos)
     pdf.cell(0, 5, 'Diagnosis', 0, 1)
     
     pdf.set_font(FONT_NAME, '', 10)
-    pdf.set_xy(15, pdf.get_y() + 5)
+    y_pos += 6
+    pdf.set_xy(15, y_pos)
     diagnosis_list = data.get('final_diagnosis', [])
     diagnosis_text = ', '.join(diagnosis_list) if diagnosis_list else '진단 근거 없음'
     pdf.multi_cell(0, 5, diagnosis_text)
@@ -2667,6 +2712,7 @@ if st.session_state.get("step", 0) == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
         )
+
 
 
 
