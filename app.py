@@ -34,40 +34,126 @@ for key, default in diagnosis_keys.items():
         st.session_state[key] = default
 
 
-import fitz  # PyMuPDF
+
+##
+
+
+
 from io import BytesIO
+from pathlib import Path
+import fitz  # PyMuPDF
 
-def create_diagnosis_pdf(data: dict) -> BytesIO:
-    # 템플릿 불러오기
-    template_path = "template.pdf"
-    doc = fitz.open(template_path)
+def generate_filled_pdf():
+    template_text = Path("template2.txt").read_text(encoding="utf-8")
 
-    # PDF 수정용
-    for page in doc:
-        text_instances = page.search_for("{")
-        for inst in text_instances:
-            block_text = page.get_textbox(inst)
-            if block_text.startswith("{") and block_text.endswith("}"):
-                key = block_text.strip("{}")
-                val = data.get(key, "")
-                if isinstance(val, list):
-                    val = ", ".join(val)
-                elif isinstance(val, dict):
-                    val = ", ".join([k for k, v in val.items() if v])
-                else:
-                    val = str(val)
+    filled_text = template_text.format(
+        name=st.session_state.get("name", ""),
+        birthdate=st.session_state.get("birthdate", ""),
+        gender=st.session_state.get("gender", ""),
+        email=st.session_state.get("email", ""),
+        address=st.session_state.get("address", ""),
+        phone=st.session_state.get("phone", ""),
+        occupation=st.session_state.get("occupation", ""),
+        visit_reason=st.session_state.get("visit_reason", ""),
+        chief_complaint=st.session_state.get("chief_complaint", ""),
+        chief_complaint_other=st.session_state.get("chief_complaint_other", ""),
+        onset=st.session_state.get("onset", ""),
+        jaw_aggravation=st.session_state.get("jaw_aggravation", ""),
+        pain_quality=", ".join(st.session_state.get("pain_quality", [])),
+        pain_quality_other=st.session_state.get("pain_quality_other", ""),
+        muscle_movement_pain_value=st.session_state.get("muscle_movement_pain_value", ""),
+        muscle_pressure_2s_value=st.session_state.get("muscle_pressure_2s_value", ""),
+        muscle_referred_pain_value=st.session_state.get("muscle_referred_pain_value", ""),
+        muscle_referred_remote_pain_value=st.session_state.get("muscle_referred_remote_pain_value", ""),
+        tmj_movement_pain_value=st.session_state.get("tmj_movement_pain_value", ""),
+        tmj_press_pain_value=st.session_state.get("tmj_press_pain_value", ""),
+        headache_temples_value=st.session_state.get("headache_temples_value", ""),
+        headache_reproduce_by_pressure_value=st.session_state.get("headache_reproduce_by_pressure_value", ""),
+        headache_with_jaw_value=st.session_state.get("headache_with_jaw_value", ""),
+        headache_not_elsewhere_value=st.session_state.get("headache_not_elsewhere_value", ""),
+        tmj_sound_value=st.session_state.get("tmj_sound_value", ""),
+        tmj_click_summary=st.session_state.get("tmj_click_summary", ""),
+        crepitus_confirmed_value=st.session_state.get("crepitus_confirmed_value", ""),
+        jaw_locked_now_value=st.session_state.get("jaw_locked_now_value", ""),
+        jaw_unlock_possible_value=st.session_state.get("jaw_unlock_possible_value", ""),
+        jaw_locked_past_value=st.session_state.get("jaw_locked_past_value", ""),
+        mao_fits_3fingers_value=st.session_state.get("mao_fits_3fingers_value", ""),
+        frequency_choice=st.session_state.get("frequency_choice", ""),
+        pain_level=st.session_state.get("pain_level", ""),
+        selected_times=", ".join(st.session_state.get("selected_times", [])),
+        has_headache_now=st.session_state.get("has_headache_now", ""),
+        headache_areas=", ".join(st.session_state.get("headache_areas", [])),
+        headache_severity=st.session_state.get("headache_severity", ""),
+        headache_frequency=st.session_state.get("headache_frequency", ""),
+        headache_triggers=", ".join(st.session_state.get("headache_triggers", [])),
+        headache_reliefs=", ".join(st.session_state.get("headache_reliefs", [])),
+        habit_summary=st.session_state.get("habit_summary", ""),
+        additional_habits=st.session_state.get("additional_habits", ""),
+        active_opening=st.session_state.get("active_opening", ""),
+        active_pain=st.session_state.get("active_pain", ""),
+        passive_opening=st.session_state.get("passive_opening", ""),
+        passive_pain=st.session_state.get("passive_pain", ""),
+        deviation=st.session_state.get("deviation", ""),
+        devivation2=st.session_state.get("devivation2", ""),
+        deflection=st.session_state.get("deflection", ""),
+        protrusion=st.session_state.get("protrusion", ""),
+        protrusion_pain=st.session_state.get("protrusion_pain", ""),
+        latero_right=st.session_state.get("latero_right", ""),
+        latero_right_pain=st.session_state.get("latero_right_pain", ""),
+        latero_left=st.session_state.get("latero_left", ""),
+        latero_left_pain=st.session_state.get("latero_left_pain", ""),
+        occlusion=st.session_state.get("occlusion", ""),
+        occlusion_shift=st.session_state.get("occlusion_shift", ""),
+        tmj_noise_right_open=st.session_state.get("tmj_noise_right_open", ""),
+        tmj_noise_left_open=st.session_state.get("tmj_noise_left_open", ""),
+        tmj_noise_right_close=st.session_state.get("tmj_noise_right_close", ""),
+        tmj_noise_left_close=st.session_state.get("tmj_noise_left_close", ""),
+        palpation_temporalis=st.session_state.get("palpation_temporalis", ""),
+        palpation_medial_pterygoid=st.session_state.get("palpation_medial_pterygoid", ""),
+        palpation_lateral_pterygoid=st.session_state.get("palpation_lateral_pterygoid", ""),
+        pain_mapping=st.session_state.get("pain_mapping", ""),
+        ear_symptoms=", ".join(st.session_state.get("ear_symptoms", [])),
+        ear_symptom_other=st.session_state.get("ear_symptom_other", ""),
+        neck_shoulder_symptoms=", ".join(st.session_state.get("neck_shoulder_symptoms", [])),
+        additional_symptoms=st.session_state.get("additional_symptoms", ""),
+        neck_trauma_radio=st.session_state.get("neck_trauma_radio", ""),
+        stress_radio=st.session_state.get("stress_radio", ""),
+        stress_detail=st.session_state.get("stress_detail", ""),
+        ortho_exp=st.session_state.get("ortho_exp", ""),
+        ortho_detail=st.session_state.get("ortho_detail", ""),
+        prosth_exp=st.session_state.get("prosth_exp", ""),
+        prosth_detail=st.session_state.get("prosth_detail", ""),
+        other_dental=st.session_state.get("other_dental", ""),
+        tmd_treatment_history=st.session_state.get("tmd_treatment_history", ""),
+        tmd_treatment_detail=st.session_state.get("tmd_treatment_detail", ""),
+        tmd_treatment_response=st.session_state.get("tmd_treatment_response", ""),
+        tmd_current_medications=st.session_state.get("tmd_current_medications", ""),
+        past_history=st.session_state.get("past_history", ""),
+        current_medications=st.session_state.get("current_medications", ""),
+        bite_right=st.session_state.get("bite_right", ""),
+        bite_left=st.session_state.get("bite_left", ""),
+        loading_test=st.session_state.get("loading_test", ""),
+        resistance_test=st.session_state.get("resistance_test", ""),
+        attrition=st.session_state.get("attrition", ""),
+        impact_daily=st.session_state.get("impact_daily", ""),
+        impact_work=st.session_state.get("impact_work", ""),
+        impact_quality_of_life=st.session_state.get("impact_quality_of_life", ""),
+        sleep_quality=st.session_state.get("sleep_quality", ""),
+        sleep_tmd_relation=st.session_state.get("sleep_tmd_relation", ""),
+        diagnosis_result=st.session_state.get("diagnosis_result", "")
+    )
 
-                # 치환: 해당 영역에 기존 텍스트 덮어쓰기
-                page.add_redact_annot(inst, fill=(1, 1, 1))  # 흰색으로 영역 삭제
-                page.apply_redactions()
-                page.insert_text(inst.tl, val, fontname="helv", fontsize=11)
+    # PDF 생성
+    doc = fitz.open()
+    page = doc.new_page()
+    rect = fitz.Rect(72, 72, 540, 800)
+    page.insert_textbox(rect, filled_text, fontsize=10, fontname="helv", align=0)
 
-    # PDF 버퍼 반환
-    buffer = BytesIO()
-    doc.save(buffer)
+    pdf_buffer = BytesIO()
+    doc.save(pdf_buffer)
     doc.close()
-    buffer.seek(0)
-    return buffer
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
 
 # --- 페이지 설정 ---
@@ -174,7 +260,11 @@ def sync_widget_key(widget_key, state_key):
 
 def sync_multiple_keys(field_mapping):
     for session_key, widget_key in field_mapping.items():
-        st.session_state[session_key] = st.session_state.get(widget_key, "")
+        if widget_key in st.session_state:
+            st.session_state[session_key] = st.session_state[widget_key]
+        else:
+            st.session_state[session_key] = ""
+
 
 
 # 총 단계 수 (0부터 시작)
@@ -849,19 +939,16 @@ elif st.session_state.step == 6:
     # widget_key → state_key 매핑
     widget_map = {
         "frequency_choice_widget": "frequency_choice",
-        "frequency_other_widget": "frequency_other_text",
         "pain_level_widget": "pain_level",
         "time_morning_widget": "time_morning",
         "time_afternoon_widget": "time_afternoon",
         "time_evening_widget": "time_evening",
-        "time_other_widget": "time_other",
-        "time_other_text_widget": "time_other_text",
         "has_headache_widget": "has_headache_now"
     }
 
     with st.container(border=True):
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
-        freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
+        freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
         st.radio(
             "", freq_opts, index=5,
             key="frequency_choice_widget",
@@ -869,16 +956,7 @@ elif st.session_state.step == 6:
             args=("frequency_choice_widget", "frequency_choice")
         )
 
-        if st.session_state.get("frequency_choice") == "기타":
-            st.text_input(
-                "기타 빈도:",
-                key="frequency_other_widget",
-                value=st.session_state.get("frequency_other_text", ""),
-                on_change=sync_widget_key,
-                args=("frequency_other_widget", "frequency_other_text")
-            )
-        else:
-            st.session_state["frequency_other_text"] = ""
+       
 
         st.markdown("---")
         st.markdown("**(통증이 있을 시) 현재 통증 정도는 어느 정도인가요? (0=없음, 10=극심한 통증)**")
@@ -896,9 +974,9 @@ elif st.session_state.step == 6:
             "morning": "오전",
             "afternoon": "오후",
             "evening": "저녁",
-            "other": "기타"
+           
         }
-        for key in ["morning", "afternoon", "evening", "other"]:
+        for key in ["morning", "afternoon", "evening"]:
             widget_key = f"time_{key}_widget"
             state_key = f"time_{key}"
             st.checkbox(
@@ -908,17 +986,6 @@ elif st.session_state.step == 6:
                 on_change=sync_widget_key,
                 args=(widget_key, state_key)
             )
-
-        if st.session_state.get("time_other", False):
-            st.text_input(
-                "기타 시간대:",
-                key="time_other_text_widget",
-                value=st.session_state.get("time_other_text", ""),
-                on_change=sync_widget_key,
-                args=("time_other_text_widget", "time_other_text")
-            )
-        else:
-            st.session_state["time_other_text"] = ""
 
         st.markdown("---")
         st.markdown("**두통이 있나요?**")
@@ -996,12 +1063,10 @@ elif st.session_state.step == 6:
             freq_other = st.session_state.get("frequency_other_text", "").strip()
             freq_valid = freq not in ["선택 안 함", "기타"] or (freq == "기타" and freq_other != "")
 
-            time_valid = (
-                st.session_state.get("time_morning", False) or
-                st.session_state.get("time_afternoon", False) or
-                st.session_state.get("time_evening", False) or
-                (st.session_state.get("time_other", False) and st.session_state.get("time_other_text", "").strip() != "")
-            )
+            time_valid = any([
+                st.session_state.get(f"time_{opt['key']}", False) for opt in time_options
+            ])
+
 
             if st.session_state.get("has_headache_now") == "예":
                 if not st.session_state.get("headache_areas"):
@@ -1019,6 +1084,9 @@ elif st.session_state.step == 6:
                 errors.append("빈도 항목을 입력하거나 선택해주세요.")
             if not time_valid:
                 errors.append("시간대 항목을 입력하거나 선택해주세요.")
+            selected_times = [opt['label'] for opt in time_options if st.session_state.get(f"time_{opt['key']}", False)]
+            st.session_state["selected_times"] = ", ".join(selected_times)
+
 
             if errors:
                 for err in errors:
@@ -2183,6 +2251,8 @@ elif st.session_state.step == 19:
         st.rerun()
 
 
+
+import datetime
 
 if st.session_state.get("step", 0) == final_step:
     pdf_output_bytes = create_diagnosis_pdf(st.session_state)
