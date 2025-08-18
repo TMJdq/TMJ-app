@@ -110,6 +110,7 @@ def generate_filled_pdf():
 
 
     values = {k: str(st.session_state.get(k, "")) for k in keys}
+    # 선택  안 함 항목은 빈칸으로 출력
     values = {k: ("" if v == "선택 안 함" else v) for k, v in values.items()}
 
     # PDF 각 페이지에 대해 텍스트 치환
@@ -131,7 +132,7 @@ def generate_filled_pdf():
             for rect in rects:
                 x, y = rect.tl
                 # baseline 보정값
-                page.insert_text((x, y + 7), val, fontname="nan", fontfile=FONT_FILE)
+                page.insert_text((x, y + 7), val, fontname="nan", fontfile=FONT_FILE, fontsize=9)
 
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
