@@ -2285,7 +2285,7 @@ elif st.session_state.step == 19:
 import datetime
 
 if st.session_state.get("step", 0) == final_step:
-    pdf_output_bytes = create_diagnosis_pdf(st.session_state)
+    pdf_output_bytes = generate_filled_pdf()   # ✅ 함수명 맞게 수정
     if pdf_output_bytes:
         st.download_button(
             label="📥 진단 결과 PDF 다운로드",
@@ -2293,3 +2293,4 @@ if st.session_state.get("step", 0) == final_step:
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'
         )
+
