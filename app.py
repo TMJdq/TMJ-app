@@ -64,7 +64,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
 
 def generate_filled_pdf():
-    template_path = "template5.pdf"
+    template_path = "template6.pdf"
     doc = fitz.open(template_path)
 
     keys = [
@@ -2239,6 +2239,25 @@ elif st.session_state.step == 19:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+
+
+
+
+# neck/shoulder 증상 나열식으로 변환
+selected_neck = [
+    k for k, v in st.session_state.get("neck_shoulder_symptoms", {}).items() if v
+]
+st.session_state["neck_shoulder_symptoms_str"] = (
+    ", ".join(selected_neck) if selected_neck else "없음"
+)
+
+# 추가 증상도 마찬가지
+selected_additional = [
+    k for k, v in st.session_state.get("additional_symptoms", {}).items() if v
+]
+st.session_state["additional_symptoms_str"] = (
+    ", ".join(selected_additional) if selected_additional else "없음"
+)
 
 
 
