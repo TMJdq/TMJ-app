@@ -255,12 +255,14 @@ def compute_diagnoses(state):
 
 
 # 콜백 함수 정의
+# ✔ 1) 한 방향 복사용 함수
 def sync_multiple_keys(field_mapping):
-    for session_key, widget_key in field_mapping.items():
-        if widget_key in st.session_state:
-            st.session_state[session_key] = st.session_state[widget_key]
-        else:
-            st.session_state[session_key] = ""
+    for widget_key, session_key in field_mapping.items():
+        st.session_state[session_key] = st.session_state.get(widget_key, "")
+
+# ✔ 2) 단일 위젯 on_change 에서 사용하는 함수
+def sync_widget_key(widget_key, state_key):
+    st.session_state[state_key] = st.session_state.get(widget_key, "")
 
 
 
