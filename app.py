@@ -1746,7 +1746,6 @@ elif st.session_state.step == 9:
     )
 
     with st.container(border=True):
-        # ▣ 턱 움직임 패턴
         st.markdown("---")
         st.subheader("턱 움직임 패턴 (Mandibular Movement Pattern)")
         st.markdown("**입을 벌리고 닫을 때 턱이 한쪽으로 치우치는 것 같나요?**")
@@ -1780,7 +1779,6 @@ elif st.session_state.step == 9:
             label_visibility="collapsed"
         )
 
-        # ▣ Protrusion
         st.markdown("---")
         st.markdown("**앞으로 내밀기(Protrusion) ______ mm (의료진이 측정 후 기록)**")
         st.text_input(
@@ -1801,7 +1799,6 @@ elif st.session_state.step == 9:
             args=("protrusion_pain_widget", "protrusion_pain")
         )
 
-        # ▣ Laterotrusion Right
         st.markdown("---")
         st.markdown("**측방운동(Laterotrusion) 오른쪽: ______ mm (의료진이 측정 후 기록)**")
         st.text_input(
@@ -1822,7 +1819,6 @@ elif st.session_state.step == 9:
             args=("latero_right_pain_widget", "latero_right_pain")
         )
 
-        # ▣ Laterotrusion Left
         st.markdown("---")
         st.markdown("**측방운동(Laterotrusion) 왼쪽: ______ mm (의료진이 측정 후 기록)**")
         st.text_input(
@@ -1843,7 +1839,6 @@ elif st.session_state.step == 9:
             args=("latero_left_pain_widget", "latero_left_pain")
         )
 
-        # ▣ Occlusion
         st.markdown("---")
         st.markdown("**교합(Occlusion): 앞니(위, 아래)가 정중앙에서 잘 맞물리나요?**")
         st.radio(
@@ -1858,10 +1853,14 @@ elif st.session_state.step == 9:
 
         if st.session_state.get("occlusion") == "아니오":
             st.markdown("**정중앙이 어느 쪽으로 어긋나는지:**")
+            shift_value = st.session_state.get("occlusion_shift", "선택 안 함")
+            shift_options = ["오른쪽", "왼쪽", "선택 안 함"]
+            shift_index = shift_options.index(shift_value) if shift_value in shift_options else 2
+
             st.radio(
                 label="",
-                options=["오른쪽", "왼쪽", "선택 안 함"],
-                index=["오른쪽", "왼쪽", "선택 안 함"].index(st.session_state.get("occlusion_shift", "선택 안 함")),
+                options=shift_options,
+                index=shift_index,
                 key="occlusion_shift_widget",
                 on_change=sync_widget_key,
                 args=("occlusion_shift_widget", "occlusion_shift"),
@@ -1880,7 +1879,6 @@ elif st.session_state.step == 9:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            # 동기화 보장
             sync_multiple_keys({
                 "deviation_widget": "deviation",
                 "deviation2_widget": "deviation2",
@@ -1896,6 +1894,7 @@ elif st.session_state.step == 9:
             })
             st.session_state.step = 10
             st.rerun()
+
 
 # STEP 10: 턱 운동 범위 및 관찰3 (Range of Motion & Observations)
 elif st.session_state.step == 10:
