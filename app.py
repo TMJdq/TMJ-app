@@ -1435,17 +1435,14 @@ elif st.session_state.step == 6:
         if st.session_state.get("has_headache_now") == "예":
             st.markdown("---")
             st.markdown("**두통 부위를 모두 선택해주세요.**")
-            headache_area_opts = ["이마", "측두부(관자놀이)", "뒤통수", "정수리", "기타"]
+            headache_area_opts = ["이마", "측두부(관자놀이)", "뒤통수", "정수리"]
             selected_areas = []
             for area in headache_area_opts:
                 if st.checkbox(area, value=(area in st.session_state.get("headache_areas", [])), key=f"headache_area_{area}"):
                     selected_areas.append(area)
             st.session_state["headache_areas"] = selected_areas
 
-            if "기타" in selected_areas:
-                st.text_input("기타 부위:", key="headache_area_other_text")
-            else:
-                st.session_state["headache_area_other_text"] = ""
+
 
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state["headache_severity"] = st.slider("두통 강도", 0, 10, value=st.session_state.get("headache_severity", 0))
@@ -1459,30 +1456,24 @@ elif st.session_state.step == 6:
             )
 
             st.markdown("**두통을 유발하거나 악화시키는 요인이 있나요? (복수 선택 가능)**")
-            trigger_opts = ["스트레스", "수면 부족", "음식 섭취", "소음", "밝은 빛", "기타"]
+            trigger_opts = ["스트레스", "수면 부족", "음식 섭취", "소음", "밝은 빛"]
             selected_triggers = []
             for trig in trigger_opts:
                 if st.checkbox(trig, value=(trig in st.session_state.get("headache_triggers", [])), key=f"trigger_{trig}"):
                     selected_triggers.append(trig)
             st.session_state["headache_triggers"] = selected_triggers
 
-            if "기타" in selected_triggers:
-                st.text_input("기타 악화요인:", key="headache_trigger_other_text")
-            else:
-                st.session_state["headache_trigger_other_text"] = ""
+    
 
             st.markdown("**두통을 완화시키는 요인이 있나요? (복수 선택 가능)**")
-            relief_opts = ["휴식", "약물", "안마", "수면", "기타"]
+            relief_opts = ["휴식", "약물", "안마", "수면"]
             selected_reliefs = []
             for rel in relief_opts:
                 if st.checkbox(rel, value=(rel in st.session_state.get("headache_reliefs", [])), key=f"relief_{rel}"):
                     selected_reliefs.append(rel)
             st.session_state["headache_reliefs"] = selected_reliefs
 
-            if "기타" in selected_reliefs:
-                st.text_input("기타 경감요인:", key="headache_relief_other_text")
-            else:
-                st.session_state["headache_relief_other_text"] = ""
+        
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -1553,7 +1544,7 @@ elif st.session_state.step == 7:
             "이 악물기 - 밤(수면 중)": "habit_clenching_night"
         }
 
-        # 없음 체크박스 - 콜백 적용
+        # 없음 체크박스
         st.checkbox(
             "없음",
             value=st.session_state.get("habit_none", False),
@@ -1585,17 +1576,15 @@ elif st.session_state.step == 7:
             "단단한 음식 선호(예: 견과류, 딱딱한 사탕 등)", "한쪽으로만 씹기",
             "혀 내밀기 및 밀기(이를 밀거나 입술 사이로 내미는 습관)", "손톱/입술/볼 물기",
             "손가락 빨기", "턱 괴기", "거북목/머리 앞으로 빼기",
-            "음주", "흡연", "카페인", "기타"
+            "음주", "흡연", "카페인"
         ]
 
         if "selected_habits" not in st.session_state:
             st.session_state.selected_habits = []
 
         for habit in additional_habits:
-            # 위젯 키 구성 (특수 문자 제거)
             widget_key = f"habit_{habit.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_').replace('-', '_').replace('.', '').replace(':', '')}_widget"
 
-            # 기본 체크 상태
             checked = st.checkbox(
                 habit,
                 value=habit in st.session_state.selected_habits,
@@ -1607,17 +1596,6 @@ elif st.session_state.step == 7:
             elif not checked and habit in st.session_state.selected_habits:
                 st.session_state.selected_habits.remove(habit)
 
-        if "기타" in st.session_state.selected_habits:
-            st.text_input(
-                "기타 습관을 입력해주세요:",
-                key="habit_other_detail_widget",
-                value=st.session_state.get("habit_other_detail", ""),
-                on_change=sync_widget_key,
-                args=("habit_other_detail_widget", "habit_other_detail")
-            )
-        else:
-            st.session_state["habit_other_detail"] = ""
-
     st.markdown("---")
     col1, col2 = st.columns(2)
 
@@ -1628,14 +1606,35 @@ elif st.session_state.step == 7:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            # 동기화 보장
             sync_multiple_keys({
                 "habit_none_widget": "habit_none",
                 "habit_bruxism_night_widget": "habit_bruxism_night",
                 "habit_clenching_day_widget": "habit_clenching_day",
                 "habit_clenching_night_widget": "habit_clenching_night",
-                "habit_other_detail_widget": "habit_other_detail"
             })
+
+            # 습관 요약 생성
+            first_habit_labels = {
+                "habit_bruxism_night": "이갈이 (밤)",
+                "habit_clenching_day": "이 악물기 (낮)",
+                "habit_clenching_night": "이 악물기 (밤)",
+            }
+
+            first_selected = []
+
+            if st.session_state.get("habit_none"):
+                first_selected.append("없음")
+            else:
+                for key, label in first_habit_labels.items():
+                    if st.session_state.get(key):
+                        first_selected.append(label)
+
+            habit_summary = ", ".join(first_selected) if first_selected else "없음"
+            additional_summary = ", ".join(st.session_state.selected_habits) if st.session_state.selected_habits else "없음"
+
+            st.session_state["habit_summary"] = habit_summary
+            st.session_state["additional_habits"] = additional_summary
+            st.session_state["full_habit_summary"] = f"주요 습관: {habit_summary}\n기타 습관: {additional_summary}"
 
             has_first = any([
                 st.session_state.get("habit_bruxism_night", False),
@@ -1649,7 +1648,6 @@ elif st.session_state.step == 7:
                 st.rerun()
             else:
                 st.warning("‘이갈이/이 악물기/없음’ 중에서 최소 한 가지를 선택해주세요.")
-
 
 # STEP 8: 턱 운동 범위 및 관찰1 (Range of Motion & Observations)
 elif st.session_state.step == 8:
