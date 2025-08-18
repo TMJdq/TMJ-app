@@ -34,67 +34,40 @@ for key, default in diagnosis_keys.items():
         st.session_state[key] = default
 
 
-def create_diagnosis_pdf(data: dict) -> BytesIO:
-    # PDF 저장을 위한 버퍼 생성
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
-    story = []
+import fitz  # PyMuPDF
+from io import BytesIO
 
+def create_diagnosis_pdf(session_data: dict) -> BytesIO:
     def get_value(key):
-        val = data.get(key, "")
+        val = session_data.get(key, "")
         if isinstance(val, list):
             return ", ".join(val)
         elif isinstance(val, dict):
             return ", ".join([k for k, v in val.items() if v])
         return str(val)
 
-    # 템플릿 항목에 대응하는 필드 정의 (예시)
-    placeholders = [
-        ("이름", "name"),
-        ("성별", "gender"),
-        ("이메일", "email"),
-        ("주소", "address"),
-        ("직업", "occupation"),
-        ("내원목적", "visit_reason"),
-        ("생년월일", "birthdate"),
-        ("연락처", "phone"),
-        ("주증상", "chief_complaint"),
-        ("기타 주증상", "chief_complaint_other"),
-        ("문제 시작 시기", "onset"),
-        ("악화 요인", "jaw_aggravation"),
-        ("통증 양상", "pain_quality"),
-        ("기타 통증 양상", "pain_quality_other"),
-        ("입 벌릴 때 통증", "muscle_movement_pain_value"),
-        ("근육 압통", "muscle_pressure_2s_value"),
-        ("근육 눌러 퍼지는 통증", "muscle_referred_pain_value"),
-        ("다른 부위까지 퍼짐", "muscle_referred_remote_pain_value"),
-        ("귀 관련 증상", "selected_ear_symptoms"),
-        ("귀 기타 증상", "ear_symptom_other"),
-        ("목/어깨 관련 증상", "neck_shoulder_symptoms"),
-        ("눈/코/목 추가 증상", "additional_symptoms"),
-        ("목 외상 여부", "neck_trauma"),
-        ("외상 상세", "trauma_detail"),
-        ("예비 진단명", "final_diagnosis")  # 이건 미리 생성된 결과 리스트일 수 있음
-    ]
+    # 1. 템플릿 로드
+    template_path = "template.pdf"  # 템플릿 PDF 파일 경로
+    doc = fitz.open(template_path)
 
-    # 문서 제목
-    story.append(Paragraph("🦷 턱관절장애 예비 진단 보고서", styles['Title']))
-    story.append(Spacer(1, 24))
+    # 2. 전체 텍스트 검색 후 플레이스홀더 치환
+    for page in doc:
+        text_instances = page.search_for("{")
+        for inst in text_instances:
+            # 전체 텍스트 줄 읽기
+            full_text = page.get_textbox(inst)
+            if full_text.startswith("{") and full_text.endswith("}"):
+                key = full_text.strip("{}").strip()
+                value = get_value(key)
+                page.insert_textbox(inst, value, fontsize=10, fontname="helv", color=(0, 0, 0), overlay=True)
 
-    for label, key in placeholders:
-        value = get_value(key)
-        if value:
-            story.append(Paragraph(f"<b>{label}</b>: {value}", styles['Normal']))
-            story.append(Spacer(1, 8))
+    # 3. 메모리에 저장
+    output = BytesIO()
+    doc.save(output)
+    doc.close()
+    output.seek(0)
+    return output
 
-    story.append(Spacer(1, 12))
-    story.append(Paragraph("⚠ 본 결과는 자가 예진용이며, 전문의 상담을 반드시 권장합니다.", styles['Italic']))
-    story.append(Spacer(1, 24))
-
-    doc.build(story)
-    buffer.seek(0)
-    return buffer
 
 # --- 페이지 설정 ---
 st.set_page_config(
