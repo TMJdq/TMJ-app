@@ -3,7 +3,8 @@ fpdf2
 pillow
 pymupdf
 reportlab
-PyMuPDF==1.21.1
+
+
 
 
 
