@@ -975,7 +975,7 @@ elif st.session_state.step == 6:
             st.session_state["headache_severity"] = st.slider("두통 강도", 0, 10, value=st.session_state.get("headache_severity", 0))
 
             st.markdown("**두통 빈도는 얼마나 자주 발생하나요?**")
-            headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "기타", "선택 안 함"]
+            headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
             st.radio(
                 "", headache_freq_opts,
                 index=headache_freq_opts.index(st.session_state.get("headache_frequency", "선택 안 함")),
