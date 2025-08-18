@@ -55,8 +55,15 @@ FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
 # 폰트 파일이 fonts 폴더 안에 있을 경우:
 # FONT_FILE = os.path.join(script_dir, "fonts", "NanumGothic.ttf")
 
+from io import BytesIO
+import fitz  # PyMuPDF
+import streamlit as st
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
+
 def generate_filled_pdf():
-    # 'template5.pdf' 파일도 마찬가지로 앱 폴더에 있어야 합니다.
     template_path = "template5.pdf"
     doc = fitz.open(template_path)
 
@@ -89,6 +96,7 @@ def generate_filled_pdf():
 
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
+    # PDF 각 페이지에 대해 텍스트 치환
     for page in doc:
         placeholders_to_insert = {}
         for key, val in values.items():
@@ -105,16 +113,16 @@ def generate_filled_pdf():
             val = data['value']
             rects = data['rects']
             for rect in rects:
-                 x, y = rect.tl
-    # baseline 보정값 (+2 또는 +3 정도에서 시작 → 필요 시 조정)
+                x, y = rect.tl
+                # baseline 보정값(+3)
                 page.insert_text((x, y + 3), val, fontname="nan", fontfile=FONT_FILE)
-
 
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 # --- 페이지 설정 ---
 st.set_page_config(
