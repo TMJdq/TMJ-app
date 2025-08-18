@@ -730,6 +730,25 @@ if st.session_state.step == 0:
         * 제공된 모든 정보는 **익명으로 처리**되며, 개인 정보 보호를 최우선으로 합니다.
         * 솔직하게 답변해주시면 더욱 정확한 예비 진단 결과를 얻을 수 있습니다.
         """)
+
+    if 'show_exercise' not in st.session_state:
+       st.session_state.show_exercise = False
+
+    if not st.session_state.show_exercise:
+        # 버튼 key 이름을 'btn_show_exercise' 같이 다르게 설정
+        if st.button("턱관절 운동 안내 보기", key="btn_show_exercise"):
+            st.session_state.show_exercise = True
+    else:
+        exercise_img_path = "tmj_exercise.png"
+        if os.path.exists(exercise_img_path):
+            st.image(exercise_img_path, use_container_width=True)
+        else:
+            st.warning(f"운동 안내 이미지({exercise_img_path})를 찾을 수 없습니다.")
+
+        # 닫기 버튼도 key 이름 변경
+        if st.button("운동 안내 닫기", key="btn_hide_exercise"):
+            st.session_state.show_exercise = False
+
     
     st.markdown("---")
     if st.button("문진 시작하기 🚀", use_container_width=True):
@@ -737,6 +756,7 @@ if st.session_state.step == 0:
         st.session_state.step = 1
 # 세션 상태가 업데이트된 후, 스크립트를 즉시 다시 실행
         st.rerun()
+
 
 # STEP 1: 환자 정보 입력
 elif st.session_state.step == 1:
