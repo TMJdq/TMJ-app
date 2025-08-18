@@ -40,13 +40,15 @@ for key, default in diagnosis_keys.items():
 
 
 from io import BytesIO
-from pathlib import Path
 import fitz  # PyMuPDF
+import streamlit as st
 
 def generate_filled_pdf():
-    template_text = Path("template3.txt").read_text(encoding="cp949")
+    # PDF 템플릿 열기
+    template_path = "template.pdf"
+    doc = fitz.open(template_path)
 
-    # 템플릿에서 사용될 key 목록 (template2.txt 안에 쓰인 {xxx} 들)
+    # 템플릿 안에 존재하는 key 목록
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
         "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
@@ -74,24 +76,22 @@ def generate_filled_pdf():
         "sleep_quality","sleep_tmd_relation","diagnosis_result"
     ]
 
-    # 👉 템플릿에서 쓰는 key 들을 모두 가져오고, 없으면 "" 로 채워줌
-    values = {k: st.session_state.get(k, "") for k in keys}
+    # key → 실제 값 매핑
+    values = {k: str(st.session_state.get(k, "")) for k in keys}
 
-    # 문자열을 실제 값으로 치환
-    filled_text = template_text.format(**values)
+    # 각 페이지에서 텍스트 치환
+    for page in doc:
+        for key, val in values.items():
+            placeholder = f"{{{key}}}"
+            if placeholder in page.get_text():
+                page.replace_text(placeholder, val, quads=True)
 
-    # PDF 생성
-    doc = fitz.open()
-    page = doc.new_page()
-    rect = fitz.Rect(72, 72, 540, 800)
-    page.insert_textbox(rect, filled_text, fontsize=10, fontname="helv", align=0)
-
+    # PDF 저장
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
-
 
 
 # --- 페이지 설정 ---
@@ -2222,20 +2222,23 @@ elif st.session_state.step == 19:
 
 
 
-import datetime
+iimport datetime
 
-# ✅ PDF 생성 전에 diagnosis_result 가 없는 경우 기본값으로 채움
+# 진단 결과가 없을 경우 기본값 설정
 if "diagnosis_result" not in st.session_state:
-    st.session_state["diagnosis_result"] = ", ".join(compute_diagnoses(st.session_state)) or "진단 없음"
+    result = compute_diagnoses(st.session_state)
+    st.session_state["diagnosis_result"] = ", ".join(result) if result else "진단 없음"
 
-if st.session_state.get("step", 0) == final_step:
-    pdf_output_bytes = generate_filled_pdf()   # ✅ 함수명 맞게 수정
+# 마지막 단계에서 PDF 다운로드 버튼 노출
+if st.session_state.get("step") == final_step:
+    pdf_output_bytes = generate_filled_pdf()
+
     if pdf_output_bytes:
         st.download_button(
             label="📥 진단 결과 PDF 다운로드",
             data=pdf_output_bytes,
-            file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
-            mime='application/pdf'
+            file_name=f"턱관절_진단_결과_{datetime.date.today()}.pdf",
+            mime="application/pdf"
         )
 
 
