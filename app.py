@@ -1688,6 +1688,24 @@ elif st.session_state.step == 12:
                 st.rerun()
 
 # STEP 13: 경추/목/어깨 관련 증상
+
+def update_neck_none():
+    """
+    '없음' 체크 시 다른 항목을 모두 False 로 초기화
+    """
+    if st.session_state.get('neck_none'):
+        st.session_state['neck_pain'] = False
+        st.session_state['shoulder_pain'] = False
+        st.session_state['stiffness'] = False
+
+def update_neck_symptom(key):
+    """
+    개별 증상 체크 시 '없음' 체크박스를 False 로 변경
+    """
+    if st.session_state.get(key):
+        st.session_state['neck_none'] = False
+
+
 elif st.session_state.step == 13:
     st.title("경추/목/어깨 관련 증상")
     st.markdown("---")
