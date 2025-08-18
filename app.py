@@ -807,10 +807,12 @@ elif st.session_state.step == 1:
                 st.error(st.session_state.validation_errors['email'])
 
         with col_phone:
-            st.text_input("연락처 (선택 사항)", key="phone_widget",
+            st.text_input("연락처*", key="phone_widget",
                           value=st.session_state.get("phone", ""),
                           placeholder="예: 01012345678 (숫자만 입력)",
                           on_change=sync_widget_key, args=("phone_widget", "phone"))
+            if 'phone' in st.session_state.get("validation_errors", {}):
+                st.error(st.session_state.validation_errors['phone'])
 
         st.markdown("---")
         st.text_input("주소 (선택 사항)", key="address_widget", value=st.session_state.get("address", ""),
@@ -847,6 +849,9 @@ elif st.session_state.step == 1:
                 mandatory_fields_filled = False
             if not st.session_state.get('email'):
                 st.session_state.validation_errors['email'] = "이메일은 필수 입력 항목입니다."
+                mandatory_fields_filled = False
+            if not st.session_state.get('phone'):
+                st.session_state.validation_errors['phone'] = "연락처는 필수 입력 항목입니다."
                 mandatory_fields_filled = False
 
             if mandatory_fields_filled:
