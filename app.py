@@ -44,16 +44,19 @@ import fitz # PyMuPDF
 import streamlit as st
 import os
 
-# 현재 사용자 홈 디렉토리 경로를 얻습니다.
-home_dir = os.path.expanduser("~")
+# 현재 스크립트 파일의 디렉토리를 얻습니다.
+# 이렇게 하면 앱이 어디에 있든 올바른 경로를 찾을 수 있습니다.
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# 사용자 홈 디렉토리와 바탕화면 경로를 결합합니다.
-desktop_path = os.path.join(home_dir, "Desktop")
+# 폰트 파일의 상대 경로를 지정합니다.
+# 예를 들어, NanumGothic.ttf가 app.py와 같은 폴더에 있을 경우:
+FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
 
-# 바탕화면의 TMJ/fonts/NanumGothic.ttf 경로를 지정합니다.
-FONT_FILE = os.path.join(desktop_path, "TMJ", "fonts", "NanumGothic.ttf")
+# 폰트 파일이 fonts 폴더 안에 있을 경우:
+# FONT_FILE = os.path.join(script_dir, "fonts", "NanumGothic.ttf")
 
 def generate_filled_pdf():
+    # 'template5.pdf' 파일도 마찬가지로 앱 폴더에 있어야 합니다.
     template_path = "template5.pdf"
     doc = fitz.open(template_path)
 
@@ -109,7 +112,6 @@ def generate_filled_pdf():
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
-
 
 # --- 페이지 설정 ---
 st.set_page_config(
