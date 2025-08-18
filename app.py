@@ -2747,16 +2747,12 @@ elif st.session_state.step == 19:
 
 
 if st.session_state.get("step", 0) == final_step:
-    diagnosis_results = {
-        key: st.session_state.get(key, diagnosis_keys[key])
-        for key in diagnosis_keys
-    }
-    # ✅ PDF 바이트 스트림 반환
-    pdf_output_bytes = create_diagnosis_pdf(diagnosis_results)
+    # 전체 session_state 를 그대로 전달
+    pdf_output_bytes = create_diagnosis_pdf(st.session_state)
     if pdf_output_bytes:
         st.download_button(
             label="📥 진단 결과 PDF 다운로드",
             data=pdf_output_bytes,
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
-            mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
+            mime='application/pdf'
         )
