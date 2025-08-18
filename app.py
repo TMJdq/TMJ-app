@@ -40,8 +40,18 @@ for key, default in diagnosis_keys.items():
 
 
 from io import BytesIO
-import fitz  # PyMuPDF
+import fitz # PyMuPDF
 import streamlit as st
+import os
+
+# 현재 사용자 홈 디렉토리 경로를 얻습니다.
+home_dir = os.path.expanduser("~")
+
+# 사용자 홈 디렉토리와 바탕화면 경로를 결합합니다.
+desktop_path = os.path.join(home_dir, "Desktop")
+
+# 바탕화면의 TMJ/fonts/NanumGothic.ttf 경로를 지정합니다.
+FONT_FILE = os.path.join(desktop_path, "TMJ", "fonts", "NanumGothic.ttf")
 
 def generate_filled_pdf():
     template_path = "template5.pdf"
@@ -77,32 +87,29 @@ def generate_filled_pdf():
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
     for page in doc:
-        # Step 1: placeholder와 그 위치(rect)를 미리 딕셔너리에 저장합니다.
         placeholders_to_insert = {}
         for key, val in values.items():
             placeholder = f"{{{key}}}"
             rects = page.search_for(placeholder)
             if rects:
                 placeholders_to_insert[key] = {'value': val, 'rects': rects}
-                # 삭제 주석을 추가합니다.
                 for rect in rects:
                     page.add_redact_annot(rect)
 
-        # Step 2: 모든 redaction 주석을 한 번에 적용하여 텍스트를 삭제합니다.
         page.apply_redactions()
 
-        # Step 3: 저장된 위치 정보를 사용하여 텍스트를 삽입합니다.
         for key, data in placeholders_to_insert.items():
             val = data['value']
             rects = data['rects']
             for rect in rects:
-                page.insert_text(rect.tl, val)
+                page.insert_text(rect.tl, val, fontname="nan", fontfile=FONT_FILE)
 
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 # --- 페이지 설정 ---
 st.set_page_config(
