@@ -66,19 +66,20 @@ FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
 def generate_filled_pdf():
     template_path = "template5.pdf"
     doc = fitz.open(template_path)
-        # neck_shoulder_symptoms를 문자열 리스트로 변환
-    neck_dict = st.session_state.get("neck_shoulder_symptoms", {})
-    neck_list = [k for k,v in neck_dict.items() if v]
-    neck_str = ", ".join(neck_list) if neck_list else "없음"
+
+    # neck_shoulder_symptoms 변환 (dict일 때만)
+    neck_val = st.session_state.get("neck_shoulder_symptoms", {})
+    if isinstance(neck_val, dict):
+        neck_list = [k for k, v in neck_val.items() if v]
+        st.session_state["neck_shoulder_symptoms"] = ", ".join(neck_list) if neck_list else "없음"
+
+    # additional_symptoms 변환 (dict일 때만)
+    add_val = st.session_state.get("additional_symptoms", {})
+    if isinstance(add_val, dict):
+        add_list = [k for k, v in add_val.items() if v]
+        st.session_state["additional_symptoms"] = ", ".join(add_list) if add_list else "없음"
 
 
-    # PDF 값에 넣기 위해 세션 값을 문자열로 업데이트
-    st.session_state["neck_shoulder_symptoms"] = neck_str
-
-    add_dict = st.session_state.get("additional_symptoms", {})
-    add_list = [k for k,v in add_dict.items() if v]
-    add_str = ", ".join(add_list) if add_list else "없음"
-    st.session_state["additional_symptoms"] = add_str
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
         "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
