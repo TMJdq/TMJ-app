@@ -949,7 +949,7 @@ elif st.session_state.step == 6:
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
         freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
         st.radio(
-            "", freq_opts, index=5,
+            "", freq_opts, index=4,
             key="frequency_choice_widget",
             on_change=sync_widget_key,
             args=("frequency_choice_widget", "frequency_choice")
