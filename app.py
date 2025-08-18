@@ -2287,6 +2287,10 @@ elif st.session_state.step == 19:
 
 import datetime
 
+# ✅ PDF 생성 전에 diagnosis_result 가 없는 경우 기본값으로 채움
+if "diagnosis_result" not in st.session_state:
+    st.session_state["diagnosis_result"] = ", ".join(compute_diagnoses(st.session_state)) or "진단 없음"
+
 if st.session_state.get("step", 0) == final_step:
     pdf_output_bytes = generate_filled_pdf()   # ✅ 함수명 맞게 수정
     if pdf_output_bytes:
