@@ -44,7 +44,7 @@ import fitz  # PyMuPDF
 import streamlit as st
 
 def generate_filled_pdf():
-    template_path = "template3.pdf"
+    template_path = "template4.pdf"
     doc = fitz.open(template_path)
 
     keys = [
@@ -526,7 +526,7 @@ elif st.session_state.step == 3:
         st.markdown("**통증을 어떻게 표현하시겠습니까? (예: 둔함, 날카로움, 욱신거림 등)**")
         st.radio(
             label="통증 양상",
-            options=["둔함", "날카로움", "욱신거림", "간헐적", "기타", "선택 안 함"],
+            options=["둔함", "날카로움", "욱신거림", "간헐적", "선택 안 함"],
             key="pain_quality_widget",
             index=5,
             label_visibility="collapsed",
@@ -534,16 +534,6 @@ elif st.session_state.step == 3:
             args=("pain_quality_widget", "pain_quality")
         )
 
-        if st.session_state.get("pain_quality") == "기타":
-            st.text_input(
-                "기타 통증 양상을 적어주세요:",
-                key="pain_quality_other_widget",
-                value=st.session_state.get("pain_quality_other", ""),
-                on_change=sync_widget_key,
-                args=("pain_quality_other_widget", "pain_quality_other")
-            )
-        else:
-            st.session_state["pain_quality_other"] = ""
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -551,7 +541,7 @@ elif st.session_state.step == 3:
     # 이전 단계
     with col1:
         if st.button("이전 단계"):
-            for key in ["jaw_aggravation", "pain_quality", "pain_quality_other"]:
+            for key in ["jaw_aggravation", "pain_quality",]:
                 st.session_state.pop(key, None)
             st.session_state.step = 2
             st.rerun()
