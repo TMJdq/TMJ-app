@@ -79,6 +79,11 @@ def generate_filled_pdf():
         add_list = [k for k, v in add_val.items() if v]
         st.session_state["additional_symptoms"] = ", ".join(add_list) if add_list else "없음"
 
+    # ✅ 두통 관련 리스트를 문자열로 변환
+    for k in ["headache_areas", "headache_triggers", "headache_reliefs"]:
+        v = st.session_state.get(k, [])
+        if isinstance(v, list):
+            st.session_state[k] = ", ".join(v)
 
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
@@ -107,13 +112,9 @@ def generate_filled_pdf():
         "sleep_quality","sleep_tmd_relation","diagnosis_result"
     ]
 
-
-
     values = {k: str(st.session_state.get(k, "")) for k in keys}
-    # 선택  안 함 항목은 빈칸으로 출력
     values = {k: ("" if v == "선택 안 함" else v) for k, v in values.items()}
 
-    # PDF 각 페이지에 대해 텍스트 치환
     for page in doc:
         placeholders_to_insert = {}
         for key, val in values.items():
@@ -131,7 +132,6 @@ def generate_filled_pdf():
             rects = data['rects']
             for rect in rects:
                 x, y = rect.tl
-                # baseline 보정값
                 page.insert_text((x, y + 8), val, fontname="nan", fontfile=FONT_FILE, fontsize=10)
 
     pdf_buffer = BytesIO()
