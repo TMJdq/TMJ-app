@@ -2,4 +2,6 @@ streamlit
 fpdf2
 pillow
 pymupdf
+reportlab
+
 
