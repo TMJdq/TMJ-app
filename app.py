@@ -64,7 +64,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
 
 def generate_filled_pdf():
-    template_path = "template7.pdf"
+    template_path = "template8.pdf"
     doc = fitz.open(template_path)
 
     # neck_shoulder_symptoms 변환 (dict일 때만)
