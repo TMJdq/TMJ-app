@@ -1301,10 +1301,15 @@ elif st.session_state.step == 5:
     if st.session_state.tmj_sound_value != "딸깍소리":
         st.session_state.tmj_click_context = []
 
+    # 딸깍소리 문맥 요약 정리 (PDF용)
+    st.session_state.tmj_click_summary = (
+        ", ".join(st.session_state.tmj_click_context)
+        if st.session_state.tmj_click_context else "해당 없음"
+    )
+
     st.markdown("---")
     col1, col2 = st.columns(2)
 
-    # ✅ 이전 버튼: Step 5 관련 세션 초기화
     with col1:
         if st.button("이전 단계"):
             for key in [
@@ -1341,6 +1346,7 @@ elif st.session_state.step == 5:
             else:
                 st.session_state.step = 6
                 st.rerun()
+
 
 
 # STEP 6: 빈도 및 시기, 강도
@@ -1743,9 +1749,9 @@ elif st.session_state.step == 9:
         # ▣ 턱 움직임 패턴
         st.markdown("---")
         st.subheader("턱 움직임 패턴 (Mandibular Movement Pattern)")
-
+        st.markdown("**입을 벌리고 닫을 때 턱이 한쪽으로 치우치는 것 같나요?**")
         st.radio(
-            label="입 벌릴 때 턱이 치우치나요?",
+            label=" ",
             options=["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get("deviation", "선택 안 함")),
             key="deviation_widget",
@@ -1753,9 +1759,9 @@ elif st.session_state.step == 9:
             args=("deviation_widget", "deviation"),
             label_visibility="collapsed"
         )
-
+        st.markdown("**편위(Deviation, 치우치지만 마지막에는 중앙으로 돌아옴)**")
         st.radio(
-            label="편위(Deviation): 치우쳤지만 다시 돌아옴",
+            label=" ",
             options=["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get("deviation2", "선택 안 함")),
             key="deviation2_widget",
@@ -1763,7 +1769,7 @@ elif st.session_state.step == 9:
             args=("deviation2_widget", "deviation2"),
             label_visibility="collapsed"
         )
-
+        st.markdown("**편향(Deflection, 치우친 채 돌아오지 않음)**")
         st.radio(
             label="편향(Deflection): 치우치고 돌아오지 않음",
             options=["예", "아니오", "선택 안 함"],
