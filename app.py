@@ -105,7 +105,10 @@ def generate_filled_pdf():
             val = data['value']
             rects = data['rects']
             for rect in rects:
-                page.insert_text(rect.tl, val, fontname="nan", fontfile=FONT_FILE)
+                 x, y = rect.tl
+    # baseline 보정값 (+2 또는 +3 정도에서 시작 → 필요 시 조정)
+                page.insert_text((x, y + 3), val, fontname="nan", fontfile=FONT_FILE)
+
 
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
