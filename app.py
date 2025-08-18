@@ -44,7 +44,7 @@ import fitz  # PyMuPDF
 import streamlit as st
 
 def generate_filled_pdf():
-    template_path = "template.pdf"
+    template_path = "template3.pdf"
     doc = fitz.open(template_path)
 
     keys = [
