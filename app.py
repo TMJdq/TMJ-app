@@ -2238,3 +2238,18 @@ if st.session_state.get("step", 0) == final_step:
             mime='application/pdf'
         )
 
+
+
+# 템플릿 파일에서 중괄호 { } 로 쓰인 placeholder 키를 모두 추출합니다.
+import re
+from pathlib import Path
+
+template_text = Path("template2.txt").read_text(encoding="cp949")
+placeholders = sorted(set(re.findall(r"{(.*?)}", template_text)))
+
+st.write("📌 template2.txt에 사용된 placeholder 목록:")
+for p in placeholders:
+    st.write("-", p)
+
+
+
