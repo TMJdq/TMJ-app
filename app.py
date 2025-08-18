@@ -71,13 +71,14 @@ def generate_filled_pdf():
     neck_list = [k for k,v in neck_dict.items() if v]
     neck_str = ", ".join(neck_list) if neck_list else "없음"
 
+
+    # PDF 값에 넣기 위해 세션 값을 문자열로 업데이트
+    st.session_state["neck_shoulder_symptoms"] = neck_str
+
     add_dict = st.session_state.get("additional_symptoms", {})
     add_list = [k for k,v in add_dict.items() if v]
     add_str = ", ".join(add_list) if add_list else "없음"
     st.session_state["additional_symptoms"] = add_str
-
-    # PDF 값에 넣기 위해 세션 값을 문자열로 업데이트
-    st.session_state["neck_shoulder_symptoms"] = neck_str
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
         "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
