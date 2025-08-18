@@ -2265,6 +2265,7 @@ elif st.session_state.step == 19:
     if not results:
         st.success("✅ DC/TMD 기준상 명확한 진단 근거는 확인되지 않았습니다.\n\n다른 질환 가능성에 대한 조사가 필요합니다.")
     else:
+        st.session_state["diagnosis_result"] = ", ".join(results)
         if len(results) == 1:
             st.error(f"**{results[0]}**이(가) 의심됩니다.")
         else:
