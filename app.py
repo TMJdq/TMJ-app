@@ -280,6 +280,12 @@ def update_neck_symptom(key):
     if st.session_state.get(key):
         st.session_state['neck_none'] = False
 
+def update_radio_state(key):
+    st.session_state[key] = st.session_state.get(key)
+
+def update_text_state(key):
+    st.session_state[key] = st.session_state.get(key, "")
+
 # ---------------------------------------------
 
 # 총 단계 수 (0부터 시작)
@@ -825,7 +831,7 @@ elif st.session_state.step == 5:
 
     if st.session_state.tmj_sound_value == "딸깍소리":
         st.markdown("**딸깍 소리가 나는 상황을 모두 선택하세요.**")
-        click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때", "기타"]
+        click_options = ["입 벌릴 때", "입 다물 때", "음식 씹을 때"]
         updated_context = []
         for option in click_options:
             key = f"click_{option}"
