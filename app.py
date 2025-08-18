@@ -264,7 +264,23 @@ def sync_multiple_keys(field_mapping):
 def sync_widget_key(widget_key, state_key):
     st.session_state[state_key] = st.session_state.get(widget_key, "")
 
+def update_neck_none():
+    """
+    '없음' 체크 시 다른 항목을 모두 False 로 초기화
+    """
+    if st.session_state.get('neck_none'):
+        st.session_state['neck_pain'] = False
+        st.session_state['shoulder_pain'] = False
+        st.session_state['stiffness'] = False
 
+def update_neck_symptom(key):
+    """
+    개별 증상 체크 시 '없음' 체크박스를 False 로 변경
+    """
+    if st.session_state.get(key):
+        st.session_state['neck_none'] = False
+
+# ---------------------------------------------
 
 # 총 단계 수 (0부터 시작)
 total_steps = 20 
@@ -1689,28 +1705,6 @@ elif st.session_state.step == 12:
 
 # STEP 13: 경추/목/어깨 관련 증상
 
-# ---------------------------------------------
-# STEP 13: 경추/목/어깨 관련 증상 (수정 버전: 콜백 추가됨)
-# ---------------------------------------------
-
-# ✅ 콜백 함수 정의 (STEP13 위에 위치시키세요)
-def update_neck_none():
-    """
-    '없음' 체크 시 다른 항목을 모두 False 로 초기화
-    """
-    if st.session_state.get('neck_none'):
-        st.session_state['neck_pain'] = False
-        st.session_state['shoulder_pain'] = False
-        st.session_state['stiffness'] = False
-
-def update_neck_symptom(key):
-    """
-    개별 증상 체크 시 '없음' 체크박스를 False 로 변경
-    """
-    if st.session_state.get(key):
-        st.session_state['neck_none'] = False
-
-# ---------------------------------------------
 elif st.session_state.step == 13:
     st.title("경추/목/어깨 관련 증상")
     st.markdown("---")
