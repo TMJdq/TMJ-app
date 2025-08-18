@@ -77,24 +77,26 @@ def generate_filled_pdf():
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
     for page in doc:
-        # 1. 모든 placeholder에 대한 redaction 주석을 먼저 추가
+        # Step 1: placeholder와 그 위치(rect)를 미리 딕셔너리에 저장합니다.
+        placeholders_to_insert = {}
         for key, val in values.items():
             placeholder = f"{{{key}}}"
             rects = page.search_for(placeholder)
             if rects:
+                placeholders_to_insert[key] = {'value': val, 'rects': rects}
+                # 삭제 주석을 추가합니다.
                 for rect in rects:
                     page.add_redact_annot(rect)
 
-        # 2. 한 페이지의 모든 주석을 한 번에 적용 (텍스트 일괄 삭제)
+        # Step 2: 모든 redaction 주석을 한 번에 적용하여 텍스트를 삭제합니다.
         page.apply_redactions()
 
-        # 3. 모든 redaction이 끝난 후, 새로운 텍스트를 삽입
-        for key, val in values.items():
-            placeholder = f"{{{key}}}"
-            rects = page.search_for(placeholder) # 다시 rect를 찾아야 함
-            if rects:
-                for rect in rects:
-                    page.insert_text(rect.tl, val)
+        # Step 3: 저장된 위치 정보를 사용하여 텍스트를 삽입합니다.
+        for key, data in placeholders_to_insert.items():
+            val = data['value']
+            rects = data['rects']
+            for rect in rects:
+                page.insert_text(rect.tl, val)
 
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
