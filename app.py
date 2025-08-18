@@ -44,11 +44,9 @@ import fitz  # PyMuPDF
 import streamlit as st
 
 def generate_filled_pdf():
-    # PDF 템플릿 열기
     template_path = "template.pdf"
     doc = fitz.open(template_path)
 
-    # 템플릿 안에 존재하는 key 목록
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
         "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
@@ -76,23 +74,25 @@ def generate_filled_pdf():
         "sleep_quality","sleep_tmd_relation","diagnosis_result"
     ]
 
-    # key → 실제 값 매핑
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
-    # 각 페이지에서 텍스트 치환
     for page in doc:
         for key, val in values.items():
             placeholder = f"{{{key}}}"
-            if placeholder in page.get_text():
-                page.replace_text(placeholder, val, quads=True)
+            # placeholder 위치 찾기
+            rects = page.search_for(placeholder)
+            for rect in rects:
+                # 기존 텍스트 영역 제거 (redaction)
+                page.add_redact_annot(rect)
+                page.apply_redactions()
+                # 새 텍스트 삽입
+                page.insert_text(rect.tl, val)
 
-    # PDF 저장
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
-
 
 # --- 페이지 설정 ---
 st.set_page_config(
@@ -2231,15 +2231,14 @@ if "diagnosis_result" not in st.session_state:
 
 # 마지막 단계에서 PDF 다운로드 버튼 노출
 if st.session_state.get("step") == final_step:
-    pdf_output_bytes = generate_filled_pdf()
-
-    if pdf_output_bytes:
-        st.download_button(
-            label="📥 진단 결과 PDF 다운로드",
-            data=pdf_output_bytes,
-            file_name=f"턱관절_진단_결과_{datetime.date.today()}.pdf",
-            mime="application/pdf"
-        )
+    # PDF 다운로드 버튼 렌더링
+    if st.download_button(
+        label="📥 진단 결과 PDF 다운로드",
+        data=generate_filled_pdf(),
+        file_name=f"턱관절_진단_결과_{datetime.date.today()}.pdf",
+        mime="application/pdf"
+    ):
+        pass
 
 
 
