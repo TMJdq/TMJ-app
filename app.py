@@ -2746,59 +2746,17 @@ elif st.session_state.step == 19:
 
 
 
-from pathlib import Path
-
-def create_diagnosis_pdf(diagnosis_data):
-    # PDF 객체 생성
-    pdf = FPDF('P', 'mm', 'A4')
-    pdf.add_page()
-
-    font_path = Path.home() / "OneDrive" / "바탕 화면" / "NanumGothic.ttf"
-    
-    if not font_path.exists():
-        st.error(f"폰트 파일을 찾을 수 없습니다: {font_path}")
-        return None
-
-    pdf.add_font('NanumGothic', '', str(font_path), uni=True)
-    pdf.set_font('NanumGothic', '', 16)
-    pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
-    pdf.ln(10)
-
-    pdf.set_font('NanumGothic', '', 12)
-    for key, value in diagnosis_data.items():
-        pdf.cell(0, 10, f'{key}: {value}', 0, 1)
-        pdf.ln(2)
-
-    return pdf.output(dest='S').encode('latin1')    
-
-    # 제목
-    pdf.set_font('NanumGothic', '', 16)
-    pdf.cell(0, 10, '턱관절 진단 결과 보고서', 0, 1, 'C')
-    pdf.ln(10) # 줄바꿈
-
-    # 진단 결과 내용 추가
-    pdf.set_font('NanumGothic', '', 12)
-    for key, value in diagnosis_data.items():
-        # 키를 보기 좋은 한글로 변환하는 로직을 추가할 수 있습니다.
-        # 예: key_display = key.replace('_', ' ').title()
-        
-        pdf.cell(0, 10, f'{key}: {value}', 0, 1)
-        pdf.ln(2) # 간격 조절
-
-    # PDF를 바이트 형태로 반환
-    return pdf.output(dest='S').encode('latin1')
-
 if st.session_state.get("step", 0) == final_step:
     diagnosis_results = {
         key: st.session_state.get(key, diagnosis_keys[key])
         for key in diagnosis_keys
     }
+    # ✅ PDF 바이트 스트림 반환
     pdf_output_bytes = create_diagnosis_pdf(diagnosis_results)
-
     if pdf_output_bytes:
         st.download_button(
-            label="진단 결과 PDF 다운로드",
+            label="📥 진단 결과 PDF 다운로드",
             data=pdf_output_bytes,
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
-            mime='application/octet-stream'
+            mime='application/pdf'  # ✅ 꼭 PDF MIME 타입 사용!
         )
