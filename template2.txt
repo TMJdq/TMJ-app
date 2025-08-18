@@ -1,0 +1,185 @@
+Temporomandibular Disorder Chart
+
+Ⅰ. 환자 기본 정보
+□ 이름 : {name}                                   □ 생년월일 : {birthdate}
+□ 성별 : {gender}
+□ 이메일 : {email}                                 □ 연락처 : {phone}
+□ 주소 : {address}
+□ 직업 : {occupation}
+□ 내원목적 : {visit_reason}
+
+Ⅱ. 주증상
+□ 병원을 방문한 주된 이유 : {chief_complaint} {chief_complaint_other}
+□ 문제가 처음 발생한 시기 : {onset}
+
+Ⅲ. 현재 증상
+■ 턱 주변의 통증 / 턱 움직임 관련 두통
+ⅰ) 통증 양상
+&#8226; 턱을 움직이거나 씹기, 말하기 등의 기능 또는 악습관(이갈기, 턱 괴기 등)으로 인해 통증이 악화되나요? : {jaw_aggravation}
+&#8226; 통증을 어떻게 표현하시겠습니까? : {pain_quality} {pain_quality_other}
+
+근육/넓은 부위 통증
+&#8226; 입을 벌릴 때나 턱을 움직일 때 통증이 있나요? : {muscle_movement_pain_value}
+&#8226; 근육을 2초간 눌렀을 때 통증이 느껴지나요? : {muscle_pressure_2s_value}
+&#8226; 근육을 5초간 눌렀을 때, 통증이 눌린 부위 넘어서 퍼지나요? : {muscle_referred_pain_value}
+&#8226; 통증이 눌린 부위 외 다른 곳(눈, 귀 등)까지 퍼지나요? : {muscle_referred_remote_pain_value}
+ⅱ) 통증 분류 및 검사
+
+턱관절 통증
+&#8226; 입을 벌릴 때나 움직일 때 통증이 있나요? : {tmj_movement_pain_value}
+&#8226; 턱관절 부위를 눌렀을 때 기존 통증이 재현되나요? : {tmj_press_pain_value}
+
+두통
+&#8226; 두통이 관자놀이 부위에서 발생하나요? : {headache_temples_value}
+&#8226; 관자놀이 근육을 눌렀을 때 기존 두통이 재현되나요? : {headache_reproduce_by_pressure_value}
+&#8226; 턱을 움직일 때 두통이 심해지나요? : {headache_with_jaw_value}
+&#8226; 통해당 두통이 다른 의학적 진단으로 설명되지 않나요? : {headache_not_elsewhere_value}
+
+■ 턱관절 소리 / 잠김
+ⅰ) 턱에서 나는 소리 : {tmj_sound_value}
+
+딸깍 소리가 나는 상황
+{tmj_click_summary}
+
+
+
+ⅱ) 딸깍소리
+
+ⅲ) 사각사각소리(크레피투스)
+&#8226; 사각사각소리가 확실하게 느껴지나요? : {crepitus_confirmed_value}
+&#8226; 현재 턱이 걸려서 입이 잘 안 벌어지는 증상이 있나요? : {jaw_locked_now_value}
+&#8226; 해당 증상은 조작해야 풀리나요? : {jaw_unlock_possible_value}
+&#8226; 과거에 턱 잠김 또는 개방성 잠김을 경험한 적이 있나요? : {jaw_locked_past_value}
+&#8226; 입을 최대한 벌렸을 때(MAO), 손가락 3개가 들어가나요? : {mao_fits_3fingers_value}
+
+
+□ 빈도 및 시기
+&#8226; 통증 또는 다른 증상이 얼마나 자주 발생하나요? : {frequency_choice}
+&#8226; (통증이 있을 시) 현재 통증 정도는 어느 정도인가요? : {pain_level}
+&#8226; 주로 어느 시간대에 발생하나요? : {selected times}
+&#8226; 두통이 있나요? : {has_headache_now}
+&#8226; 두통 부위를 모두 선택해주세요. : {headache_areas}
+&#8226; 현재 두통 강도는 얼마나 되나요? : {headache_severity}
+&#8226; 두통 빈도는 얼마나 자주 발생하나요? : {headache_frequency}
+&#8226; 두통을 유발하거나 악화시키는 요인이 있나요? : {headache_triggers}
+&#8226; 두통을 완화시키는 요인이 있나요? : {headache_reliefs}
+
+Ⅳ. 습관
+&#8226; 다음 중 해당되는 습관이 있나요? : {habit_summary}
+&#8226; 다음 중 해당되는 습관이 있다면 모두 선택해주세요.
+
+{additional_habits}
+
+
+
+
+
+Ⅴ. 턱 운동 범위 및 관찰
+■ 자발적 개구
+&#8226; 스스로 입을 크게 벌렸을 때 어느 정도까지 벌릴 수 있나요? : {active_opening}
+&#8226; 통증이 있나요? : {active_pain}
+
+■ 수동적 개구
+&#8226; 타인이 도와서 벌렸을 때 어느 정도까지 벌릴 수 있나요? : {passive_opening}
+&#8226; 통증이 있나요? : {passive_pain}
+
+□ 턱 움직임 패턴
+&#8226; 입을 벌리고 닫을 때 턱이 한쪽으로 치우치는 것 같나요? : {deviation}
+&#8226; 편위(Deviation, 치우치지만 마지막에는 중앙으로 돌아옴) : {devivation2}
+&#8226; 편향(Deflection, 치우친 채 돌아오지 않음) : {deflection}
+&#8226; 앞으로 내밀기(mm) : {protrusion}
+&#8226; Protrusion 시 통증이 있나요? : {protrusion_pain}
+&#8226; 측방운동 오른쪽(mm) : {latero_right}
+&#8226; 오른쪽으로 측방운동 시 통증이 있나요? : {latero_right_pain}
+
+&#8226; 측방운동 왼쪽(mm) : {latero_left}
+&#8226; 왼쪽으로 측방운동 시 통증이 있나요? : {latero_left_pain}
+&#8226; 교합 : 앞니(위, 아래)가 정중앙에서 잘 맞물리나요? : {occlusion}
+&#8226; 정중앙에서 어느 쪽으로 어긋나나요? : {occlusion_shift}
+□ 턱관절 소리
+&#8226; 오른쪽 &#8211; 입 벌릴 때 : {tmj_noise_right_open}
+&#8226; 왼쪽 &#8211; 입 벌릴 때 : {tmj_noise_left_open}
+&#8226; 오른쪽 &#8211; 입 다물 때 : {tmj_noise_right_close}
+&#8226; 왼쪽 &#8211; 입 다물 때 : {tmj_noise_left_close}
+
+측두근 촉진 소견
+{palpation_temporalis}
+
+내측 익돌근 촉진 소견
+{palpation_medial_pterygoid}
+
+외측 익돌근 촉진 소견
+{palpation_lateral_pterygoid}
+
+통증 위치 매핑
+{pain_mapping}
+
+Ⅵ. 근육 촉진 평가
+
+Ⅶ. 귀/경추/목/어깨 관련 증상
+ⅰ) 귀 관련 증상
+&#8226; 귀와 관련된 증상이 있으신가요? : {ear_symptoms}
+  {ear_symptom_other}
+ⅱ) 경추/목/어깨 관련 증상
+&#8226; 다음 중의 증상이 있으신가요? : {neck_shoulder_symptoms}
+&#8226; 다음 중 해당되는 증상이 있다면 모두 선택해주세요. : {additional_symptoms}
+&#8226; 목 외상 관련 이력이 있으신가요? : {neck_trauma_radio}
+
+Ⅷ. 이력  
+□ 정서적 스트레스 이력
+&#8226; 스트레스, 불안, 우울감 등을 많이 느끼시나요? : {stress_radio}
+&#8226; 있다면 자세히 기재해 주세요.
+  : {stress_detail}
+
+□ 과거 치과적 이력
+&#8226; 교정치료(치아 교정) 경험 : {ortho_exp}
+  {ortho_detail}
+&#8226; 보철치료(의치, 브리지, 임플란트 등) 경험 : {prosth_exp}
+  {prosth_detail}
+&#8226; 기타 치과 치료 이력 : {other_dental}
+
+&#8226; 턱관절 질환 치료 경험 : 
+치료
+{tmd_treatment_detail}
+해당 치료에 대한 반응
+{tmd_treatment_response}
+복용 중인 턱관절 관련 약물
+{tmd_current_medications}
+{tmd_treatment_history}
+
+□ 과거 의과적 이력
+&#8226; 과거에 앓았던 질환, 입원 등 주요 의학적 이력이 있다면 적어주세요.
+
+{past_history}
+
+
+                                                                                                      
+
+&#8226; 현재 복용 중인 약이 있다면 적어주세요.
+
+{current_medications}
+
+                                                                                                    
+
+
+Ⅸ. 자극 검사
+&#8226; 오른쪽으로 어금니를 강하게 물 때 : {bite_right}
+&#8226; 왼쪽으로 어금니를 강하게 물 때 : {bite_left}
+&#8226; 압력 가하기 : {loading_test}
+&#8226; 저항 검사 : {resistance_test}
+&#8226; 치아 마모 : {attrition}
+
+Ⅹ. 기능 평가
+&#8226; 턱관절 증상으로 인해 일상생활에 불편함을 느끼시나요? : {impact_daily}
+&#8226; 턱관절 증상으로 인해 직장 업무나 학업 성과에 영향을 받은 적이 있나요? : {impact_work}
+&#8226; 턱관절 증상이 귀하의 전반적인 삶의 질에 얼마나 영향을 미치고 있다고 느끼시나요? : {impact_quality_of_life}
+&#8226; 최근 2주간 수면의 질은 어떠셨나요? : {sleep_quality}
+&#8226; 수면의 질이 턱관절 증상에 영향을 준다고 느끼시나요? : {sleep_tmd_relation}
+
+&#8554;. 진단 결과{diagnosis_result}
+
+
+
+
+
+
