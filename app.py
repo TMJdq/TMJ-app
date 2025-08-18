@@ -172,6 +172,9 @@ def compute_diagnoses(state):
 def sync_widget_key(widget_key, state_key):
     st.session_state[state_key] = st.session_state[widget_key]
 
+def sync_multiple_keys(mapping):
+    for session_key, value in mapping.items():
+        st.session_state[session_key] = value
 
 # 총 단계 수 (0부터 시작)
 total_steps = 20 
