@@ -2222,7 +2222,7 @@ elif st.session_state.step == 19:
 
 
 
-iimport datetime
+import datetime
 
 # 진단 결과가 없을 경우 기본값 설정
 if "diagnosis_result" not in st.session_state:
