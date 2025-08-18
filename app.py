@@ -80,7 +80,7 @@ def generate_filled_pdf():
         st.session_state["additional_symptoms"] = ", ".join(add_list) if add_list else "없음"
 
     # ✅ 두통 관련 리스트를 문자열로 변환
-    for k in ["headache_areas", "headache_triggers", "headache_reliefs"]:
+    for k in ["headache_areas", "headache_triggers", "headache_reliefs","headache_frequency"]:
         v = st.session_state.get(k, [])
         if isinstance(v, list):
             st.session_state[k] = ", ".join(v)
