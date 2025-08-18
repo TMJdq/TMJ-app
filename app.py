@@ -66,7 +66,18 @@ FONT_FILE = os.path.join(script_dir, "NanumGothic.ttf")
 def generate_filled_pdf():
     template_path = "template5.pdf"
     doc = fitz.open(template_path)
+        # neck_shoulder_symptoms를 문자열 리스트로 변환
+    neck_dict = st.session_state.get("neck_shoulder_symptoms", {})
+    neck_list = [k for k,v in neck_dict.items() if v]
+    neck_str = ", ".join(neck_list) if neck_list else "없음"
 
+    add_dict = st.session_state.get("additional_symptoms", {})
+    add_list = [k for k,v in add_dict.items() if v]
+    add_str = ", ".join(add_list) if add_list else "없음"
+    st.session_state["additional_symptoms"] = add_str
+
+    # PDF 값에 넣기 위해 세션 값을 문자열로 업데이트
+    st.session_state["neck_shoulder_symptoms"] = neck_str
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
         "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
@@ -93,6 +104,8 @@ def generate_filled_pdf():
         "loading_test","resistance_test","attrition","impact_daily","impact_work","impact_quality_of_life",
         "sleep_quality","sleep_tmd_relation","diagnosis_result"
     ]
+
+
 
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
