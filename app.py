@@ -37,36 +37,37 @@ for key, default in diagnosis_keys.items():
 import fitz  # PyMuPDF
 from io import BytesIO
 
-def create_diagnosis_pdf(session_data: dict) -> BytesIO:
-    def get_value(key):
-        val = session_data.get(key, "")
-        if isinstance(val, list):
-            return ", ".join(val)
-        elif isinstance(val, dict):
-            return ", ".join([k for k, v in val.items() if v])
-        return str(val)
-
-    # 1. 템플릿 로드
-    template_path = "template.pdf"  # 템플릿 PDF 파일 경로
+def create_diagnosis_pdf(data: dict) -> BytesIO:
+    # 템플릿 불러오기
+    template_path = "template.pdf"
     doc = fitz.open(template_path)
 
-    # 2. 전체 텍스트 검색 후 플레이스홀더 치환
+    # PDF 수정용
     for page in doc:
         text_instances = page.search_for("{")
         for inst in text_instances:
-            # 전체 텍스트 줄 읽기
-            full_text = page.get_textbox(inst)
-            if full_text.startswith("{") and full_text.endswith("}"):
-                key = full_text.strip("{}").strip()
-                value = get_value(key)
-                page.insert_textbox(inst, value, fontsize=10, fontname="helv", color=(0, 0, 0), overlay=True)
+            block_text = page.get_textbox(inst)
+            if block_text.startswith("{") and block_text.endswith("}"):
+                key = block_text.strip("{}")
+                val = data.get(key, "")
+                if isinstance(val, list):
+                    val = ", ".join(val)
+                elif isinstance(val, dict):
+                    val = ", ".join([k for k, v in val.items() if v])
+                else:
+                    val = str(val)
 
-    # 3. 메모리에 저장
-    output = BytesIO()
-    doc.save(output)
+                # 치환: 해당 영역에 기존 텍스트 덮어쓰기
+                page.add_redact_annot(inst, fill=(1, 1, 1))  # 흰색으로 영역 삭제
+                page.apply_redactions()
+                page.insert_text(inst.tl, val, fontname="helv", fontsize=11)
+
+    # PDF 버퍼 반환
+    buffer = BytesIO()
+    doc.save(buffer)
     doc.close()
-    output.seek(0)
-    return output
+    buffer.seek(0)
+    return buffer
 
 
 # --- 페이지 설정 ---
