@@ -110,6 +110,7 @@ def generate_filled_pdf():
 
 
     values = {k: str(st.session_state.get(k, "")) for k in keys}
+    values = {k: ("" if v == "선택 안 함" else v) for k, v in values.items()}
 
     # PDF 각 페이지에 대해 텍스트 치환
     for page in doc:
