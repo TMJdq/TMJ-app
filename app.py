@@ -1,10 +1,9 @@
 import streamlit as st
-from PyPDF2 import PdfReader, PdfWriter
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 import datetime
-
 
 
 total_steps = 20
@@ -35,51 +34,67 @@ for key, default in diagnosis_keys.items():
         st.session_state[key] = default
 
 
-from PyPDF2 import PdfReader, PdfWriter
-from PyPDF2.generic import NameObject, TextStringObject
-from io import BytesIO
+def create_diagnosis_pdf(data: dict) -> BytesIO:
+    # PDF 저장을 위한 버퍼 생성
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = []
 
-def fill_pdf_fields(session_data, template_path="template.pdf"):
-    # Step 1: Load template
-    reader = PdfReader(template_path)
-    writer = PdfWriter()
+    def get_value(key):
+        val = data.get(key, "")
+        if isinstance(val, list):
+            return ", ".join(val)
+        elif isinstance(val, dict):
+            return ", ".join([k for k, v in val.items() if v])
+        return str(val)
 
-    for page in reader.pages:
-        writer.add_page(page)
+    # 템플릿 항목에 대응하는 필드 정의 (예시)
+    placeholders = [
+        ("이름", "name"),
+        ("성별", "gender"),
+        ("이메일", "email"),
+        ("주소", "address"),
+        ("직업", "occupation"),
+        ("내원목적", "visit_reason"),
+        ("생년월일", "birthdate"),
+        ("연락처", "phone"),
+        ("주증상", "chief_complaint"),
+        ("기타 주증상", "chief_complaint_other"),
+        ("문제 시작 시기", "onset"),
+        ("악화 요인", "jaw_aggravation"),
+        ("통증 양상", "pain_quality"),
+        ("기타 통증 양상", "pain_quality_other"),
+        ("입 벌릴 때 통증", "muscle_movement_pain_value"),
+        ("근육 압통", "muscle_pressure_2s_value"),
+        ("근육 눌러 퍼지는 통증", "muscle_referred_pain_value"),
+        ("다른 부위까지 퍼짐", "muscle_referred_remote_pain_value"),
+        ("귀 관련 증상", "selected_ear_symptoms"),
+        ("귀 기타 증상", "ear_symptom_other"),
+        ("목/어깨 관련 증상", "neck_shoulder_symptoms"),
+        ("눈/코/목 추가 증상", "additional_symptoms"),
+        ("목 외상 여부", "neck_trauma"),
+        ("외상 상세", "trauma_detail"),
+        ("예비 진단명", "final_diagnosis")  # 이건 미리 생성된 결과 리스트일 수 있음
+    ]
 
-    # Step 2: Create mapping dict based on session_state
-    mapping = {
-        "{ear_symptoms}": ", ".join(session_data.get("selected_ear_symptoms", [])),
-        "{ear_symptom_other}": session_data.get("ear_symptom_other", ""),
-        "{neck_shoulder_symptoms}": ", ".join([
-            k for k, v in session_data.get("neck_shoulder_symptoms", {}).items() if v
-        ]),
-        "{additional_symptoms}": ", ".join([
-            k for k, v in session_data.get("additional_symptoms", {}).items() if v
-        ]),
-        "{neck_trauma}": session_data.get("neck_trauma", ""),
-        "{trauma_detail}": session_data.get("trauma_detail", ""),
-        "{dc_tmd_results}": ", ".join(session_data.get("dc_tmd_results", []))
-    }
+    # 문서 제목
+    story.append(Paragraph("🦷 턱관절장애 예비 진단 보고서", styles['Title']))
+    story.append(Spacer(1, 24))
 
-    # Step 3: Replace form fields (if AcroForm based PDF)
-    for j, page in enumerate(writer.pages):
-        if "/Annots" in page:
-            for annot in page["/Annots"]:
-                obj = annot.get_object()
-                if obj.get("/T"):
-                    key_name = obj.get("/T")
-                    if key_name in mapping:
-                        obj.update({
-                            NameObject("/V"): TextStringObject(mapping[key_name])
-                        })
+    for label, key in placeholders:
+        value = get_value(key)
+        if value:
+            story.append(Paragraph(f"<b>{label}</b>: {value}", styles['Normal']))
+            story.append(Spacer(1, 8))
 
-    # Step 4: Output PDF to bytes
-    output_stream = BytesIO()
-    writer.write(output_stream)
-    output_stream.seek(0)
-    return output_stream.getvalue()
+    story.append(Spacer(1, 12))
+    story.append(Paragraph("⚠ 본 결과는 자가 예진용이며, 전문의 상담을 반드시 권장합니다.", styles['Italic']))
+    story.append(Spacer(1, 24))
 
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
 
 # --- 페이지 설정 ---
 st.set_page_config(
@@ -2187,11 +2202,11 @@ elif st.session_state.step == 19:
 
 
 if st.session_state.get("step", 0) == final_step:
-    pdf_output = create_diagnosis_pdf_from_template(st.session_state)
-    if pdf_output:
+    pdf_output_bytes = create_diagnosis_pdf(st.session_state)
+    if pdf_output_bytes:
         st.download_button(
             label="📥 진단 결과 PDF 다운로드",
-            data=pdf_output,
+            data=pdf_output_bytes,
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'
         )
