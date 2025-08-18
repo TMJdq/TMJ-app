@@ -1689,6 +1689,11 @@ elif st.session_state.step == 12:
 
 # STEP 13: 경추/목/어깨 관련 증상
 
+# ---------------------------------------------
+# STEP 13: 경추/목/어깨 관련 증상 (수정 버전: 콜백 추가됨)
+# ---------------------------------------------
+
+# ✅ 콜백 함수 정의 (STEP13 위에 위치시키세요)
 def update_neck_none():
     """
     '없음' 체크 시 다른 항목을 모두 False 로 초기화
@@ -1705,7 +1710,7 @@ def update_neck_symptom(key):
     if st.session_state.get(key):
         st.session_state['neck_none'] = False
 
-
+# ---------------------------------------------
 elif st.session_state.step == 13:
     st.title("경추/목/어깨 관련 증상")
     st.markdown("---")
@@ -1713,6 +1718,7 @@ elif st.session_state.step == 13:
     with st.container(border=True):
         st.markdown("**다음 중의 증상이 있으신가요?**")
 
+        # '없음' 체크박스
         st.checkbox(
             "없음",
             value=st.session_state.get('neck_none', False),
@@ -1720,6 +1726,7 @@ elif st.session_state.step == 13:
             on_change=update_neck_none
         )
 
+        # 개별 증상 체크박스 (없음이 체크된 경우 disabled 처리)
         st.checkbox(
             "목 통증",
             value=st.session_state.get('neck_pain', False),
@@ -1747,6 +1754,7 @@ elif st.session_state.step == 13:
             disabled=st.session_state.get("neck_none", False)
         )
 
+        # 요약 저장
         st.session_state.neck_shoulder_symptoms = {
             "목 통증": st.session_state.get('neck_pain', False),
             "어깨 통증": st.session_state.get('shoulder_pain', False),
