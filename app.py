@@ -132,7 +132,7 @@ def generate_filled_pdf():
             for rect in rects:
                 x, y = rect.tl
                 # baseline 보정값
-                page.insert_text((x, y + 7), val, fontname="nan", fontfile=FONT_FILE, fontsize=9)
+                page.insert_text((x, y + 7), val, fontname="nan", fontfile=FONT_FILE, fontsize=10)
 
     pdf_buffer = BytesIO()
     doc.save(pdf_buffer)
