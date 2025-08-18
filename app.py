@@ -40,7 +40,7 @@ for key, default in diagnosis_keys.items():
 
 
 from io import BytesIO
-import fitz # PyMuPDF
+import fitz  # PyMuPDF
 import streamlit as st
 
 def generate_filled_pdf():
@@ -77,20 +77,24 @@ def generate_filled_pdf():
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
     for page in doc:
+        # Step 1: Find all placeholders and mark them for redaction.
         for key, val in values.items():
             placeholder = f"{{{key}}}"
             rects = page.search_for(placeholder)
-            # 텍스트가 발견되면
             if rects:
-                # 1) 기존 placeholder를 덮어쓰기 위해 redaction 마커 추가
                 for rect in rects:
                     page.add_redact_annot(rect)
 
-                # 2) redaction 적용 (실제 텍스트 제거)
-                page.apply_redactions()
+        # Step 2: Apply all redactions at once for the current page.
+        page.apply_redactions()
 
-                # 3) 제거된 자리에 새로운 텍스트 삽입
+        # Step 3: Insert the new text into the redacted areas.
+        for key, val in values.items():
+            placeholder = f"{{{key}}}"
+            rects = page.search_for(placeholder)
+            if rects:
                 for rect in rects:
+                    # 'rects' will now point to the original locations, which are now blank.
                     page.insert_text(rect.tl, val)
 
     pdf_buffer = BytesIO()
