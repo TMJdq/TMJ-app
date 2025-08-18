@@ -2250,6 +2250,7 @@ elif st.session_state.step == 19:
     st.title("📊 턱관절 질환 예비 진단 결과")
     st.markdown("---")
     results = compute_diagnoses(st.session_state)
+    st.session_state["diagnosis_result"] = ", ".join(results) if results else "진단 없음"
     dc_tmd_explanations = {
         "근육통 (Myalgia)": "턱 주변 근육에서 발생하는 통증으로, 움직임이나 압박 시 통증이 심해지는 증상입니다.",
         "국소 근육통 (Local Myalgia)": "통증이 특정 근육 부위에만 국한되어 있고, 다른 부위로 퍼지지 않는 증상입니다.",
