@@ -77,15 +77,21 @@ def generate_filled_pdf():
     values = {k: str(st.session_state.get(k, "")) for k in keys}
 
     for page in doc:
+        # 1) placeholder 영역을 모두 찾고 redaction 등록
         for key, val in values.items():
             placeholder = f"{{{key}}}"
-            # placeholder 위치 찾기
             rects = page.search_for(placeholder)
             for rect in rects:
-                # 기존 텍스트 영역 제거 (redaction)
                 page.add_redact_annot(rect)
-                page.apply_redactions()
-                # 새 텍스트 삽입
+
+        # 2) 한 번만 적용
+        page.apply_redactions()
+
+        # 3) 실제 텍스트 삽입
+        for key, val in values.items():
+            placeholder = f"{{{key}}}"
+            rects = page.search_for(placeholder)
+            for rect in rects:
                 page.insert_text(rect.tl, val)
 
     pdf_buffer = BytesIO()
@@ -93,6 +99,7 @@ def generate_filled_pdf():
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 # --- 페이지 설정 ---
 st.set_page_config(
