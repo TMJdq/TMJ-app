@@ -1,10 +1,10 @@
 import streamlit as st
-from fpdf import FPDF
-import datetime
-import os
-from PIL import Image
-from pathlib import Path
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from io import BytesIO
+import datetime
+
 
 
 total_steps = 20
@@ -35,556 +35,50 @@ for key, default in diagnosis_keys.items():
         st.session_state[key] = default
 
 
-import streamlit as st
-from fpdf import FPDF
-import datetime
-from pathlib import Path
+from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.generic import NameObject, TextStringObject
 from io import BytesIO
 
-# --- PDF 생성 함수 (이미지 양식에 맞춰 완전히 재작성) ---
+def fill_pdf_fields(session_data, template_path="template.pdf"):
+    # Step 1: Load template
+    reader = PdfReader(template_path)
+    writer = PdfWriter()
 
-# PDF 생성을 위한 전역 설정
-FONT_NAME = 'NanumGothic'
-FONT_PATH = "fonts/NanumGothic.ttf"
+    for page in reader.pages:
+        writer.add_page(page)
 
-def create_diagnosis_pdf(diagnosis_data):
-    """
-    제공된 이미지 양식에 맞춰 PDF 결과지를 생성합니다.
-    diagnosis_data는 st.session_state 딕셔너리입니다.
-    """
-    pdf = FPDF('P', 'mm', 'A4')
-    pdf.add_page()
-    
-    # 폰트 등록
-    try:
-        pdf.add_font(FONT_NAME, '', str(Path(FONT_PATH)), uni=True)
-    except FileNotFoundError:
-        st.error(f"폰트 파일을 찾을 수 없습니다: {Path(FONT_PATH).absolute()}")
-        return None
-    except Exception as e:
-        st.error(f"폰트 등록 중 오류가 발생했습니다: {e}")
-        return None
+    # Step 2: Create mapping dict based on session_state
+    mapping = {
+        "{ear_symptoms}": ", ".join(session_data.get("selected_ear_symptoms", [])),
+        "{ear_symptom_other}": session_data.get("ear_symptom_other", ""),
+        "{neck_shoulder_symptoms}": ", ".join([
+            k for k, v in session_data.get("neck_shoulder_symptoms", {}).items() if v
+        ]),
+        "{additional_symptoms}": ", ".join([
+            k for k, v in session_data.get("additional_symptoms", {}).items() if v
+        ]),
+        "{neck_trauma}": session_data.get("neck_trauma", ""),
+        "{trauma_detail}": session_data.get("trauma_detail", ""),
+        "{dc_tmd_results}": ", ".join(session_data.get("dc_tmd_results", []))
+    }
 
-    # PDF 양식 작성 함수 호출
-    add_diagnosis_content_styled(pdf, diagnosis_data)
-    
-    # PDF 반환
-    try:
-        pdf_bytes = pdf.output(dest='S')
-    except Exception as e:
-        st.error(f"PDF 생성 중 오류가 발생했습니다: {e}")
-        return None
+    # Step 3: Replace form fields (if AcroForm based PDF)
+    for j, page in enumerate(writer.pages):
+        if "/Annots" in page:
+            for annot in page["/Annots"]:
+                obj = annot.get_object()
+                if obj.get("/T"):
+                    key_name = obj.get("/T")
+                    if key_name in mapping:
+                        obj.update({
+                            NameObject("/V"): TextStringObject(mapping[key_name])
+                        })
 
-    return BytesIO(pdf_bytes)
-
-def add_diagnosis_content_styled(pdf, data):
-    """
-    Streamlit 세션 상태(data)의 내용을 이미지 양식에 맞춰 PDF에 추가합니다.
-    """
-    # 헬퍼 함수
-    def safe_value(key, default=""):
-        val = data.get(key, default)
-        if isinstance(val, bool):
-            return "✔" if val else ""
-        if isinstance(val, list):
-            # '기타' 항목이 리스트에 포함되어 있을 경우, '_other' 키도 확인
-            val_str = ', '.join([item for item in val if item and item != '기타'])
-            if '기타' in val and data.get(f"{key}_other", ""):
-                val_str += f" ({data.get(f'{key}_other')})"
-            return val_str if val_str else ""
-        if val == "선택 안 함" or val is None or val == "":
-            return ""
-        return str(val)
-
-    # --- 제목 ---
-    pdf.set_font(FONT_NAME, '', 14)
-    pdf.set_xy(10, 15)
-    pdf.cell(0, 10, 'Temporomandibular Disorder Chart', 0, 1, 'C')
-    pdf.ln(5)
-    
-    # --- I. Patient Information ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = 25
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'I. Patient Information', 0, 1)
-    
-    pdf.set_font(FONT_NAME, '', 10)
-    y_pos += 6
-    
-    pdf.set_xy(15, y_pos)
-    pdf.cell(85, 5, f"이름: {safe_value('name')}", 0, 0)
-    pdf.cell(0, 5, f"생년월일: {safe_value('birthdate')}", 0, 1)
-    
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(85, 5, f"성별: {safe_value('gender')}", 0, 0)
-    pdf.cell(0, 5, f"연락처: {safe_value('phone')}", 0, 1)
-
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"이메일: {safe_value('email')}", 0, 1)
-
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"주소: {safe_value('address')}", 0, 1)
-    
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"직업: {safe_value('occupation')}", 0, 1)
-
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.multi_cell(0, 5, f"내원 목적: {safe_value('visit_reason')}")
-    pdf.ln(2)
-
-    # --- II. Chief Complaint ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, f"II. Chief Complaint (Onset: {safe_value('onset')})", 0, 1)
-    
-    pdf.set_font(FONT_NAME, '', 10)
-    y_pos += 6
-    pdf.set_xy(15, y_pos)
-    chief_complaint_text = safe_value('chief_complaint')
-    if safe_value('chief_complaint_other'):
-        chief_complaint_text += f" ({safe_value('chief_complaint_other')})"
-    pdf.cell(0, 5, f"주증상: {chief_complaint_text}", 0, 1)
-    pdf.ln(2)
-
-    # --- III. Present Illness ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'III. Present Illness', 0, 1)
-
-    pdf.set_font(FONT_NAME, '', 10)
-    y_pos += 6
-    
-    # Pain
-    pdf.set_xy(15, y_pos)
-    pain_text = safe_value('pain_quality')
-    if safe_value('pain_quality_other'):
-        pain_text += f" ({safe_value('pain_quality_other')})"
-    pdf.cell(0, 5, f"Pain: {pain_text}", 0, 1)
-
-    # Sound
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    tmj_sound_val = safe_value('tmj_sound_value')
-    if tmj_sound_val == '딸깍소리':
-        tmj_sound_val += f" ({safe_value('tmj_click_context')})"
-    pdf.cell(0, 5, f"Sound: {tmj_sound_val}", 0, 1)
-
-    # Mouth Jaw Movement
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"Mouth Jaw Movement: open: {safe_value('active_opening')} mm / closed: {safe_value('passive_opening')} mm", 0, 1)
-    
-    # History/Quality
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    history_quality = safe_value('past_history')
-    pdf.cell(0, 5, f"History / Quality: {history_quality}", 0, 1)
-
-    # VAS
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"VAS: {safe_value('pain_level')}", 0, 1)
-    
-    pdf.ln(2)
-    
-    # --- IV. Habits ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'IV. Habits', 0, 1)
-    pdf.set_font(FONT_NAME, '', 10)
-    
-    y_pos += 6
-    x_pos = 15
-    col_spacing = 90
-    
-    # Habits list
-    habits = [
-        ("Clenching", "habit_clenching_day"),
-        ("Bruxism", "habit_bruxism_night"),
-        ("Side Sleep", "side_sleep"),
-        ("Snoring", "snoring"),
-        ("Gum chewing", "gum_chewing"),
-        ("Hard food favorite", "hard_food"),
-        ("Unilateral chewing", "unilateral_chewing"),
-        ("Nail / Lip/ Cheek biting", "nail_biting"),
-        ("Tongue thrusting", "tongue_thrusting"),
-        ("Finger sucking", "finger_sucking"),
-        ("Chin leaning", "chin_leaning"),
-        ("Forward head posture", "forward_head"),
-        ("Alcohol", "alcohol"),
-        ("Smoking", "smoking"),
-        ("Caffeine", "caffeine"),
-        ("기타", "habit_other_detail")
-    ]
-    
-    for i in range(0, len(habits), 2):
-        label1, key1 = habits[i]
-        label2, key2 = habits[i+1] if i+1 < len(habits) else (None, None)
-
-        val1 = safe_value(key1)
-        pdf.set_xy(x_pos, y_pos)
-        pdf.cell(col_spacing, 5, f"{label1}: {val1}", 0, 0)
-        
-        if label2:
-            val2 = safe_value(key2)
-            pdf.cell(0, 5, f"{label2}: {val2}", 0, 1)
-        else:
-            pdf.ln()
-        y_pos += 5
-    
-    pdf.ln(2)
-    
-    # --- V. Associated Symptoms ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'V. Associated Symptoms', 0, 1)
-    pdf.set_font(FONT_NAME, '', 10)
-    
-    y_pos += 6
-    
-    # Headache
-    headache_text = safe_value('has_headache_now')
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"Headache: {headache_text}", 0, 1)
-    if headache_text == '예':
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 부위: {safe_value('headache_areas')}", 0, 1)
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 강도: {safe_value('headache_severity')}", 0, 1)
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 빈도: {safe_value('headache_frequency')}", 0, 1)
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 악화요인: {safe_value('headache_triggers')}", 0, 1)
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 경감요인: {safe_value('headache_reliefs')}", 0, 1)
-    
-    # Ear Symptoms
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    ear_symptoms = safe_value('selected_ear_symptoms')
-    ear_other_text = safe_value('ear_symptom_other')
-    ear_symptom_str = ear_symptoms
-    if ear_other_text:
-        ear_symptom_str += f" ({ear_other_text})"
-    pdf.cell(0, 5, f"Ear Symptoms: {ear_symptom_str}", 0, 1)
-    
-    # Eye, Nose, Throat
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    eye_pain_val = "통증" if data.get('eye_pain', False) else ""
-    nose_pain_val = "통증" if data.get('nose_pain', False) else ""
-    throat_pain_val = "통증" if data.get('throat_pain', False) else ""
-    pdf.cell(0, 5, f"Eye: {eye_pain_val}, Nose: {nose_pain_val}, Throat: {throat_pain_val}", 0, 1)
-    
-    # 기타
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"기타: {safe_value('additional_symptoms_text')}", 0, 1)
-    
-    pdf.ln(2)
-
-    # --- VI. History of Emotional Stress ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'VI. History of Emotional Stress', 0, 1)
-    pdf.set_font(FONT_NAME, '', 10)
-    
-    y_pos += 6
-    pdf.set_xy(15, y_pos)
-    pdf.multi_cell(0, 5, f"상세 내용: {safe_value('stress_detail')}")
-    
-    pdf.ln(2)
-
-    # --- VII. PMH (Past Medical History) ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'VII. PMH', 0, 1)
-    pdf.set_font(FONT_NAME, '', 10)
-    
-    y_pos += 6
-    pdf.set_xy(15, y_pos)
-    pdf.multi_cell(0, 5, f"과거 이력: {safe_value('past_history', '기재 안함')}")
-    y_pos = pdf.get_y()
-    pdf.set_xy(15, y_pos)
-    pdf.multi_cell(0, 5, f"현재 복용 약물: {safe_value('current_medications', '기재 안함')}")
-
-    pdf.ln(2)
-    
-    # --- VIII. PDH (Past Dental History) ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'VIII. PDH', 0, 1)
-    pdf.set_font(FONT_NAME, '', 10)
-    
-    y_pos += 6
-    
-    # Ortho Tx.
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"Ortho Tx. Hx.: {safe_value('ortho_exp')}", 0, 1)
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f" - 상세: {safe_value('ortho_detail')}", 0, 1)
-    
-    # Prostho Tx.
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"Prostho Tx. Hx.: {safe_value('prosth_exp')}", 0, 1)
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f" - 상세: {safe_value('prosth_detail')}", 0, 1)
-    
-    # Other
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, f"기타 치과 이력: {safe_value('other_dental')}", 0, 1)
-    
-    # TMD Tx.
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    tmd_hist_val = safe_value('tmd_treatment_history')
-    pdf.cell(0, 5, f"턱관절 치료 경험: {tmd_hist_val}", 0, 1)
-    if tmd_hist_val == '예':
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 치료 내용: {safe_value('tmd_treatment_detail')}", 0, 1)
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 치료 반응: {safe_value('tmd_treatment_response')}", 0, 1)
-        y_pos += 5
-        pdf.set_xy(20, y_pos)
-        pdf.cell(0, 5, f" - 복용 약물: {safe_value('tmd_current_medications')}", 0, 1)
-
-    # --- 페이지 넘김 ---
-    pdf.add_page()
-    pdf.set_xy(10, 10)
-    y_pos = 10
-
-    # --- IX. Range of Motion ---
-    pdf.set_font(FONT_NAME, '', 12)
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'IX. Range of Motion', 0, 1)
-    pdf.set_font(FONT_NAME, '', 10)
-    
-    y_pos += 6
-    
-    # Active Opening
-    pdf.set_xy(15, y_pos)
-    pdf.cell(50, 5, f"Active Opening: {safe_value('active_opening')} mm", 0, 0)
-    pdf.cell(40, 5, f"Pain: {safe_value('active_pain')}", 0, 1)
-    
-    # Passive Opening
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(50, 5, f"Passive Opening: {safe_value('passive_opening')} mm", 0, 0)
-    pdf.cell(40, 5, f"Pain: {safe_value('passive_pain')}", 0, 1)
-    
-    # Protrusion, Laterotrusion
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(40, 5, f"Protrusion: {safe_value('protrusion')} mm", 0, 0)
-    pdf.cell(30, 5, f"Pain: {safe_value('protrusion_pain')}", 0, 0)
-    pdf.ln()
-
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(40, 5, f"Laterotrusion Rt.: {safe_value('latero_right')} mm", 0, 0)
-    pdf.cell(30, 5, f"Pain: {safe_value('latero_right_pain')}", 0, 0)
-    pdf.ln()
-    
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    pdf.cell(40, 5, f"Laterotrusion Lt.: {safe_value('latero_left')} mm", 0, 0)
-    pdf.cell(30, 5, f"Pain: {safe_value('latero_left_pain')}", 0, 0)
-    pdf.ln()
-    
-    # Occlusion
-    y_pos += 5
-    pdf.set_xy(15, y_pos)
-    occlusion_text = safe_value('occlusion')
-    if safe_value('occlusion_shift'):
-        occlusion_text += f" ({safe_value('occlusion_shift')} shift)"
-    pdf.cell(0, 5, f"Occlusion: {occlusion_text}", 0, 1)
-
-    pdf.ln(5)
-
-    # --- X. TMJ Noise Dysfunction ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'X. TMJ Noise Dysfunction', 0, 1)
-    
-    y_start = pdf.get_y() + 6
-    col1_w, col2_w, col3_w, col4_w, col5_w = 40, 25, 25, 25, 25
-    row_h = 7
-    
-    pdf.set_font(FONT_NAME, '', 10)
-    pdf.set_xy(10 + col1_w, y_start)
-    pdf.cell(col2_w + col3_w, row_h, 'Right', 1, 0, 'C')
-    pdf.set_xy(10 + col1_w + col2_w + col3_w, y_start)
-    pdf.cell(col4_w + col5_w, row_h, 'Left', 1, 1, 'C')
-    y_start += row_h
-    
-    pdf.set_xy(10, y_start)
-    pdf.cell(col1_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col2_w, row_h, 'Open', 1, 0, 'C')
-    pdf.cell(col3_w, row_h, 'Close', 1, 0, 'C')
-    pdf.cell(col4_w, row_h, 'Open', 1, 0, 'C')
-    pdf.cell(col5_w, row_h, 'Close', 1, 1, 'C')
-    y_start += row_h
-
-    def get_noise_cell_value(open_close, right_left):
-        tmj_sound_val = data.get('tmj_sound_value', '')
-        if '사각사각' in tmj_sound_val:
-            return safe_value('crepitus_confirmed_value')
-        
-        click_context = data.get('tmj_click_context', [])
-        
-        if '딸깍' in tmj_sound_val:
-            if open_close == 'Open' and ('입 벌릴 때' in click_context):
-                return '딸깍'
-            if open_close == 'Close' and ('입 다물 때' in click_context):
-                return '딸깍'
-        return ''
-
-    y_pos = y_start
-    pdf.set_xy(10, y_pos)
-    pdf.cell(col1_w, row_h, 'Closed condyle (0~15mm)', 1, 0, 'C')
-    pdf.cell(col2_w, row_h, get_noise_cell_value('Open', 'Right'), 1, 0, 'C')
-    pdf.cell(col3_w, row_h, get_noise_cell_value('Close', 'Right'), 1, 0, 'C')
-    pdf.cell(col4_w, row_h, get_noise_cell_value('Open', 'Left'), 1, 0, 'C')
-    pdf.cell(col5_w, row_h, get_noise_cell_value('Close', 'Left'), 1, 1, 'C')
-    
-    y_pos += row_h
-    pdf.set_xy(10, y_pos)
-    pdf.cell(col1_w, row_h, 'Mild (15~30mm)', 1, 0, 'C')
-    pdf.cell(col2_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col3_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col4_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col5_w, row_h, '', 1, 1, 'C')
-    
-    y_pos += row_h
-    pdf.set_xy(10, y_pos)
-    pdf.cell(col1_w, row_h, 'Wide open (30mm 이상)', 1, 0, 'C')
-    pdf.cell(col2_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col3_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col4_w, row_h, '', 1, 0, 'C')
-    pdf.cell(col5_w, row_h, '', 1, 1, 'C')
-    
-    pdf.ln(5)
-
-    # --- XI. Provocation Test ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'XI. Provocation Test', 0, 1)
-    
-    y_start = pdf.get_y() + 6
-    col1_w, col2_w, col3_w = 60, 40, 50
-    row_h = 7
-    
-    # Header
-    pdf.set_font(FONT_NAME, '', 10)
-    pdf.set_xy(10, y_start)
-    pdf.cell(col1_w, row_h, 'Test', 1, 0, 'C')
-    pdf.cell(col2_w, row_h, 'Pain (+/-)', 1, 0, 'C')
-    pdf.cell(col3_w, row_h, 'Location', 1, 1, 'C')
-    y_start += row_h
-
-    # Content
-    test_data = [
-        ('Right clenching', 'bite_right', 'bite_right_loc'),
-        ('Left clenching', 'bite_left', 'bite_left_loc'),
-        ('Loading Test', 'loading_test', 'loading_test_loc'),
-        ('Resistance Test', 'resistance_test', 'resistance_test_loc')
-    ]
-    
-    y_pos = y_start
-    for label, key_pain, key_loc in test_data:
-        pdf.set_xy(10, y_pos)
-        pdf.cell(col1_w, row_h, label, 1, 0)
-        pdf.cell(col2_w, row_h, safe_value(key_pain, ''), 1, 0, 'C')
-        pdf.cell(col3_w, row_h, safe_value(key_loc, ''), 1, 1, 'C')
-        y_pos += row_h
-
-    pdf.ln(5)
-
-    # --- XII. Attrition ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'XII. Attrition', 0, 1)
-    
-    pdf.set_font(FONT_NAME, '', 10)
-    y_pos += 6
-    pdf.set_xy(15, y_pos)
-    pdf.cell(0, 5, safe_value('attrition'), 0, 1)
-
-    pdf.ln(2)
-
-    # --- XIII. Diagnosis ---
-    pdf.set_font(FONT_NAME, '', 12)
-    y_pos = pdf.get_y()
-    pdf.set_xy(10, y_pos)
-    pdf.cell(0, 5, 'XIII. Diagnosis', 0, 1)
-    
-    pdf.set_font(FONT_NAME, '', 10)
-    y_pos += 6
-    pdf.set_xy(15, y_pos)
-    diagnosis_list = data.get('final_diagnosis', [])
-    diagnosis_text = ', '.join(diagnosis_list) if diagnosis_list else '진단 근거 없음'
-    pdf.multi_cell(0, 5, diagnosis_text)
-
-    
-
-def sync_widget_key(widget_key: str, state_key: str):
-    """특정 위젯 키 값을 세션 상태 키에 복사"""
-    st.session_state[state_key] = st.session_state.get(widget_key, "")
-
-def sync_multiple_keys(mapping: dict):
-    """여러 widget_key → state_key 매핑 복사"""
-    for widget_key, state_key in mapping.items():
-        st.session_state[state_key] = st.session_state.get(widget_key, "")
-
-def update_textarea(key: str):
-    """텍스트 입력형 위젯 업데이트"""
-    st.session_state[key] = st.session_state.get(key, "").strip()
-
-def update_radio_state(key: str):
-    """라디오 버튼 선택값 업데이트"""
-    st.session_state[key] = st.session_state.get(key, "")
-
-def update_neck_none():
-    """'없음' 체크 시 다른 증상 해제"""
-    if st.session_state.get("neck_none", False):
-        for key in ["neck_pain", "shoulder_pain", "stiffness"]:
-            st.session_state[key] = False
-
-def update_neck_symptom(symptom_key: str):
-    """다른 증상 선택 시 '없음' 체크 해제"""
-    if st.session_state.get(symptom_key, False):
-        st.session_state["neck_none"] = False
-
-def update_text_state(key: str):
-    """텍스트 입력값을 세션에 저장"""
-    st.session_state[key] = st.session_state.get(key, "").strip()
-
+    # Step 4: Output PDF to bytes
+    output_stream = BytesIO()
+    writer.write(output_stream)
+    output_stream.seek(0)
+    return output_stream.getvalue()
 
 
 # --- 페이지 설정 ---
@@ -1913,8 +1407,8 @@ elif st.session_state.step == 10:
         st.markdown("**오른쪽 - 입 벌릴 때**")
         st.radio(
             label="", 
-            options=["딸깍/소리", "없음", "기타", "선택 안 함"],
-            index=["딸깍/소리", "없음", "기타", "선택 안 함"].index(
+            options=["딸깍/소리", "없음", "선택 안 함"],
+            index=["딸깍/소리", "없음", "선택 안 함"].index(
                 st.session_state.get("tmj_noise_right_open", "선택 안 함")
             ),
             key="tmj_noise_right_open_widget",
@@ -1922,22 +1416,15 @@ elif st.session_state.step == 10:
             args=("tmj_noise_right_open_widget", "tmj_noise_right_open"),
             label_visibility="collapsed"
         )
-        if st.session_state.get("tmj_noise_right_open") == "기타":
-            st.text_input(
-                "기타 내용 (오른쪽-벌릴 때):",
-                value=st.session_state.get("tmj_noise_right_open_other", ""),
-                key="tmj_noise_right_open_other"
-            )
-        else:
-            st.session_state["tmj_noise_right_open_other"] = ""
+       
 
         # 왼쪽 - 입 벌릴 때
         st.markdown("---")
         st.markdown("**왼쪽 - 입 벌릴 때**")
         st.radio(
             label="", 
-            options=["딸깍/소리", "없음", "기타", "선택 안 함"],
-            index=["딸깍/소리", "없음", "기타", "선택 안 함"].index(
+            options=["딸깍/소리", "없음", "선택 안 함"],
+            index=["딸깍/소리", "없음", "선택 안 함"].index(
                 st.session_state.get("tmj_noise_left_open", "선택 안 함")
             ),
             key="tmj_noise_left_open_widget",
@@ -1945,22 +1432,15 @@ elif st.session_state.step == 10:
             args=("tmj_noise_left_open_widget", "tmj_noise_left_open"),
             label_visibility="collapsed"
         )
-        if st.session_state.get("tmj_noise_left_open") == "기타":
-            st.text_input(
-                "기타 내용 (왼쪽-벌릴 때):",
-                value=st.session_state.get("tmj_noise_left_open_other", ""),
-                key="tmj_noise_left_open_other"
-            )
-        else:
-            st.session_state["tmj_noise_left_open_other"] = ""
+        
 
         # 오른쪽 - 입 다물 때
         st.markdown("---")
         st.markdown("**오른쪽 - 입 다물 때**")
         st.radio(
             label="", 
-            options=["딸깍/소리", "없음", "기타", "선택 안 함"],
-            index=["딸깍/소리", "없음", "기타", "선택 안 함"].index(
+            options=["딸깍/소리", "없음", "선택 안 함"],
+            index=["딸깍/소리", "없음", "선택 안 함"].index(
                 st.session_state.get("tmj_noise_right_close", "선택 안 함")
             ),
             key="tmj_noise_right_close_widget",
@@ -1968,22 +1448,15 @@ elif st.session_state.step == 10:
             args=("tmj_noise_right_close_widget", "tmj_noise_right_close"),
             label_visibility="collapsed"
         )
-        if st.session_state.get("tmj_noise_right_close") == "기타":
-            st.text_input(
-                "기타 내용 (오른쪽-다물 때):",
-                value=st.session_state.get("tmj_noise_right_close_other", ""),
-                key="tmj_noise_right_close_other"
-            )
-        else:
-            st.session_state["tmj_noise_right_close_other"] = ""
+       
 
         # 왼쪽 - 입 다물 때
         st.markdown("---")
         st.markdown("**왼쪽 - 입 다물 때**")
         st.radio(
             label="", 
-            options=["딸깍/소리", "없음", "기타", "선택 안 함"],
-            index=["딸깍/소리", "없음", "기타", "선택 안 함"].index(
+            options=["딸깍/소리", "없음", "선택 안 함"],
+            index=["딸깍/소리", "없음", "선택 안 함"].index(
                 st.session_state.get("tmj_noise_left_close", "선택 안 함")
             ),
             key="tmj_noise_left_close_widget",
@@ -1991,14 +1464,7 @@ elif st.session_state.step == 10:
             args=("tmj_noise_left_close_widget", "tmj_noise_left_close"),
             label_visibility="collapsed"
         )
-        if st.session_state.get("tmj_noise_left_close") == "기타":
-            st.text_input(
-                "기타 내용 (왼쪽-다물 때):",
-                value=st.session_state.get("tmj_noise_left_close_other", ""),
-                key="tmj_noise_left_close_other"
-            )
-        else:
-            st.session_state["tmj_noise_left_close_other"] = ""
+        
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -2078,13 +1544,11 @@ elif st.session_state.step == 12:
             "이명 (귀울림)", "귀가 먹먹한 느낌", "귀 통증", "청력 저하", "기타"
         ]
 
-        # --- 상태 초기화 ---
-        if "selected_ear_symptoms" not in st.session_state:
-            st.session_state.selected_ear_symptoms = []
-        if "ear_symptom_other" not in st.session_state:
-            st.session_state.ear_symptom_other = ""
+        # 상태 초기화
+        st.session_state.setdefault("selected_ear_symptoms", [])
+        st.session_state.setdefault("ear_symptom_other", "")
 
-        # --- 없음 체크 ---
+        # 없음 체크 박스
         def toggle_ear_symptom_none():
             if st.session_state.ear_symptom_none:
                 st.session_state.selected_ear_symptoms = ["없음"]
@@ -2100,7 +1564,7 @@ elif st.session_state.step == 12:
 
         disabled = "없음" in st.session_state.selected_ear_symptoms
 
-        # --- 나머지 증상 체크박스 ---
+        # 체크박스 렌더링
         for symptom in ear_symptoms:
             key = f"ear_symptom_{symptom}"
             default = symptom in st.session_state.selected_ear_symptoms
@@ -2123,7 +1587,7 @@ elif st.session_state.step == 12:
                 on_change=make_callback()
             )
 
-        # --- 기타 입력 ---
+        # 기타 항목 입력
         if "기타" in st.session_state.selected_ear_symptoms and not disabled:
             st.text_input(
                 "기타 귀 관련 증상을 입력해주세요:",
@@ -2133,7 +1597,7 @@ elif st.session_state.step == 12:
         else:
             st.session_state.ear_symptom_other = ""
 
-    # --- 이전/다음 단계 버튼 ---
+    # 이전/다음 버튼
     st.markdown("---")
     col1, col2 = st.columns(2)
 
@@ -2152,7 +1616,6 @@ elif st.session_state.step == 12:
             else:
                 st.session_state.step = 13
                 st.rerun()
-
 
 # STEP 13: 경추/목/어깨 관련 증상
 elif st.session_state.step == 13:
@@ -2260,7 +1723,6 @@ elif st.session_state.step == 13:
                 st.rerun()
 
 
-
 # STEP 14: 정서적 스트레스 이력
 elif st.session_state.step == 14:
     st.title("정서적 스트레스 이력")
@@ -2269,7 +1731,7 @@ elif st.session_state.step == 14:
     with st.container(border=True):
         st.markdown("**스트레스, 불안, 우울감 등을 많이 느끼시나요?**")
 
-        stress_options = ["예", "아니오", "기타", "선택 안 함"]
+        stress_options = ["예", "아니오", "선택 안 함"]
         stress_radio_val = st.session_state.get("stress_radio", "선택 안 함")
 
         st.radio(
@@ -2280,13 +1742,6 @@ elif st.session_state.step == 14:
             label_visibility="collapsed"
         )
 
-        # 기타 선택 시
-        if st.session_state.get("stress_radio") == "기타":
-            st.text_input("기타 의견:", key="stress_other_input", value=st.session_state.get("stress_other_input", ""))
-            st.session_state.stress_other = st.session_state.stress_other_input
-        else:
-            st.session_state["stress_other_input"] = ""
-            st.session_state["stress_other"] = ""
 
         st.markdown("---")
         st.markdown("**있다면 간단히 기재해 주세요:**")
@@ -2326,7 +1781,7 @@ elif st.session_state.step == 15:
     with st.container(border=True):
         # 교정치료 경험
         st.markdown("**교정치료(치아 교정) 경험**")
-        ortho_options = ["예", "아니오", "기타", "선택 안 함"]
+        ortho_options = ["예", "아니오", "선택 안 함"]
         st.radio(
             "", ortho_options,
             index=ortho_options.index(st.session_state.get("ortho_exp", "선택 안 함")),
@@ -2336,16 +1791,7 @@ elif st.session_state.step == 15:
             label_visibility="collapsed"
         )
 
-        if st.session_state.get("ortho_exp") == "기타":
-            st.text_input(
-                "기타: 교정치료 관련 내용 입력",
-                key="ortho_exp_other",
-                value=st.session_state.get("ortho_exp_other", ""),
-                on_change=update_text_state,
-                args=("ortho_exp_other",)
-            )
-        else:
-            st.session_state["ortho_exp_other"] = ""
+    
 
         st.text_input(
             "예라면 언제, 얼마나 받았는지 적어주세요:",
@@ -2359,7 +1805,7 @@ elif st.session_state.step == 15:
 
         # 보철치료 경험
         st.markdown("**보철치료(의치, 브리지, 임플란트 등) 경험**")
-        prosth_options = ["예", "아니오", "기타", "선택 안 함"]
+        prosth_options = ["예", "아니오", "선택 안 함"]
         st.radio(
             "", prosth_options,
             index=prosth_options.index(st.session_state.get("prosth_exp", "선택 안 함")),
@@ -2369,16 +1815,7 @@ elif st.session_state.step == 15:
             label_visibility="collapsed"
         )
 
-        if st.session_state.get("prosth_exp") == "기타":
-            st.text_input(
-                "기타: 보철치료 관련 내용 입력",
-                key="prosth_exp_other",
-                value=st.session_state.get("prosth_exp_other", ""),
-                on_change=update_text_state,
-                args=("prosth_exp_other",)
-            )
-        else:
-            st.session_state["prosth_exp_other"] = ""
+        
 
         st.text_input(
             "예라면 어떤 치료였는지 적어주세요:",
@@ -2750,12 +2187,11 @@ elif st.session_state.step == 19:
 
 
 if st.session_state.get("step", 0) == final_step:
-    # 전체 session_state 를 그대로 전달
-    pdf_output_bytes = create_diagnosis_pdf(st.session_state)
-    if pdf_output_bytes:
+    pdf_output = create_diagnosis_pdf_from_template(st.session_state)
+    if pdf_output:
         st.download_button(
             label="📥 진단 결과 PDF 다운로드",
-            data=pdf_output_bytes,
+            data=pdf_output,
             file_name=f'턱관절_진단_결과_{datetime.date.today()}.pdf',
             mime='application/pdf'
         )
