@@ -945,6 +945,11 @@ elif st.session_state.step == 6:
         "has_headache_widget": "has_headache_now"
     }
 
+    time_options = [
+        {"key": "morning", "label": "오전"},
+        {"key": "afternoon", "label": "오후"},
+        {"key": "evening", "label": "저녁"},
+    ]
     with st.container(border=True):
         st.markdown("**통증 또는 다른 증상이 얼마나 자주 발생하나요?**")
         freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
