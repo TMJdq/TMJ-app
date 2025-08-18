@@ -194,6 +194,11 @@ def compute_diagnoses(state):
 
 
 
+# 콜백 함수 정의
+def sync_widget_key(widget_key, state_key):
+    st.session_state[state_key] = st.session_state[widget_key]
+
+
 # 총 단계 수 (0부터 시작)
 total_steps = 20 
 # --- 사이드바 ---
