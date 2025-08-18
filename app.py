@@ -46,103 +46,39 @@ import fitz  # PyMuPDF
 def generate_filled_pdf():
     template_text = Path("template2.txt").read_text(encoding="cp949")
 
+    # 템플릿에서 사용될 key 목록 (template2.txt 안에 쓰인 {xxx} 들)
+    keys = [
+        "name", "birthdate", "gender", "email", "address", "phone",
+        "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
+        "onset", "jaw_aggravation", "pain_quality", "pain_quality_other",
+        "muscle_movement_pain_value", "muscle_pressure_2s_value",
+        "muscle_referred_pain_value", "muscle_referred_remote_pain_value",
+        "tmj_movement_pain_value","tmj_press_pain_value","headache_temples_value",
+        "headache_reproduce_by_pressure_value","headache_with_jaw_value","headache_not_elsewhere_value",
+        "tmj_sound_value","tmj_click_summary","crepitus_confirmed_value","jaw_locked_now_value",
+        "jaw_unlock_possible_value","jaw_locked_past_value","mao_fits_3fingers_value",
+        "frequency_choice","pain_level","selected_times",
+        "has_headache_now","headache_areas","headache_severity","headache_frequency",
+        "headache_triggers","headache_reliefs","habit_summary","additional_habits",
+        "active_opening","active_pain","passive_opening","passive_pain",
+        "deviation","deviation2","deflection","protrusion","protrusion_pain",
+        "latero_right","latero_right_pain","latero_left","latero_left_pain",
+        "occlusion","occlusion_shift",
+        "tmj_noise_right_open","tmj_noise_left_open","tmj_noise_right_close","tmj_noise_left_close",
+        "palpation_temporalis","palpation_medial_pterygoid","palpation_lateral_pterygoid","pain_mapping",
+        "ear_symptoms","ear_symptom_other","neck_shoulder_symptoms","additional_symptoms","neck_trauma_radio",
+        "stress_radio","stress_detail","ortho_exp","ortho_detail","prosth_exp","prosth_detail",
+        "other_dental","tmd_treatment_history","tmd_treatment_detail","tmd_treatment_response",
+        "tmd_current_medications","past_history","current_medications","bite_right","bite_left",
+        "loading_test","resistance_test","attrition","impact_daily","impact_work","impact_quality_of_life",
+        "sleep_quality","sleep_tmd_relation","diagnosis_result"
+    ]
 
-    filled_text = template_text.format(
-        name=st.session_state.get("name", ""),
-        birthdate=st.session_state.get("birthdate", ""),
-        gender=st.session_state.get("gender", ""),
-        email=st.session_state.get("email", ""),
-        address=st.session_state.get("address", ""),
-        phone=st.session_state.get("phone", ""),
-        occupation=st.session_state.get("occupation", ""),
-        visit_reason=st.session_state.get("visit_reason", ""),
-        chief_complaint=st.session_state.get("chief_complaint", ""),
-        chief_complaint_other=st.session_state.get("chief_complaint_other", ""),
-        onset=st.session_state.get("onset", ""),
-        jaw_aggravation=st.session_state.get("jaw_aggravation", ""),
-        pain_quality=", ".join(st.session_state.get("pain_quality", [])),
-        pain_quality_other=st.session_state.get("pain_quality_other", ""),
-        muscle_movement_pain_value=st.session_state.get("muscle_movement_pain_value", ""),
-        muscle_pressure_2s_value=st.session_state.get("muscle_pressure_2s_value", ""),
-        muscle_referred_pain_value=st.session_state.get("muscle_referred_pain_value", ""),
-        muscle_referred_remote_pain_value=st.session_state.get("muscle_referred_remote_pain_value", ""),
-        tmj_movement_pain_value=st.session_state.get("tmj_movement_pain_value", ""),
-        tmj_press_pain_value=st.session_state.get("tmj_press_pain_value", ""),
-        headache_temples_value=st.session_state.get("headache_temples_value", ""),
-        headache_reproduce_by_pressure_value=st.session_state.get("headache_reproduce_by_pressure_value", ""),
-        headache_with_jaw_value=st.session_state.get("headache_with_jaw_value", ""),
-        headache_not_elsewhere_value=st.session_state.get("headache_not_elsewhere_value", ""),
-        tmj_sound_value=st.session_state.get("tmj_sound_value", ""),
-        tmj_click_summary=st.session_state.get("tmj_click_summary", ""),
-        crepitus_confirmed_value=st.session_state.get("crepitus_confirmed_value", ""),
-        jaw_locked_now_value=st.session_state.get("jaw_locked_now_value", ""),
-        jaw_unlock_possible_value=st.session_state.get("jaw_unlock_possible_value", ""),
-        jaw_locked_past_value=st.session_state.get("jaw_locked_past_value", ""),
-        mao_fits_3fingers_value=st.session_state.get("mao_fits_3fingers_value", ""),
-        frequency_choice=st.session_state.get("frequency_choice", ""),
-        pain_level=st.session_state.get("pain_level", ""),
-        selected_times=", ".join(st.session_state.get("selected_times", [])),
-        has_headache_now=st.session_state.get("has_headache_now", ""),
-        headache_areas=", ".join(st.session_state.get("headache_areas", [])),
-        headache_severity=st.session_state.get("headache_severity", ""),
-        headache_frequency=st.session_state.get("headache_frequency", ""),
-        headache_triggers=", ".join(st.session_state.get("headache_triggers", [])),
-        headache_reliefs=", ".join(st.session_state.get("headache_reliefs", [])),
-        habit_summary=st.session_state.get("habit_summary", ""),
-        additional_habits=st.session_state.get("additional_habits", ""),
-        active_opening=st.session_state.get("active_opening", ""),
-        active_pain=st.session_state.get("active_pain", ""),
-        passive_opening=st.session_state.get("passive_opening", ""),
-        passive_pain=st.session_state.get("passive_pain", ""),
-        deviation=st.session_state.get("deviation", ""),
-        devivation2=st.session_state.get("devivation2", ""),
-        deflection=st.session_state.get("deflection", ""),
-        protrusion=st.session_state.get("protrusion", ""),
-        protrusion_pain=st.session_state.get("protrusion_pain", ""),
-        latero_right=st.session_state.get("latero_right", ""),
-        latero_right_pain=st.session_state.get("latero_right_pain", ""),
-        latero_left=st.session_state.get("latero_left", ""),
-        latero_left_pain=st.session_state.get("latero_left_pain", ""),
-        occlusion=st.session_state.get("occlusion", ""),
-        occlusion_shift=st.session_state.get("occlusion_shift", ""),
-        tmj_noise_right_open=st.session_state.get("tmj_noise_right_open", ""),
-        tmj_noise_left_open=st.session_state.get("tmj_noise_left_open", ""),
-        tmj_noise_right_close=st.session_state.get("tmj_noise_right_close", ""),
-        tmj_noise_left_close=st.session_state.get("tmj_noise_left_close", ""),
-        palpation_temporalis=st.session_state.get("palpation_temporalis", ""),
-        palpation_medial_pterygoid=st.session_state.get("palpation_medial_pterygoid", ""),
-        palpation_lateral_pterygoid=st.session_state.get("palpation_lateral_pterygoid", ""),
-        pain_mapping=st.session_state.get("pain_mapping", ""),
-        ear_symptoms=", ".join(st.session_state.get("ear_symptoms", [])),
-        ear_symptom_other=st.session_state.get("ear_symptom_other", ""),
-        neck_shoulder_symptoms=", ".join(st.session_state.get("neck_shoulder_symptoms", [])),
-        additional_symptoms=st.session_state.get("additional_symptoms", ""),
-        neck_trauma_radio=st.session_state.get("neck_trauma_radio", ""),
-        stress_radio=st.session_state.get("stress_radio", ""),
-        stress_detail=st.session_state.get("stress_detail", ""),
-        ortho_exp=st.session_state.get("ortho_exp", ""),
-        ortho_detail=st.session_state.get("ortho_detail", ""),
-        prosth_exp=st.session_state.get("prosth_exp", ""),
-        prosth_detail=st.session_state.get("prosth_detail", ""),
-        other_dental=st.session_state.get("other_dental", ""),
-        tmd_treatment_history=st.session_state.get("tmd_treatment_history", ""),
-        tmd_treatment_detail=st.session_state.get("tmd_treatment_detail", ""),
-        tmd_treatment_response=st.session_state.get("tmd_treatment_response", ""),
-        tmd_current_medications=st.session_state.get("tmd_current_medications", ""),
-        past_history=st.session_state.get("past_history", ""),
-        current_medications=st.session_state.get("current_medications", ""),
-        bite_right=st.session_state.get("bite_right", ""),
-        bite_left=st.session_state.get("bite_left", ""),
-        loading_test=st.session_state.get("loading_test", ""),
-        resistance_test=st.session_state.get("resistance_test", ""),
-        attrition=st.session_state.get("attrition", ""),
-        impact_daily=st.session_state.get("impact_daily", ""),
-        impact_work=st.session_state.get("impact_work", ""),
-        impact_quality_of_life=st.session_state.get("impact_quality_of_life", ""),
-        sleep_quality=st.session_state.get("sleep_quality", ""),
-        sleep_tmd_relation=st.session_state.get("sleep_tmd_relation", ""),
-        diagnosis_result=st.session_state.get("diagnosis_result", "")
-    )
+    # 👉 템플릿에서 쓰는 key 들을 모두 가져오고, 없으면 "" 로 채워줌
+    values = {k: st.session_state.get(k, "") for k in keys}
+
+    # 문자열을 실제 값으로 치환
+    filled_text = template_text.format(**values)
 
     # PDF 생성
     doc = fitz.open()
@@ -155,6 +91,7 @@ def generate_filled_pdf():
     doc.close()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 
 # --- 페이지 설정 ---
