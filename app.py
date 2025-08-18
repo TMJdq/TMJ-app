@@ -44,7 +44,8 @@ from pathlib import Path
 import fitz  # PyMuPDF
 
 def generate_filled_pdf():
-    template_text = Path("template2.txt").read_text(encoding="utf-8")
+    template_text = Path("template2.txt").read_text(encoding="cp949")
+
 
     filled_text = template_text.format(
         name=st.session_state.get("name", ""),
