@@ -124,7 +124,7 @@ def generate_filled_pdf():
     values = {k: ("" if v == "선택 안 함" else v) for k, v in values.items()}
 
     if "additional_habits" in values:
-        values["additional_habits"] = "\n".join(textwrap.wrap(values["additional_habits"], width=10))
+        values["additional_habits"] = "\n".join(textwrap.wrap(values["additional_habits"], width=30))
     
     for page in doc:
         placeholders_to_insert = {}
