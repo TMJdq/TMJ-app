@@ -249,48 +249,27 @@ def compute_diagnoses(state):
 
 
 # 콜백 함수 정의
-
-def update_headache_frequency():
-    st.session_state["headache_frequency"] = st.session_state["headache_frequency_widget"]
-# ✔ 1) 한 방향 복사용 함수
+# ✅ (유지) 여러 개 복사
 def sync_multiple_keys(field_mapping):
     for widget_key, session_key in field_mapping.items():
         st.session_state[session_key] = st.session_state.get(widget_key, "")
 
-def sync_widget_to_session(widget_key, session_key):
-    """
-    Streamlit 위젯의 현재 값을 세션 상태에 동기화하는 콜백 함수
-    """
-    if widget_key in st.session_state:
-        st.session_state[session_key] = st.session_state[widget_key]
-
+# ✅ (유지) 일반적인 widget → session 복사
 def sync_widget_key(widget_key, target_key):
     if widget_key in st.session_state:
         st.session_state[target_key] = st.session_state[widget_key]
 
-
-
+# ✅ (유지) '목/어깨 증상' 전용 로직
 def update_neck_none():
-    """
-    '없음' 체크 시 다른 항목을 모두 False 로 초기화
-    """
     if st.session_state.get('neck_none'):
         st.session_state['neck_pain'] = False
         st.session_state['shoulder_pain'] = False
         st.session_state['stiffness'] = False
 
 def update_neck_symptom(key):
-    """
-    개별 증상 체크 시 '없음' 체크박스를 False 로 변경
-    """
     if st.session_state.get(key):
         st.session_state['neck_none'] = False
 
-def update_radio_state(key):
-    st.session_state[key] = st.session_state.get(key)
-
-def update_text_state(key):
-    st.session_state[key] = st.session_state.get(key, "")
 
 # ---------------------------------------------
 
