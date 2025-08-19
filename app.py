@@ -1890,21 +1890,20 @@ elif st.session_state.step == 15:
         st.radio(
             "", ortho_options,
             index=ortho_options.index(st.session_state.get("ortho_exp", "선택 안 함")),
-            key="ortho_exp",
-            on_change=update_radio_state,
-            args=("ortho_exp",),
+            key="ortho_exp_widget", # 👈 위젯 키 변경
+            on_change=sync_widget_key, # 👈 콜백 함수 변경
+            args=("ortho_exp_widget", "ortho_exp"), # 👈 args 변경
             label_visibility="collapsed"
-        )
-
-    
+        )   
 
         st.text_input(
             "예라면 언제, 얼마나 받았는지 적어주세요:",
-            key="ortho_detail",
+            key="ortho_detail_widget", # 👈 위젯 키 변경
             value=st.session_state.get("ortho_detail", ""),
-            on_change=update_text_state,
-            args=("ortho_detail",)
-        )
+            on_change=sync_widget_key, # 👈 콜백 함수 변경
+            args=("ortho_detail_widget", "ortho_detail") # 👈 args 변경
+            )
+           
 
         st.markdown("---")
 
@@ -1914,9 +1913,9 @@ elif st.session_state.step == 15:
         st.radio(
             "", prosth_options,
             index=prosth_options.index(st.session_state.get("prosth_exp", "선택 안 함")),
-            key="prosth_exp",
-            on_change=update_radio_state,
-            args=("prosth_exp",),
+            key="prosth_exp_widget", # 👈 위젯 키 변경
+            on_change=sync_widget_key, # 👈 콜백 함수 변경
+            args=("prosth_exp_widget", "prosth_exp"), # 👈 args 변경
             label_visibility="collapsed"
         )
 
@@ -1924,22 +1923,21 @@ elif st.session_state.step == 15:
 
         st.text_input(
             "예라면 어떤 치료였는지 적어주세요:",
-            key="prosth_detail",
+            key="prosth_detail_widget", # 👈 위젯 키 변경
             value=st.session_state.get("prosth_detail", ""),
-            on_change=update_text_state,
-            args=("prosth_detail",)
+            on_change=sync_widget_key, # 👈 콜백 함수 변경
+            args=("prosth_detail_widget", "prosth_detail") # 👈 args 변경
         )
-
         st.markdown("---")
 
         # 기타 치과 치료
         st.markdown("**기타 치과 치료 이력 (주요 치과 시술, 수술 등)**")
         st.text_area(
             "",
-            key="other_dental",
+            key="other_dental_widget", # 👈 위젯 키 변경
             value=st.session_state.get("other_dental", ""),
-            on_change=update_text_state,
-            args=("other_dental",),
+            on_change=sync_widget_key, # 👈 콜백 함수 변경
+            args=("other_dental_widget", "other_dental"), # 👈 args 변경
             label_visibility="collapsed"
         )
 
@@ -1951,33 +1949,32 @@ elif st.session_state.step == 15:
             "",
             ["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get("tmd_treatment_history", "선택 안 함")),
-            key="tmd_treatment_history",
-            on_change=update_radio_state,
-            args=("tmd_treatment_history",),
+            key="tmd_treatment_history_widget", # 👈 위젯 키 변경
+            on_change=sync_widget_key, # 👈 콜백 함수 변경
+            args=("tmd_treatment_history_widget", "tmd_treatment_history"), # 👈 args 변경
             label_visibility="collapsed"
         )
-
         if st.session_state.get("tmd_treatment_history") == "예":
             st.text_input(
                 "어떤 치료를 받으셨나요?",
-                key="tmd_treatment_detail",
+                key="tmd_treatment_detail_widget",
                 value=st.session_state.get("tmd_treatment_detail", ""),
-                on_change=update_text_state,
-                args=("tmd_treatment_detail",)
-            )
+                on_change=sync_widget_key,
+                args=("tmd_treatment_detail_widget", "tmd_treatment_detail")
+             )
             st.text_input(
                 "해당 치료에 대한 반응(효과나 문제점 등):",
-                key="tmd_treatment_response",
+                key="tmd_treatment_response_widget",
                 value=st.session_state.get("tmd_treatment_response", ""),
-                on_change=update_text_state,
-                args=("tmd_treatment_response",)
+                on_change=sync_widget_key,
+                args=("tmd_treatment_response_widget", "tmd_treatment_response")
             )
             st.text_input(
                 "현재 복용 중인 턱관절 관련 약물이 있다면 입력해주세요:",
-                key="tmd_current_medications",
+                key="tmd_current_medications_widget",
                 value=st.session_state.get("tmd_current_medications", ""),
-                on_change=update_text_state,
-                args=("tmd_current_medications",)
+                on_change=sync_widget_key,
+                args=("tmd_current_medications_widget", "tmd_current_medications")
             )
         else:
             st.session_state["tmd_treatment_detail"] = ""
