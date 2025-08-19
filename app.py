@@ -85,6 +85,12 @@ def generate_filled_pdf():
         if isinstance(v, list):
             st.session_state[k] = ", ".join(v)
 
+    # ✅ 귀 관련 선택도 문자열로 변환
+    v = st.session_state.get("selected_ear_symptoms", [])
+    if isinstance(v, list):
+        st.session_state["selected_ear_symptoms"] = ", ".join(v)
+    
+
 
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
