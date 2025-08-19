@@ -249,7 +249,10 @@ def compute_diagnoses(state):
 
 
 # 콜백 함수 정의
-
+# Place this function at the top of your script
+def update_headache_frequency():
+    st.session_state["headache_frequency"] = st.session_state["headache_frequency_widget"]
+    
 def update_radio_state(key):
     st.session_state[key] = st.session_state.get(key)
 
