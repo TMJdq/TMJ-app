@@ -249,9 +249,6 @@ def compute_diagnoses(state):
 
 
 # 콜백 함수 정의
-
-def update_headache_frequency():
-    st.session_state["headache_frequency"] = st.session_state["headache_frequency_widget"]
 # ✔ 1) 한 방향 복사용 함수
 def sync_multiple_keys(field_mapping):
     for widget_key, session_key in field_mapping.items():
@@ -955,8 +952,7 @@ elif st.session_state.step == 6:
         "time_morning_widget": "time_morning",
         "time_afternoon_widget": "time_afternoon",
         "time_evening_widget": "time_evening",
-        "has_headache_widget": "has_headache_now",
-        "headache_frequency_widget": "headache_frequency"
+        "has_headache_widget": "has_headache_now"
     }
 
     time_options = [
@@ -1030,17 +1026,14 @@ elif st.session_state.step == 6:
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state["headache_severity"] = st.slider("두통 강도", 0, 10, value=st.session_state.get("headache_severity", 0))
 
-
             st.markdown("**두통 빈도는 얼마나 자주 발생하나요?**")
             headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
-
             st.radio(
                 "", headache_freq_opts,
                 index=headache_freq_opts.index(st.session_state.get("headache_frequency", "선택 안 함")),
-                key="headache_frequency_widget",
-                on_change=update_headache_frequency
+                key="headache_frequency"
             )
-            
+
             st.markdown("**두통을 유발하거나 악화시키는 요인이 있나요? (복수 선택 가능)**")
             trigger_opts = ["스트레스", "수면 부족", "음식 섭취", "소음", "밝은 빛"]
             selected_triggers = []
@@ -1760,28 +1753,23 @@ elif st.session_state.step == 13:
     st.markdown("---")
     with st.container(border=True):
         st.markdown("**목 외상 관련 이력이 있으신가요?**")
-
-        st.session_state["neck_trauma_radio"] = st.radio(
+        st.radio(
             label="",
             options=["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')),
-            key="neck_trauma_radio", # 키는 유지
+            key="neck_trauma_radio",
             label_visibility="collapsed"
         )
-    
+
         if st.session_state.get('neck_trauma_radio') == "예":
             st.markdown("있다면 자세히 적어주세요:")
-            # st.text_input의 반환 값을 trauma_detail 키에 직접 할당합니다.
-            st.session_state["trauma_detail"] = st.text_input(
-                label="",
-                value=st.session_state.get('trauma_detail', ''),
-                key="trauma_detail_widget", # 위젯 키를 명확히 구분
-                label_visibility="collapsed"
-            )
+            st.text_input(label="", value=st.session_state.get('trauma_detail', ''), key="trauma_detail", label_visibility="collapsed")
         else:
-            # '아니오'나 '선택 안 함'을 선택하면 내용을 초기화합니다.
             st.session_state["trauma_detail"] = ""
-        st.markdown("---")
+
+        st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
+
+    st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
