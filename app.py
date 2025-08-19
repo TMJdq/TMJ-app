@@ -2083,7 +2083,7 @@ elif st.session_state.step == 17:
             key="attrition_widget", # 위젯 키를 명확히 구분
             index=["경미", "중간", "심함", "선택 안 함"].index(st.session_state.get("attrition", "선택 안 함")),
             on_change=sync_widget_key,
-            args=("attrition_widget", "attrition"),
+            args=("attrition_widget", "attrition"),
             label_visibility="collapsed"
         )
 
