@@ -1760,23 +1760,28 @@ elif st.session_state.step == 13:
     st.markdown("---")
     with st.container(border=True):
         st.markdown("**목 외상 관련 이력이 있으신가요?**")
-        st.radio(
+
+        st.session_state["neck_trauma_radio"] = st.radio(
             label="",
             options=["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')),
-            key="neck_trauma_radio",
+            key="neck_trauma_radio", # 키는 유지
             label_visibility="collapsed"
         )
-
+    
         if st.session_state.get('neck_trauma_radio') == "예":
             st.markdown("있다면 자세히 적어주세요:")
-            st.text_input(label="", value=st.session_state.get('trauma_detail', ''), key="trauma_detail", label_visibility="collapsed")
+            # st.text_input의 반환 값을 trauma_detail 키에 직접 할당합니다.
+            st.session_state["trauma_detail"] = st.text_input(
+                label="",
+                value=st.session_state.get('trauma_detail', ''),
+                key="trauma_detail_widget", # 위젯 키를 명확히 구분
+                label_visibility="collapsed"
+            )
         else:
+            # '아니오'나 '선택 안 함'을 선택하면 내용을 초기화합니다.
             st.session_state["trauma_detail"] = ""
-
-        st.session_state.neck_trauma = st.session_state.get('neck_trauma_radio', '선택 안 함')
-
-    st.markdown("---")
+        st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
