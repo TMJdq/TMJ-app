@@ -1846,7 +1846,7 @@ elif st.session_state.step == 14:
             options=stress_options,
             key="stress_radio",
             index=stress_options.index(st.session_state.get("stress_radio", "선택 안 함")),
-            on_change=sync_widget_to_session,
+            on_change=sync_widget_key,
             args=("stress_radio", "stress_radio"), # 'stress_radio' 키에 값 저장
             label_visibility="collapsed"
         )
