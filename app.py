@@ -1026,14 +1026,17 @@ elif st.session_state.step == 6:
             st.markdown("**현재 두통 강도는 얼마나 되나요? (0=없음, 10=극심한 통증)**")
             st.session_state["headache_severity"] = st.slider("두통 강도", 0, 10, value=st.session_state.get("headache_severity", 0))
 
+
             st.markdown("**두통 빈도는 얼마나 자주 발생하나요?**")
             headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
             st.radio(
                 "", headache_freq_opts,
                 index=headache_freq_opts.index(st.session_state.get("headache_frequency", "선택 안 함")),
-                key="headache_frequency"
+                key="headache_frequency_widget", # 위젯 키를 별도로 지정
+                on_change=sync_widget_key,
+                args=("headache_frequency_widget", "headache_frequency") # 최종 저장 키 지정
             )
-
+            
             st.markdown("**두통을 유발하거나 악화시키는 요인이 있나요? (복수 선택 가능)**")
             trigger_opts = ["스트레스", "수면 부족", "음식 섭취", "소음", "밝은 빛"]
             selected_triggers = []
