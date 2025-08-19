@@ -258,7 +258,11 @@ def sync_multiple_keys(field_mapping):
         st.session_state[session_key] = st.session_state.get(widget_key, "")
 
 def sync_widget_to_session(widget_key, session_key):
-    st.session_state[session_key] = st.session_state[widget_key]
+    """
+    Streamlit 위젯의 현재 값을 세션 상태에 동기화하는 콜백 함수
+    """
+    if widget_key in st.session_state:
+        st.session_state[session_key] = st.session_state[widget_key]
 
 def sync_widget_key(widget_key, target_key):
     if widget_key in st.session_state:
@@ -1834,7 +1838,7 @@ elif st.session_state.step == 14:
             key="stress_radio",
             index=stress_options.index(st.session_state.get("stress_radio", "선택 안 함")),
             on_change=sync_widget_to_session,
-            args=("stress_radio", "stress"), # stress_radio의 값을 stress에 동기화
+            args=("stress_radio", "stress_radio"), # 'stress_radio' 키에 값 저장
             label_visibility="collapsed"
         )
         
@@ -1847,7 +1851,7 @@ elif st.session_state.step == 14:
             key="stress_detail",
             value=st.session_state.get("stress_detail", ""),
             on_change=sync_widget_to_session,
-            args=("stress_detail", "stress_detail"), # stress_detail의 값을 stress_detail에 동기화
+            args=("stress_detail", "stress_detail"), # 'stress_detail' 키에 값 저장
             placeholder="예: 최근 업무 스트레스, 가족 문제 등",
             label_visibility="collapsed"
         )
@@ -1866,8 +1870,6 @@ elif st.session_state.step == 14:
             else:
                 st.session_state.step = 15
                 st.rerun()
-
-                
 # STEP 15: 과거 치과적 이력 (Past Dental History)
 
 elif st.session_state.step == 15:
