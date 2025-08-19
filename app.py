@@ -1788,24 +1788,25 @@ elif st.session_state.step == 13:
             label="",
             options=["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')),
-            key="neck_trauma_radio",
+            key="neck_trauma_radio_widget",               # ✅ widget key 로 변경
+            on_change=sync_widget_key,                    # ✅ 콜백 추가
+            args=("neck_trauma_radio_widget", "neck_trauma_radio"),
             label_visibility="collapsed"
         )
-        
         # '예'를 선택한 경우에만 텍스트 입력창을 표시하고, 값은 자동으로 세션 상태에 저장됩니다.
         if st.session_state.get('neck_trauma_radio') == "예":
             st.markdown("있다면 자세히 적어주세요:")
             st.text_input(
                 label="",
                 value=st.session_state.get('trauma_detail', ''),
-                key="trauma_detail", # 위젯 키를 "trauma_detail"로 통일
+                key="trauma_detail_widget",
+                on_change=sync_widget_key,
+                args=("trauma_detail_widget", "trauma_detail"),
                 label_visibility="collapsed"
             )
-        # '아니오'나 '선택 안 함'을 선택했을 때만 내용을 초기화합니다.
-        # 이렇게 하면 '예'를 선택한 후 다시 페이지가 로드되어도 값이 유지됩니다.
-        elif st.session_state.get('neck_trauma_radio') in ["아니오", "선택 안 함"]:
-            if 'trauma_detail' in st.session_state:
-                st.session_state.pop('trauma_detail')
+        else:
+            # '아니오' 또는 '선택 안 함' 이면 상세내용 초기화
+            st.session_state["trauma_detail"] = ""
 
         st.markdown("---")
     col1, col2 = st.columns(2)
