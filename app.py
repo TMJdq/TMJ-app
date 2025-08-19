@@ -2030,8 +2030,7 @@ elif st.session_state.step == 17:
             options=["통증", "통증 없음", "선택 안 함"],
             key="bite_right",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_right", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("bite_right",),
+           
             label_visibility="collapsed"
         )
 
@@ -2042,8 +2041,7 @@ elif st.session_state.step == 17:
             options=["통증", "통증 없음", "선택 안 함"],
             key="bite_left",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_left", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("bite_left",),
+           
             label_visibility="collapsed"
         )
 
@@ -2054,8 +2052,7 @@ elif st.session_state.step == 17:
             options=["통증", "통증 없음", "선택 안 함"],
             key="loading_test",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("loading_test", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("loading_test",),
+           
             label_visibility="collapsed"
         )
 
@@ -2066,8 +2063,7 @@ elif st.session_state.step == 17:
             options=["통증", "통증 없음", "선택 안 함"],
             key="resistance_test",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("resistance_test", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("resistance_test",),
+            
             label_visibility="collapsed"
         )
 
@@ -2078,8 +2074,7 @@ elif st.session_state.step == 17:
             options=["경미", "중간", "심함", "선택 안 함"],
             key="attrition",
             index=["경미", "중간", "심함", "선택 안 함"].index(st.session_state.get("attrition", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("attrition",),
+           
             label_visibility="collapsed"
         )
 
