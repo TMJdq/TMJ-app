@@ -123,8 +123,9 @@ def generate_filled_pdf():
     values = {k: str(st.session_state.get(k, "")) for k in keys}
     values = {k: ("" if v == "선택 안 함" else v) for k, v in values.items()}
 
-    if "additional_habits" in values:
-        values["additional_habits"] = "\n".join(textwrap.wrap(values["additional_habits"], width=60))
+    for long_key in ["additional_habits", "past_history", "current_medications"]:
+        if long_key in values:
+            values[long_key] = "\n".join(textwrap.wrap(values[long_key], width=65))
     
     for page in doc:
         placeholders_to_insert = {}
