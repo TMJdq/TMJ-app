@@ -1826,6 +1826,7 @@ elif st.session_state.step == 14:
         stress_options = ["예", "아니오", "선택 안 함"]
         stress_radio_val = st.session_state.get("stress_radio", "선택 안 함")
 
+        # st.radio는 index를 통해 값 동기화
         st.radio(
             label="",
             options=stress_options,
@@ -1834,20 +1835,18 @@ elif st.session_state.step == 14:
             label_visibility="collapsed"
         )
 
-
         st.markdown("---")
         st.markdown("**있다면 간단히 기재해 주세요:**")
         st.text_area(
             label="",
             key="stress_detail",
-            value=st.session_state.get("stress_detail", ""),
+            value=st.session_state.get("stress_detail", ""),  
             placeholder="예: 최근 업무 스트레스, 가족 문제 등",
             label_visibility="collapsed"
         )
 
-        # 전체 요약 스트레스 상태 기록
-        st.session_state["stress"] = st.session_state.get("stress_radio")
 
+    
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
@@ -1857,12 +1856,15 @@ elif st.session_state.step == 14:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
+            # 다음 단계로 이동 시 위젯 값을 세션에 저장
+            st.session_state["stress"] = st.session_state["stress_radio"]
+            st.session_state["stress_detail"] = st.session_state["stress_detail"]
+            
             if st.session_state.get("stress_radio") == "선택 안 함":
                 st.warning("스트레스 여부를 선택해주세요.")
             else:
                 st.session_state.step = 15
                 st.rerun()
-
 
 # STEP 15: 과거 치과적 이력 (Past Dental History)
 
