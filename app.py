@@ -1846,20 +1846,18 @@ elif st.session_state.step == 14:
 
     with st.container(border=True):
         st.markdown("**스트레스, 불안, 우울감 등을 많이 느끼시나요?**")
-        
-        # 'stress_radio' 위젯
+
         stress_options = ["예", "아니오", "선택 안 함"]
         st.radio(
             label="",
             options=stress_options,
-            key="stress_radio",
+            key="stress_radio_widget",  # 👈 위젯 key
             index=stress_options.index(st.session_state.get("stress_radio", "선택 안 함")),
-            on_change=sync_widget_key,
-            args=("stress_radio", "stress_radio"), # 'stress_radio' 키에 값 저장
+            on_change=sync_widget_key,  # 👈 콜백
+            args=("stress_radio_widget", "stress_radio"),
             label_visibility="collapsed"
         )
-        
-        st.markdown("---")
+
 
 
     st.markdown("---")
@@ -1876,6 +1874,7 @@ elif st.session_state.step == 14:
             else:
                 st.session_state.step = 15
                 st.rerun()
+
                 
 # STEP 15: 과거 치과적 이력 (Past Dental History)
 
