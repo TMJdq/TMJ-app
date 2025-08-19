@@ -1752,9 +1752,8 @@ elif st.session_state.step == 13:
         st.radio(
             label="",
             options=["예", "아니오", "선택 안 함"],
+            index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')),
             key="neck_trauma_radio",
-            on_change=sync_widget_key,
-            args=("neck_trauma_radio", "neck_trauma_radio"),
             label_visibility="collapsed"
         )
 
@@ -1806,12 +1805,12 @@ elif st.session_state.step == 14:
 
         stress_options = ["예", "아니오", "선택 안 함"]
         stress_radio_val = st.session_state.get("stress_radio", "선택 안 함")
+
         st.radio(
             label="",
             options=stress_options,
             key="stress_radio",
-            on_change=sync_widget_key,
-            args=("stress_radio", "stress_radio"),
+            index=stress_options.index(stress_radio_val),
             label_visibility="collapsed"
         )
 
@@ -1846,6 +1845,7 @@ elif st.session_state.step == 14:
 
 
 # STEP 15: 과거 치과적 이력 (Past Dental History)
+
 elif st.session_state.step == 15:
     st.title("과거 치과적 이력 (Past Dental History)")
     st.markdown("---")
@@ -1856,11 +1856,14 @@ elif st.session_state.step == 15:
         ortho_options = ["예", "아니오", "선택 안 함"]
         st.radio(
             "", ortho_options,
+            index=ortho_options.index(st.session_state.get("ortho_exp", "선택 안 함")),
             key="ortho_exp",
-            on_change=sync_widget_key,
-            args=("ortho_exp", "ortho_exp"),
+            on_change=update_radio_state,
+            args=("ortho_exp",),
             label_visibility="collapsed"
         )
+
+    
 
         st.text_input(
             "예라면 언제, 얼마나 받았는지 적어주세요:",
@@ -1877,11 +1880,14 @@ elif st.session_state.step == 15:
         prosth_options = ["예", "아니오", "선택 안 함"]
         st.radio(
             "", prosth_options,
+            index=prosth_options.index(st.session_state.get("prosth_exp", "선택 안 함")),
             key="prosth_exp",
-            on_change=sync_widget_key,
-            args=("prosth_exp", "prosth_exp"),
+            on_change=update_radio_state,
+            args=("prosth_exp",),
             label_visibility="collapsed"
         )
+
+        
 
         st.text_input(
             "예라면 어떤 치료였는지 적어주세요:",
@@ -1911,9 +1917,10 @@ elif st.session_state.step == 15:
         st.radio(
             "",
             ["예", "아니오", "선택 안 함"],
+            index=["예", "아니오", "선택 안 함"].index(st.session_state.get("tmd_treatment_history", "선택 안 함")),
             key="tmd_treatment_history",
-            on_change=sync_widget_key,
-            args=("tmd_treatment_history", "tmd_treatment_history"),
+            on_change=update_radio_state,
+            args=("tmd_treatment_history",),
             label_visibility="collapsed"
         )
 
@@ -2053,7 +2060,7 @@ elif st.session_state.step == 17:
         )
 
         st.markdown("---")
-        st.markdown("**저항 검사 (Resistance Test):**")
+        st.markdown("**저항 검사 (Resistance Test, 턱 움직임 막기):**")
         st.radio(
             label="",
             options=["통증", "통증 없음", "선택 안 함"],
@@ -2076,10 +2083,9 @@ elif st.session_state.step == 17:
             label_visibility="collapsed"
         )
 
-
-
     st.markdown("---")
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("이전 단계"):
             st.session_state.step = 16
@@ -2090,7 +2096,6 @@ elif st.session_state.step == 17:
             st.session_state.step = 18
             st.rerun()
 
-            
 # STEP 18: 기능 평가
 elif st.session_state.step == 18:
     st.title("기능 평가 (Functional Impact)")
