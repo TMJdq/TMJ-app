@@ -2032,10 +2032,10 @@ elif st.session_state.step == 17:
         st.radio(
             label="",
             options=["통증", "통증 없음", "선택 안 함"],
-            key="bite_right",
+            key="bite_right_widget", # 위젯 키
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_right", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("bite_right",),
+            on_change=sync_widget_key,
+            args=("bite_right_widget", "bite_right"), # 최종 저장 키
             label_visibility="collapsed"
         )
 
@@ -2044,10 +2044,10 @@ elif st.session_state.step == 17:
         st.radio(
             label="",
             options=["통증", "통증 없음", "선택 안 함"],
-            key="bite_left",
+            key="bite_left_widget", # 위젯 키
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_left", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("bite_left",),
+            on_change=sync_widget_key,
+            args=("bite_left_widget", "bite_left"), # 최종 저장 키
             label_visibility="collapsed"
         )
 
@@ -2056,10 +2056,10 @@ elif st.session_state.step == 17:
         st.radio(
             label="",
             options=["통증", "통증 없음", "선택 안 함"],
-            key="loading_test",
+            key="loading_test_widget",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("loading_test", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("loading_test",),
+            on_change=sync_widget_key,
+            args=("loading_test_widget", "loading_test"),
             label_visibility="collapsed"
         )
 
@@ -2068,10 +2068,10 @@ elif st.session_state.step == 17:
         st.radio(
             label="",
             options=["통증", "통증 없음", "선택 안 함"],
-            key="resistance_test",
+            key="resistance_test_widget",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("resistance_test", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("resistance_test",),
+            on_change=sync_widget_key,
+            args=("resistance_test_widget", "resistance_test"),
             label_visibility="collapsed"
         )
 
@@ -2080,10 +2080,10 @@ elif st.session_state.step == 17:
         st.radio(
             label="",
             options=["경미", "중간", "심함", "선택 안 함"],
-            key="attrition",
+            key="attrition_widget", # 위젯 키를 명확히 구분
             index=["경미", "중간", "심함", "선택 안 함"].index(st.session_state.get("attrition", "선택 안 함")),
-            on_change=update_radio_state,
-            args=("attrition",),
+            on_change=sync_widget_key,
+            args=("attrition_widget", "attrition"),
             label_visibility="collapsed"
         )
 
