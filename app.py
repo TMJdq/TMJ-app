@@ -257,6 +257,9 @@ def sync_multiple_keys(field_mapping):
     for widget_key, session_key in field_mapping.items():
         st.session_state[session_key] = st.session_state.get(widget_key, "")
 
+def sync_widget_to_session(widget_key, session_key):
+    st.session_state[session_key] = st.session_state[widget_key]
+
 def sync_widget_key(widget_key, target_key):
     if widget_key in st.session_state:
         st.session_state[target_key] = st.session_state[widget_key]
@@ -1822,31 +1825,33 @@ elif st.session_state.step == 14:
 
     with st.container(border=True):
         st.markdown("**스트레스, 불안, 우울감 등을 많이 느끼시나요?**")
-
+        
+        # 'stress_radio' 위젯
         stress_options = ["예", "아니오", "선택 안 함"]
-        stress_radio_val = st.session_state.get("stress_radio", "선택 안 함")
-
-        # st.radio는 index를 통해 값 동기화
         st.radio(
             label="",
             options=stress_options,
             key="stress_radio",
-            index=stress_options.index(stress_radio_val),
+            index=stress_options.index(st.session_state.get("stress_radio", "선택 안 함")),
+            on_change=sync_widget_to_session,
+            args=("stress_radio", "stress"), # stress_radio의 값을 stress에 동기화
             label_visibility="collapsed"
         )
-
+        
         st.markdown("---")
         st.markdown("**있다면 간단히 기재해 주세요:**")
+
+        # 'stress_detail' 위젯
         st.text_area(
             label="",
             key="stress_detail",
-            value=st.session_state.get("stress_detail", ""),  
+            value=st.session_state.get("stress_detail", ""),
+            on_change=sync_widget_to_session,
+            args=("stress_detail", "stress_detail"), # stress_detail의 값을 stress_detail에 동기화
             placeholder="예: 최근 업무 스트레스, 가족 문제 등",
             label_visibility="collapsed"
         )
 
-
-    
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
@@ -1856,16 +1861,13 @@ elif st.session_state.step == 14:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
-            # 다음 단계로 이동 시 위젯 값을 세션에 저장
-            st.session_state["stress"] = st.session_state["stress_radio"]
-            st.session_state["stress_detail"] = st.session_state["stress_detail"]
-            
             if st.session_state.get("stress_radio") == "선택 안 함":
                 st.warning("스트레스 여부를 선택해주세요.")
             else:
                 st.session_state.step = 15
                 st.rerun()
 
+                
 # STEP 15: 과거 치과적 이력 (Past Dental History)
 
 elif st.session_state.step == 15:
