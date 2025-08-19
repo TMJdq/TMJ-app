@@ -125,7 +125,7 @@ def generate_filled_pdf():
 
     for long_key in ["additional_habits", "past_history", "current_medications"]:
         if long_key in values:
-            values[long_key] = "\n".join(textwrap.wrap(values[long_key], width=65))
+            values[long_key] = "\n".join(textwrap.wrap(values[long_key], width=70))
     
     for page in doc:
         placeholders_to_insert = {}
