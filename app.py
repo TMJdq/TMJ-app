@@ -1761,14 +1761,13 @@ elif st.session_state.step == 13:
     with st.container(border=True):
         st.markdown("**목 외상 관련 이력이 있으신가요?**")
 
-        st.session_state["neck_trauma_radio"] = st.radio(
+        st.radio(
             label="",
             options=["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get('neck_trauma_radio', '선택 안 함')),
-            key="neck_trauma_radio", # 키는 유지
+            key="neck_trauma_radio",
             label_visibility="collapsed"
         )
-    
         if st.session_state.get('neck_trauma_radio') == "예":
             st.markdown("있다면 자세히 적어주세요:")
             # st.text_input의 반환 값을 trauma_detail 키에 직접 할당합니다.
