@@ -250,6 +250,11 @@ def compute_diagnoses(state):
 
 # 콜백 함수 정의
 # Place this function at the top of your script
+def sync_widget_key(widget_key, target_key):
+    if widget_key in st.session_state:
+        st.session_state[target_key] = st.session_state[widget_key]
+
+
 def update_headache_frequency():
     st.session_state["headache_frequency"] = st.session_state["headache_frequency_widget"]
     
