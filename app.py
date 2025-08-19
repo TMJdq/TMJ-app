@@ -2031,9 +2031,9 @@ elif st.session_state.step == 17:
         st.markdown("**오른쪽으로 어금니를 강하게 물 때:**")
         st.radio(
             label="",
-            options=["통증", "통증 없음", "선택 안 함"],
+            options=["통증 있음", "통증 없음", "선택 안 함"],
             key="bite_right_widget", # 위젯 키
-            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_right", "선택 안 함")),
+            index=["통증 있음", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_right", "선택 안 함")),
             on_change=sync_widget_key,
             args=("bite_right_widget", "bite_right"), # 최종 저장 키
             label_visibility="collapsed"
@@ -2043,9 +2043,9 @@ elif st.session_state.step == 17:
         st.markdown("**왼쪽으로 어금니를 강하게 물 때:**")
         st.radio(
             label="",
-            options=["통증", "통증 없음", "선택 안 함"],
+            options=["통증 있음", "통증 없음", "선택 안 함"],
             key="bite_left_widget", # 위젯 키
-            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_left", "선택 안 함")),
+            index=["통증 있음", "통증 없음", "선택 안 함"].index(st.session_state.get("bite_left", "선택 안 함")),
             on_change=sync_widget_key,
             args=("bite_left_widget", "bite_left"), # 최종 저장 키
             label_visibility="collapsed"
@@ -2055,9 +2055,9 @@ elif st.session_state.step == 17:
         st.markdown("**압력 가하기 (Loading Test):**")
         st.radio(
             label="",
-            options=["통증", "통증 없음", "선택 안 함"],
+            options=["통증 있음", "통증 없음", "선택 안 함"],
             key="loading_test_widget",
-            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("loading_test", "선택 안 함")),
+            index=["통증 있음", "통증 없음", "선택 안 함"].index(st.session_state.get("loading_test", "선택 안 함")),
             on_change=sync_widget_key,
             args=("loading_test_widget", "loading_test"),
             label_visibility="collapsed"
@@ -2067,9 +2067,9 @@ elif st.session_state.step == 17:
         st.markdown("**저항 검사 (Resistance Test, 턱 움직임 막기):**")
         st.radio(
             label="",
-            options=["통증", "통증 없음", "선택 안 함"],
+            options=["통증 있음", "통증 없음", "선택 안 함"],
             key="resistance_test_widget",
-            index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("resistance_test", "선택 안 함")),
+            index=["통증 있음", "통증 없음", "선택 안 함"].index(st.session_state.get("resistance_test", "선택 안 함")),
             on_change=sync_widget_key,
             args=("resistance_test_widget", "resistance_test"),
             label_visibility="collapsed"
