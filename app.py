@@ -1793,20 +1793,7 @@ elif st.session_state.step == 13:
             args=("neck_trauma_radio_widget", "neck_trauma_radio"),
             label_visibility="collapsed"
         )
-        # '예'를 선택한 경우에만 텍스트 입력창을 표시하고, 값은 자동으로 세션 상태에 저장됩니다.
-        if st.session_state.get('neck_trauma_radio') == "예":
-            st.markdown("있다면 자세히 적어주세요:")
-            st.text_input(
-                label="",
-                value=st.session_state.get('trauma_detail', ''),
-                key="trauma_detail_widget",
-                on_change=sync_widget_key,
-                args=("trauma_detail_widget", "trauma_detail"),
-                label_visibility="collapsed"
-            )
-        else:
-            # '아니오' 또는 '선택 안 함' 이면 상세내용 초기화
-            st.session_state["trauma_detail"] = ""
+
 
         st.markdown("---")
     col1, col2 = st.columns(2)
@@ -2224,8 +2211,8 @@ elif st.session_state.step == 18:
         st.markdown("**수면의 질이 턱관절 증상(통증, 근육 경직 등)에 영향을 준다고 느끼시나요?**")
         st.radio(
             label="수면과 턱관절 질환 연관성",
-            options=["영향을 미침", "영향을 미치지 않음", "잘 모름", "선택 안 함"],
-            index=["영향을 미침", "영향을 미치지 않음", "잘 모름", "선택 안 함"].index(
+            options=["영향을 미침", "영향을 미치지 않음", "잘 모르겠음", "선택 안 함"],
+            index=["영향을 미침", "영향을 미치지 않음", "잘 모르겠음", "선택 안 함"].index(
                 st.session_state.get("sleep_tmd_relation", "선택 안 함")
             ),
             key="sleep_tmd_relation",
