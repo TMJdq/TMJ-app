@@ -112,7 +112,7 @@ def generate_filled_pdf():
         "tmj_noise_right_open","tmj_noise_left_open","tmj_noise_right_close","tmj_noise_left_close",
         "palpation_temporalis","palpation_medial_pterygoid","palpation_lateral_pterygoid","pain_mapping",
         "selected_ear_symptoms","neck_shoulder_symptoms","additional_symptoms","neck_trauma_radio",
-        "stress_radio","ortho_exp","ortho_detail","prosth_exp","prosth_detail",
+        "stress_radio","stress_detail","ortho_exp","ortho_detail","prosth_exp","prosth_detail",
         "other_dental","tmd_treatment_history","tmd_treatment_detail","tmd_treatment_response",
         "tmd_current_medications","past_history","current_medications","bite_right","bite_left",
         "loading_test","resistance_test","attrition","impact_daily","impact_work","impact_quality_of_life",
@@ -1858,7 +1858,18 @@ elif st.session_state.step == 14:
             label_visibility="collapsed"
         )
 
+        st.markdown("---")
+        st.markdown("**있다면 간단히 기재해 주세요:**")
 
+        st.text_area(
+            label="",
+            key="stress_detail_widget",  # 👈 위젯 key
+            value=st.session_state.get("stress_detail", ""),
+            on_change=sync_widget_key,
+            args=("stress_detail_widget", "stress_detail"),
+            placeholder="예: 최근 업무 스트레스, 가족 문제 등",
+            label_visibility="collapsed"
+        )
 
     st.markdown("---")
     col1, col2 = st.columns(2)
