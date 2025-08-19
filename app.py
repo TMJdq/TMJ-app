@@ -249,6 +249,9 @@ def compute_diagnoses(state):
 
 
 # 콜백 함수 정의
+
+def update_headache_frequency():
+    st.session_state["headache_frequency"] = st.session_state["headache_frequency_widget"]
 # ✔ 1) 한 방향 복사용 함수
 def sync_multiple_keys(field_mapping):
     for widget_key, session_key in field_mapping.items():
@@ -1030,12 +1033,12 @@ elif st.session_state.step == 6:
 
             st.markdown("**두통 빈도는 얼마나 자주 발생하나요?**")
             headache_freq_opts = ["주 1~2회", "주 3~4회", "주 5~6회", "매일", "선택 안 함"]
+
             st.radio(
                 "", headache_freq_opts,
                 index=headache_freq_opts.index(st.session_state.get("headache_frequency", "선택 안 함")),
-                key="headache_frequency_widget", # 위젯 키를 별도로 지정
-                on_change=sync_widget_key,
-                args=("headache_frequency_widget", "headache_frequency") # 최종 저장 키 지정
+                key="headache_frequency_widget",
+                on_change=update_headache_frequency
             )
             
             st.markdown("**두통을 유발하거나 악화시키는 요인이 있나요? (복수 선택 가능)**")
