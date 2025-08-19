@@ -2071,7 +2071,7 @@ elif st.session_state.step == 17:
             key="resistance_test_widget",
             index=["통증", "통증 없음", "선택 안 함"].index(st.session_state.get("resistance_test", "선택 안 함")),
             on_change=sync_widget_key,
-            args=("resistance_test_widget", "resistance_test"),
+            args=("resistance_test_widget", "resistance_test"),
             label_visibility="collapsed"
         )
 
