@@ -269,7 +269,13 @@ def update_neck_none():
 def update_neck_symptom(key):
     if st.session_state.get(key):
         st.session_state['neck_none'] = False
-
+        
+def sync_widget_to_session(widget_key, session_key):
+    """
+    Streamlit 위젯의 현재 값을 세션 상태에 동기화하는 콜백 함수
+    """
+    if widget_key in st.session_state:
+        st.session_state[session_key] = st.session_state[widget_key]
 
 # ---------------------------------------------
 
