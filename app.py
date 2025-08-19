@@ -268,12 +268,7 @@ def sync_widget_key(widget_key, target_key):
     if widget_key in st.session_state:
         st.session_state[target_key] = st.session_state[widget_key]
 
-def sync_widget_key(widget_key, session_key):
-    st.session_state[session_key] = st.session_state[widget_key]
 
-# ✔ 2) 단일 위젯 on_change 에서 사용하는 함수
-def sync_widget_key(widget_key, state_key):
-    st.session_state[state_key] = st.session_state.get(widget_key, "")
 
 def update_neck_none():
     """
@@ -1870,6 +1865,7 @@ elif st.session_state.step == 14:
             else:
                 st.session_state.step = 15
                 st.rerun()
+                
 # STEP 15: 과거 치과적 이력 (Past Dental History)
 
 elif st.session_state.step == 15:
