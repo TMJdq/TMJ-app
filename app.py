@@ -1697,7 +1697,6 @@ elif st.session_state.step == 12:
                 st.rerun()
 
 # STEP 13: 경추/목/어깨 관련 증상
-
 elif st.session_state.step == 13:
     st.title("경추/목/어깨 관련 증상")
     st.markdown("---")
@@ -1768,18 +1767,22 @@ elif st.session_state.step == 13:
             key="neck_trauma_radio",
             label_visibility="collapsed"
         )
+        
+        # '예'를 선택한 경우에만 텍스트 입력창을 표시하고, 값은 자동으로 세션 상태에 저장됩니다.
         if st.session_state.get('neck_trauma_radio') == "예":
             st.markdown("있다면 자세히 적어주세요:")
-            # st.text_input의 반환 값을 trauma_detail 키에 직접 할당합니다.
-            st.session_state["trauma_detail"] = st.text_input(
+            st.text_input(
                 label="",
                 value=st.session_state.get('trauma_detail', ''),
-                key="trauma_detail_widget", # 위젯 키를 명확히 구분
+                key="trauma_detail", # 위젯 키를 "trauma_detail"로 통일
                 label_visibility="collapsed"
             )
-        else:
-            # '아니오'나 '선택 안 함'을 선택하면 내용을 초기화합니다.
-            st.session_state["trauma_detail"] = ""
+        # '아니오'나 '선택 안 함'을 선택했을 때만 내용을 초기화합니다.
+        # 이렇게 하면 '예'를 선택한 후 다시 페이지가 로드되어도 값이 유지됩니다.
+        elif st.session_state.get('neck_trauma_radio') in ["아니오", "선택 안 함"]:
+            if 'trauma_detail' in st.session_state:
+                st.session_state.pop('trauma_detail')
+
         st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
@@ -1791,9 +1794,9 @@ elif st.session_state.step == 13:
         if st.button("다음 단계로 이동 👉"):
             trauma_selected = st.session_state.get('neck_trauma_radio') in ["예", "아니오"]
             symptoms_selected = st.session_state.get('neck_none', False) or \
-                                st.session_state.get('neck_pain', False) or \
-                                st.session_state.get('shoulder_pain', False) or \
-                                st.session_state.get('stiffness', False)
+                                 st.session_state.get('neck_pain', False) or \
+                                 st.session_state.get('shoulder_pain', False) or \
+                                 st.session_state.get('stiffness', False)
 
             if st.session_state.get('neck_none', False) and (
                 st.session_state.get('neck_pain', False) or
@@ -1808,7 +1811,6 @@ elif st.session_state.step == 13:
             else:
                 st.session_state.step = 14
                 st.rerun()
-
 
 # STEP 14: 정서적 스트레스 이력
 elif st.session_state.step == 14:
