@@ -277,6 +277,13 @@ def sync_widget_to_session(widget_key, session_key):
     if widget_key in st.session_state:
         st.session_state[session_key] = st.session_state[widget_key]
 
+
+def update_radio_state(key):
+    st.session_state[key] = st.session_state.get(key)
+
+def update_text_state(key):
+    st.session_state[key] = st.session_state.get(key, "")
+
 # ---------------------------------------------
 
 # 총 단계 수 (0부터 시작)
