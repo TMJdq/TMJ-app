@@ -261,6 +261,9 @@ def sync_widget_key(widget_key, target_key):
     if widget_key in st.session_state:
         st.session_state[target_key] = st.session_state[widget_key]
 
+def sync_widget_key(widget_key, session_key):
+    st.session_state[session_key] = st.session_state[widget_key]
+
 # ✔ 2) 단일 위젯 on_change 에서 사용하는 함수
 def sync_widget_key(widget_key, state_key):
     st.session_state[state_key] = st.session_state.get(widget_key, "")
@@ -1999,20 +2002,26 @@ elif st.session_state.step == 16:
     st.markdown("---")
 
     with st.container(border=True):
+        
         st.markdown("**과거에 앓았던 질환, 입원 등 주요 의학적 이력이 있다면 적어주세요:**")
         st.text_area(
             label="",
-            key="past_history",
-            value=st.session_state.get("past_history", ""),
+            key="past_history_widget", # 위젯 키
+            value=st.session_state.get("past_history", ""), # 세션 상태 키
+            on_change=sync_widget_key,
+            args=("past_history_widget", "past_history"),
             label_visibility="collapsed"
         )
+
 
         st.markdown("---")
         st.markdown("**현재 복용 중인 약이 있다면 적어주세요:**")
         st.text_area(
             label="",
-            key="current_medications",
-            value=st.session_state.get("current_medications", ""),
+            key="current_medications_widget", # 위젯 키
+            value=st.session_state.get("current_medications", ""), # 세션 상태 키
+            on_change=sync_widget_key,
+            args=("current_medications_widget", "current_medications"),
             label_visibility="collapsed"
         )
 
