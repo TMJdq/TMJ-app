@@ -952,7 +952,7 @@ elif st.session_state.step == 6:
         "time_morning_widget": "time_morning",
         "time_afternoon_widget": "time_afternoon",
         "time_evening_widget": "time_evening",
-        "has_headache_widget": "has_headache_now"
+        "has_headache_widget": "has_headache_now",
         "headache_frequency_widget": "headache_frequency"
     }
 
