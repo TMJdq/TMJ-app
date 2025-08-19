@@ -213,27 +213,27 @@ def compute_diagnoses(state):
     if is_yes(state.get("crepitus_confirmed_value")):
         diagnoses.append("퇴행성 관절 질환 (Degenerative Joint Disease)")
 
-    # 7. 감소 없는 디스크 변위 (손가락 3개 들어가는 경우)
+    # 7. 비정복성 관절원판 변위, 개구 제한 없음
     if is_yes(state.get("mao_fits_3fingers_value")):
-        diagnoses.append("감소 없는 디스크 변위 (Disc Displacement without Reduction)")
+        diagnoses.append("비정복성 관절원판 변위, 개구 제한 없음 (Disc Displacement without Reduction)")
 
-    # 8. 감소 없는 디스크 변위 - 개구 제한 동반
+    # 8. 비정복성 관절원판 변위, 개구 제한 동반
     if (
         is_no(state.get("mao_fits_3fingers_value")) or
         is_no(state.get("jaw_unlock_possible_value"))
     ):
-        diagnoses.append("감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)")
+        diagnoses.append("비정복성 관절원판 변위, 개구 제한 동반 (Disc Displacement without Reduction with Limited opening)")
 
-    # 9. 감소 동반 간헐적 잠금 디스크 변위 — 조작해야 열릴 경우만 진단
+    # 9. 정복성 관절원판 변위, 간헐적 개구 장애 동반
     if (
         is_yes(state.get("jaw_locked_now_value")) and
         is_yes(state.get("jaw_unlock_possible_value"))
     ):
-        diagnoses.append("감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)")
+        diagnoses.append("정복성 관절원판 변위, 간헐적 개구 장애 동반 (Disc Displacement with reduction, with intermittent locking)")
 
-    # 10. 감소 동반 디스크 변위 (딸깍 소리 있을 경우)
+    # 10. 정복성 관절원판 변위 (딸깍 소리 있을 경우)
     if state.get("tmj_sound_value") and "딸깍" in state.get("tmj_sound_value"):
-        diagnoses.append("감소 동반 디스크 변위 (Disc Displacement with Reduction)")
+        diagnoses.append("정복성 관절원판 변위 (Disc Displacement with Reduction)")
 
     return diagnoses
 
@@ -2231,10 +2231,10 @@ elif st.session_state.step == 19:
         "방사성 근막통 (Myofascial Pain with Referral)": "특정 근육을 눌렀을 때 통증이 다른 부위로 방사되어 퍼지는 증상입니다.",
         "관절통 (Arthralgia)": "턱관절 자체에 발생하는 통증으로, 움직이거나 누를 때 통증이 유발되는 상태입니다.",
         "퇴행성 관절 질환 (Degenerative Joint Disease)": "턱관절의 연골이나 뼈가 마모되거나 손상되어 통증과 기능 제한이 동반되는 상태입니다.",
-        "감소 없는 디스크 변위 (Disc Displacement without Reduction)": "턱관절 디스크가 비정상 위치에 있으며, 입을 벌려도 제자리로 돌아오지 않는 상태입니다.",
-        "감소 없는 디스크 변위 - 개구 제한 동반 (Disc Displacement without Reduction with Limitation)": "디스크가 제자리로 돌아오지 않으며, 입 벌리기가 제한되는 상태입니다.",
-        "감소 동반 간헐적 잠금 디스크 변위 (Disc Displacement with reduction, with intermittent locking)": "디스크가 움직일 때 딸깍소리가 나며, 일시적인 입 벌리기 장애가 간헐적으로 나타나는 상태입니다.",
-        "감소 동반 디스크 변위 (Disc Displacement with Reduction)": "입을 벌릴 때 디스크가 제자리로 돌아오며 딸깍소리가 나는 상태이며, 기능 제한은 없는 경우입니다.",
+        "비정복성 관절원판 변위, 개구 제한 없음 (Disc Displacement without Reduction)": "턱관절 디스크가 비정상 위치에 있으며, 입을 벌려도 제자리로 돌아오지 않는 상태입니다.",
+        "비정복성 관절원판 변위, 개구 제한 동반 (Disc Displacement without Reduction with Limited opening)": "디스크가 제자리로 돌아오지 않으며, 입 벌리기가 제한되는 상태입니다.",
+        "정복성 관절원판 변위, 간헐적 개구 장애 동반 (Disc Displacement with reduction, with intermittent locking)": "디스크가 움직일 때 딸깍소리가 나며, 일시적인 입 벌리기 장애가 간헐적으로 나타나는 상태입니다.",
+        "정복성 관절원판 변위 (Disc Displacement with Reduction)": "입을 벌릴 때 디스크가 제자리로 돌아오며 딸깍소리가 나는 상태이며, 기능 제한은 없는 경우입니다.",
         "TMD에 기인한 두통 (Headache attributed to TMD)": "턱관절 또는 턱 주변 근육 문제로 인해 발생하는 두통으로, 턱을 움직이거나 근육을 누르면 증상이 악화되는 경우입니다."
     }
     if not results:
@@ -2276,6 +2276,7 @@ if st.session_state.get("step") == final_step:
         mime="application/pdf"
     ):
         pass
+
 
 
 
