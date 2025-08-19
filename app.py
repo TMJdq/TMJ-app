@@ -249,6 +249,13 @@ def compute_diagnoses(state):
 
 
 # 콜백 함수 정의
+
+def update_radio_state(key):
+    st.session_state[key] = st.session_state.get(key)
+
+def update_text_state(key):
+    st.session_state[key] = st.session_state.get(key, "")
+    
 # ✅ (유지) 여러 개 복사
 def sync_multiple_keys(field_mapping):
     for widget_key, session_key in field_mapping.items():
@@ -284,6 +291,19 @@ def update_radio_state(key):
 def update_text_state(key):
     st.session_state[key] = st.session_state.get(key, "")
 
+def reset_headache_details():
+    if st.session_state.get("has_headache_widget") != "예":
+        # 두통이 '예'가 아니면 모든 관련 키들을 초기화
+        keys_to_reset = [
+            "headache_areas",
+            "headache_severity",
+            "headache_frequency",
+            "headache_triggers",
+            "headache_reliefs"
+        ]
+        for key in keys_to_reset:
+            if key in st.session_state:
+                del st.session_state[key]
 # ---------------------------------------------
 
 # 총 단계 수 (0부터 시작)
@@ -1008,10 +1028,12 @@ elif st.session_state.step == 6:
             "", ["예", "아니오", "선택 안 함"],
             index=["예", "아니오", "선택 안 함"].index(st.session_state.get("has_headache_now", "선택 안 함")),
             key="has_headache_widget",
-            on_change=sync_widget_key,
-            args=("has_headache_widget", "has_headache_now")
+            on_change=reset_headache_details,
+            args=()
         )
 
+        st.session_state["has_headache_now"] = st.session_state.get("has_headache_widget")
+        
         if st.session_state.get("has_headache_now") == "예":
             st.markdown("---")
             st.markdown("**두통 부위를 모두 선택해주세요.**")
