@@ -85,6 +85,7 @@ def generate_filled_pdf():
         if isinstance(v, list):
             st.session_state[k] = ", ".join(v)
 
+
     keys = [
         "name", "birthdate", "gender", "email", "address", "phone",
         "occupation", "visit_reason", "chief_complaint", "chief_complaint_other",
@@ -112,6 +113,7 @@ def generate_filled_pdf():
         "sleep_quality","sleep_tmd_relation","diagnosis_result"
     ]
 
+  
     values = {k: str(st.session_state.get(k, "")) for k in keys}
     values = {k: ("" if v == "선택 안 함" else v) for k, v in values.items()}
 
