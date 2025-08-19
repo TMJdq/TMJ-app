@@ -575,7 +575,7 @@ elif st.session_state.step == 3:
             label="통증 양상",
             options=["둔함", "날카로움", "욱신거림", "간헐적", "선택 안 함"],
             key="pain_quality_widget",
-            index=5,
+            index=4,
             label_visibility="collapsed",
             on_change=sync_widget_key,
             args=("pain_quality_widget", "pain_quality")
