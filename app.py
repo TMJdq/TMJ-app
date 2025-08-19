@@ -953,6 +953,7 @@ elif st.session_state.step == 6:
         "time_afternoon_widget": "time_afternoon",
         "time_evening_widget": "time_evening",
         "has_headache_widget": "has_headache_now"
+        "headache_frequency_widget": "headache_frequency"
     }
 
     time_options = [
