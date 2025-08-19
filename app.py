@@ -1123,10 +1123,7 @@ elif st.session_state.step == 6:
                     errors.append("두통 빈도를 선택해주세요.")
                 if st.session_state.get("headache_severity", 0) == 0:
                     errors.append("두통 강도를 선택해주세요.")
-                if not st.session_state.get("headache_triggers"):
-                    errors.append("두통 악화요인을 최소 1개 이상 선택해주세요.")
-                if not st.session_state.get("headache_reliefs"):
-                    errors.append("두통 경감요인을 최소 1개 이상 선택해주세요.")
+               
 
             if not freq_valid:
                 errors.append("빈도 항목을 입력하거나 선택해주세요.")
@@ -2226,8 +2223,8 @@ elif st.session_state.step == 18:
         st.markdown("**수면의 질이 턱관절 증상(통증, 근육 경직 등)에 영향을 준다고 느끼시나요?**")
         st.radio(
             label="수면과 턱관절 질환 연관성",
-            options=["그렇다", "아니다", "잘 모르겠다", "선택 안 함"],
-            index=["그렇다", "아니다", "잘 모르겠다", "선택 안 함"].index(
+            options=["영향을 미침", "영향을 미치지 않음", "잘 모름", "선택 안 함"],
+            index=["영향을 미침", "영향을 미치지 않음", "잘 모름", "선택 안 함"].index(
                 st.session_state.get("sleep_tmd_relation", "선택 안 함")
             ),
             key="sleep_tmd_relation",
