@@ -1799,7 +1799,7 @@ elif st.session_state.step == 13:
         )
 
 
-        st.markdown("---")
+       
     col1, col2 = st.columns(2)
     with col1:
         if st.button("이전 단계"):
