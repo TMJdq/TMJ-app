@@ -2131,27 +2131,26 @@ elif st.session_state.step == 17:
             st.session_state.step = 18
             st.rerun()
 
-# STEP 18: 기능 평가
+# STEP 18: 기능 평가 (Functional Impact)
 elif st.session_state.step == 18:
     st.title("기능 평가 (Functional Impact)")
     st.markdown("---")
 
     with st.container(border=True):
-        st.markdown("**턱관절 증상으로 인해 일상생활(음식 섭취, 말하기, 하품 등)에 불편함을 느끼시나요?**")
+        # 일상생활 영향
         st.radio(
             label="일상생활 영향",
             options=["전혀 불편하지 않음", "약간 불편함", "자주 불편함", "매우 불편함", "선택 안 함"],
             index=["전혀 불편하지 않음", "약간 불편함", "자주 불편함", "매우 불편함", "선택 안 함"].index(
                 st.session_state.get("impact_daily", "선택 안 함")
             ),
-            key="impact_daily",
-            on_change=sync_widget_key,
-            args=("impact_daily", "impact_daily"),
+            key="impact_daily_widget",                            # ✅ 위젯 key
+            on_change=sync_widget_key, args=("impact_daily_widget", "impact_daily"),
             label_visibility="collapsed"
         )
 
         st.markdown("---")
-        st.markdown("**턱관절 증상으로 인해 직장 업무나 학업 성과에 영향을 받은 적이 있나요?**")
+        # 직장/학교 영향
         st.radio(
             label="직장/학교 영향",
             options=[
@@ -2168,14 +2167,13 @@ elif st.session_state.step == 18:
                 "매우 큰 영향으로 일/학업 중단 고려한 적 있음",
                 "선택 안 함"
             ].index(st.session_state.get("impact_work", "선택 안 함")),
-            key="impact_work",
-            on_change=sync_widget_key,
-            args=("impact_work", "impact_work"),
+            key="impact_work_widget",                              # ✅ 위젯 key
+            on_change=sync_widget_key, args=("impact_work_widget", "impact_work"),
             label_visibility="collapsed"
         )
 
         st.markdown("---")
-        st.markdown("**턱관절 증상이 귀하의 전반적인 삶의 질에 얼마나 영향을 미치고 있다고 느끼시나요?**")
+        # 삶의 질 영향
         st.radio(
             label="삶의 질 영향",
             options=[
@@ -2192,67 +2190,36 @@ elif st.session_state.step == 18:
                 "심각하게 삶의 질 저하",
                 "선택 안 함"
             ].index(st.session_state.get("impact_quality_of_life", "선택 안 함")),
-            key="impact_quality_of_life",
-            on_change=sync_widget_key,
-            args=("impact_quality_of_life", "impact_quality_of_life"),
+            key="impact_quality_of_life_widget",                   # ✅ 위젯 key
+            on_change=sync_widget_key, args=("impact_quality_of_life_widget", "impact_quality_of_life"),
             label_visibility="collapsed"
         )
 
         st.markdown("---")
-        st.markdown("**최근 2주간 수면의 질은 어떠셨나요?**")
+        # 수면 질
         st.radio(
             label="수면 질",
             options=["매우 좋음", "보통", "나쁨", "매우 나쁨", "선택 안 함"],
             index=["매우 좋음", "보통", "나쁨", "매우 나쁨", "선택 안 함"].index(
                 st.session_state.get("sleep_quality", "선택 안 함")
             ),
-            key="sleep_quality",
-            on_change=sync_widget_key,
-            args=("sleep_quality", "sleep_quality"),
+            key="sleep_quality_widget",                             # ✅ 위젯 key
+            on_change=sync_widget_key, args=("sleep_quality_widget", "sleep_quality"),
             label_visibility="collapsed"
         )
 
-        st.markdown("**수면의 질이 턱관절 증상(통증, 근육 경직 등)에 영향을 준다고 느끼시나요?**")
+        # 수면-턱관절 연관성
         st.radio(
             label="수면과 턱관절 질환 연관성",
             options=["영향을 미침", "영향을 미치지 않음", "잘 모르겠음", "선택 안 함"],
             index=["영향을 미침", "영향을 미치지 않음", "잘 모르겠음", "선택 안 함"].index(
                 st.session_state.get("sleep_tmd_relation", "선택 안 함")
             ),
-            key="sleep_tmd_relation",
-            on_change=sync_widget_key,
-            args=("sleep_tmd_relation", "sleep_tmd_relation"),
+            key="sleep_tmd_relation_widget",                        # ✅ 위젯 key
+            on_change=sync_widget_key, args=("sleep_tmd_relation_widget", "sleep_tmd_relation"),
             label_visibility="collapsed"
         )
 
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("이전 단계"):
-            st.session_state.step = 17
-            st.rerun()
-
-    with col2:
-        if st.button("제출 👉"):
-            errors = []
-            if st.session_state.get("impact_daily") == "선택 안 함":
-                errors.append("일상생활 영향 여부를 선택해주세요.")
-            if st.session_state.get("impact_work") == "선택 안 함":
-                errors.append("직장/학교 영향 여부를 선택해주세요.")
-            if st.session_state.get("impact_quality_of_life") == "선택 안 함":
-                errors.append("삶의 질 영향 여부를 선택해주세요.")
-            if st.session_state.get("sleep_quality") == "선택 안 함":
-                errors.append("수면의 질을 선택해주세요.")
-            if st.session_state.get("sleep_tmd_relation") == "선택 안 함":
-                errors.append("수면과 턱관절 연관성 여부를 선택해주세요.")
-
-            if errors:
-                for err in errors:
-                    st.warning(err)
-            else:
-                st.session_state.step = 19
-                st.rerun()
 
 # STEP 19: 결과
 elif st.session_state.step == 19:
