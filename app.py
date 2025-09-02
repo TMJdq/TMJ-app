@@ -1633,26 +1633,51 @@ elif st.session_state.step == 11:
         for idx, (label, widget_key, session_key) in enumerate(palpation_fields):
             st.markdown(f"**{label}**")
 
-            col1, col2 = st.columns([2, 1])  # 왼쪽 넓게(입력창), 오른쪽 좁게(사진)
-            with col1:
-                st.text_area(
-                    label=label,
-                    key=widget_key,
-                    value=st.session_state.get(session_key, ""),
-                    on_change=sync_widget_key,
-                    args=(widget_key, session_key),
-                    placeholder="검사가 필요한 항목입니다.",
-                    label_visibility="collapsed"
-                )
-            with col2:
-                if idx < len(image_files_in_order):
-                    img_path = os.path.join(script_dir, image_files_in_order[idx])
-                    if os.path.exists(img_path):
-                        st.image(
-                            img_path,
-                            caption=f"{label} 참고 이미지",
-                            width=300   # ✅ 고정 크기
-                        )
+            # flex 컨테이너로 가운데 정렬
+            st.markdown(
+                """
+                <style>
+                .flex-container {
+                    display: flex;
+                    align-items: center;  /* ✅ 세로 가운데 정렬 */
+                    gap: 20px;            /* 좌우 간격 */
+                }
+                .flex-item {
+                    flex: 1;
+                }
+                .flex-img {
+                    flex: 0 0 auto;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # 왼쪽: 입력창 / 오른쪽: 이미지
+            st.markdown('<div class="flex-container">', unsafe_allow_html=True)
+
+            # 왼쪽 입력창
+            st.markdown('<div class="flex-item">', unsafe_allow_html=True)
+            st.text_area(
+                label=label,
+                key=widget_key,
+                value=st.session_state.get(session_key, ""),
+                on_change=sync_widget_key,
+                args=(widget_key, session_key),
+                placeholder="검사가 필요한 항목입니다.",
+                label_visibility="collapsed"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # 오른쪽 이미지
+            st.markdown('<div class="flex-img">', unsafe_allow_html=True)
+            if idx < len(image_files_in_order):
+                img_path = os.path.join(script_dir, image_files_in_order[idx])
+                if os.path.exists(img_path):
+                    st.image(img_path, caption=f"{label} 참고 이미지", width=300)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown('</div>', unsafe_allow_html=True)  # flex-container 닫기
 
     st.markdown("---")
     col1, col2 = st.columns(2)
