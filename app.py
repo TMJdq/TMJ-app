@@ -338,8 +338,8 @@ total_steps = 20
 st.sidebar.markdown("# 시스템 정보")
 st.sidebar.info("이 시스템은 턱관절 건강 자가 점검을 돕기 위해 개발되었습니다. 제공되는 정보는 참고용이며, 의료 진단을 대체할 수 없습니다.")
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"**현재 단계: {st.session_state.step + 1}/{total_steps + 1}**")
-st.sidebar.progress((st.session_state.step + 1) / (total_steps + 1))
+st.sidebar.markdown(f"**현재 단계: {st.session_state.step + 1}/{total_steps}**")
+st.sidebar.progress((st.session_state.step + 1) / (total_steps))
 st.sidebar.markdown("---")
 st.sidebar.markdown("### ❓ FAQ")
 with st.sidebar.expander("턱관절 질환이란?"):
