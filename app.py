@@ -1638,7 +1638,11 @@ elif st.session_state.step == 11:
             if idx < len(image_files_in_order):
                 img_path = os.path.join(script_dir, image_files_in_order[idx])
                 if os.path.exists(img_path):
-                    st.image(img_path, caption=f"{label} 참고 이미지", use_container_width=True)
+                    st.image(
+                        img_path,
+                        caption=f"{label} 참고 이미지",
+                        width=300
+                    )
 
             st.text_area(
                 label=label,
