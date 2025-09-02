@@ -1633,15 +1633,28 @@ elif st.session_state.step == 11:
         for idx, (label, widget_key, session_key) in enumerate(palpation_fields):
             st.markdown(f"**{label}**")
 
-            col1, col2 = st.columns([1, 2])  # 왼쪽 좁게(사진), 오른쪽 넓게(입력창)
+            if idx < len(image_files_in_order):
+                # 1~3번째: 사진 + 가로 배치
+                col1, col2 = st.columns([1, 2])
 
-            with col1:
-                if idx < len(image_files_in_order):
+                with col1:
                     img_path = os.path.join(script_dir, image_files_in_order[idx])
                     if os.path.exists(img_path):
                         st.image(img_path, width=300)
 
-            with col2:
+                with col2:
+                    st.text_area(
+                        label=label,
+                        key=widget_key,
+                        value=st.session_state.get(session_key, ""),
+                        on_change=sync_widget_key,
+                        args=(widget_key, session_key),
+                        placeholder="검사가 필요한 항목입니다.",
+                        label_visibility="collapsed",
+                        height=300  # 사진과 높이 맞춤
+                    )
+            else:
+                # 마지막: 기본 입력창만
                 st.text_area(
                     label=label,
                     key=widget_key,
@@ -1649,8 +1662,7 @@ elif st.session_state.step == 11:
                     on_change=sync_widget_key,
                     args=(widget_key, session_key),
                     placeholder="검사가 필요한 항목입니다.",
-                    label_visibility="collapsed",
-                    height=300  # ✅ 사진과 비슷한 높이
+                    label_visibility="collapsed"
                 )
 
     st.markdown("---")
