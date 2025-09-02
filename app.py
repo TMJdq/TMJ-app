@@ -1630,59 +1630,28 @@ elif st.session_state.step == 11:
 
         image_files_in_order = ["temporalis.jpg", "medial.jpg", "lateral.jpg"]
 
-        # 스타일 정의
-        st.markdown(
-            """
-            <style>
-            .pair-container {
-                display: flex;
-                gap: 20px;
-                align-items: stretch; /* 높이 동일하게 */
-                margin-bottom: 20px;
-            }
-            .pair-img {
-                flex: 0 0 auto;
-            }
-            .pair-text {
-                flex: 1;
-            }
-            .pair-text textarea {
-                height: 300px !important;  /* 사진 높이와 맞춤 */
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
         for idx, (label, widget_key, session_key) in enumerate(palpation_fields):
             st.markdown(f"**{label}**")
 
-            st.markdown('<div class="pair-container">', unsafe_allow_html=True)
+            col1, col2 = st.columns([1, 2])  # 왼쪽 좁게(사진), 오른쪽 넓게(입력창)
 
-            # 왼쪽: 사진
-            st.markdown('<div class="pair-img">', unsafe_allow_html=True)
-            if idx < len(image_files_in_order):
-                img_path = os.path.join(script_dir, image_files_in_order[idx])
-                if os.path.exists(img_path):
-                    st.image(img_path, width=300)
-            st.markdown('</div>', unsafe_allow_html=True)
+            with col1:
+                if idx < len(image_files_in_order):
+                    img_path = os.path.join(script_dir, image_files_in_order[idx])
+                    if os.path.exists(img_path):
+                        st.image(img_path, width=300)
 
-            # 오른쪽: 기재란 (HTML textarea 사용)
-            st.markdown('<div class="pair-text">', unsafe_allow_html=True)
-            current_value = st.session_state.get(session_key, "")
-            new_value = st.text_area(
-                label=label,
-                key=widget_key,
-                value=current_value,
-                on_change=sync_widget_key,
-                args=(widget_key, session_key),
-                placeholder="검사가 필요한 항목입니다.",
-                label_visibility="collapsed",
-                height=300  # ✅ Streamlit 기본 옵션도 지정
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            st.markdown('</div>', unsafe_allow_html=True)
+            with col2:
+                st.text_area(
+                    label=label,
+                    key=widget_key,
+                    value=st.session_state.get(session_key, ""),
+                    on_change=sync_widget_key,
+                    args=(widget_key, session_key),
+                    placeholder="검사가 필요한 항목입니다.",
+                    label_visibility="collapsed",
+                    height=300  # ✅ 사진과 비슷한 높이
+                )
 
     st.markdown("---")
     col1, col2 = st.columns(2)
