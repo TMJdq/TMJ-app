@@ -1629,8 +1629,17 @@ elif st.session_state.step == 11:
             ("통증 위치 매핑 (지도 또는 상세 설명)", "pain_mapping_widget", "pain_mapping"),
         ]
 
-        for label, widget_key, session_key in palpation_fields:
+       
+        image_files_in_order = ["temporalis.jpg", "medial.jpg", "lateral.jpg"]
+
+        for idx, (label, widget_key, session_key) in enumerate(palpation_fields):
             st.markdown(f"**{label}**")
+
+            if idx < len(image_files_in_order):
+                img_path = os.path.join(script_dir, image_files_in_order[idx])
+                if os.path.exists(img_path):
+                    st.image(img_path, caption=f"{label} 참고 이미지", use_container_width=True)
+
             st.text_area(
                 label=label,
                 key=widget_key,
@@ -1640,7 +1649,7 @@ elif st.session_state.step == 11:
                 placeholder="검사가 필요한 항목입니다.",
                 label_visibility="collapsed"
             )
-
+            
     st.markdown("---")
     col1, col2 = st.columns(2)
 
