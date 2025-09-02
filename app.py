@@ -1621,6 +1621,7 @@ elif st.session_state.step == 11:
         )
         st.markdown("### 의료진 촉진 소견")
 
+        # 입력 필드 정의: (라벨 표시, 위젯 키, 세션 키)
         palpation_fields = [
             ("측두근 촉진 소견", "palpation_temporalis_widget", "palpation_temporalis"),
             ("내측 익돌근 촉진 소견", "palpation_medial_pterygoid_widget", "palpation_medial_pterygoid"),
@@ -1628,36 +1629,21 @@ elif st.session_state.step == 11:
             ("통증 위치 매핑 (지도 또는 상세 설명)", "pain_mapping_widget", "pain_mapping"),
         ]
 
+       
         image_files_in_order = ["temporalis.jpg", "medial.jpg", "lateral.jpg"]
 
         for idx, (label, widget_key, session_key) in enumerate(palpation_fields):
             st.markdown(f"**{label}**")
 
-            # flex 컨테이너로 가운데 정렬
-            st.markdown(
-                """
-                <style>
-                .flex-container {
-                    display: flex;
-                    align-items: center;  /* ✅ 세로 가운데 정렬 */
-                    gap: 20px;            /* 좌우 간격 */
-                }
-                .flex-item {
-                    flex: 1;
-                }
-                .flex-img {
-                    flex: 0 0 auto;
-                }
-                </style>
-                """,
-                unsafe_allow_html=True
-            )
+            if idx < len(image_files_in_order):
+                img_path = os.path.join(script_dir, image_files_in_order[idx])
+                if os.path.exists(img_path):
+                    st.image(
+                        img_path,
+                        caption=f"{label} 참고 이미지",
+                        width=300
+                    )
 
-            # 왼쪽: 입력창 / 오른쪽: 이미지
-            st.markdown('<div class="flex-container">', unsafe_allow_html=True)
-
-            # 왼쪽 입력창
-            st.markdown('<div class="flex-item">', unsafe_allow_html=True)
             st.text_area(
                 label=label,
                 key=widget_key,
@@ -1667,18 +1653,7 @@ elif st.session_state.step == 11:
                 placeholder="검사가 필요한 항목입니다.",
                 label_visibility="collapsed"
             )
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            # 오른쪽 이미지
-            st.markdown('<div class="flex-img">', unsafe_allow_html=True)
-            if idx < len(image_files_in_order):
-                img_path = os.path.join(script_dir, image_files_in_order[idx])
-                if os.path.exists(img_path):
-                    st.image(img_path, caption=f"{label} 참고 이미지", width=300)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            st.markdown('</div>', unsafe_allow_html=True)  # flex-container 닫기
-
+            
     st.markdown("---")
     col1, col2 = st.columns(2)
 
@@ -1689,6 +1664,7 @@ elif st.session_state.step == 11:
 
     with col2:
         if st.button("다음 단계로 이동 👉"):
+            # 위젯 → 세션 키 복사
             sync_multiple_keys({
                 "palpation_temporalis_widget": "palpation_temporalis",
                 "palpation_medial_pterygoid_widget": "palpation_medial_pterygoid",
@@ -1697,7 +1673,6 @@ elif st.session_state.step == 11:
             })
             st.session_state.step = 12
             st.rerun()
-
 
 # STEP 12: 귀 관련 증상
 elif st.session_state.step == 12:
