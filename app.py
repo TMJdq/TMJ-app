@@ -316,6 +316,20 @@ def reset_headache_details():
         for key in keys_to_reset:
             if key in st.session_state:
                 del st.session_state[key]
+
+# --- 콜백: 추가 증상 '없음' 처리 ---
+def update_additional_none():
+    # '없음' 체크 시 나머지 선택 해제
+    if st.session_state.get('additional_none', False):
+        for k in ('eye_pain', 'nose_pain', 'throat_pain'):
+            st.session_state[k] = False
+
+# --- 콜백: 추가 증상 개별 항목 처리 ---
+def update_additional_symptom(symptom_key: str):
+    # 개별 항목 체크 시 '없음' 해제
+    if st.session_state.get(symptom_key, False):
+        st.session_state['additional_none'] = False
+
 # ---------------------------------------------
 
 # 총 단계 수 (0부터 시작)
@@ -1775,14 +1789,60 @@ elif st.session_state.step == 13:
             "뻣뻣함(강직감)": st.session_state.get('stiffness', False),
         }
 
+
+
+
     st.markdown("---")
     with st.container(border=True):
         st.markdown("**다음 중 해당되는 증상이 있다면 모두 선택해주세요. (복수 선택 가능)**")
+
+        # '없음' 체크박스
+        st.checkbox(
+            "없음",
+            value=st.session_state.get('additional_none', False),
+            key="additional_none",
+            on_change=update_additional_none
+        )
+
+        # '없음'이 체크되면 나머지 항목 disabled
+        disabled_additional = st.session_state.get('additional_none', False)
+
+        st.checkbox(
+            "눈 통증",
+            value=st.session_state.get('eye_pain', False),
+            key="eye_pain",
+            on_change=update_additional_symptom,
+            args=("eye_pain",),
+            disabled=disabled_additional
+        )
+        st.checkbox(
+            "코 통증",
+            value=st.session_state.get('nose_pain', False),
+            key="nose_pain",
+            on_change=update_additional_symptom,
+            args=("nose_pain",),
+            disabled=disabled_additional
+        )
+        st.checkbox(
+            "목구멍 통증",
+            value=st.session_state.get('throat_pain', False),
+            key="throat_pain",
+            on_change=update_additional_symptom,
+            args=("throat_pain",),
+            disabled=disabled_additional
+        )
+
+        # 요약 저장 (없음 포함)
         st.session_state.additional_symptoms = {
-            "눈 통증": st.checkbox("눈 통증", key="eye_pain"),
-            "코 통증": st.checkbox("코 통증", key="nose_pain"),
-            "목구멍 통증": st.checkbox("목구멍 통증", key="throat_pain"),
+            "없음": st.session_state.get('additional_none', False),
+            "눈 통증": st.session_state.get('eye_pain', False),
+            "코 통증": st.session_state.get('nose_pain', False),
+            "목구멍 통증": st.session_state.get('throat_pain', False),
         }
+
+
+
+
 
     st.markdown("---")
     with st.container(border=True):
